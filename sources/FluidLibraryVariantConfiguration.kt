@@ -110,6 +110,7 @@ class FluidLibraryVariantConfiguration private constructor(
 		repositories {
 			mavenCentral()
 			jcenter()
+			bintray("fluidsonic/maven")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")
 		}
