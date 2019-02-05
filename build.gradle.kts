@@ -53,6 +53,11 @@ sourceSets {
 	}
 }
 
+tasks.withType<Wrapper> {
+	distributionType = Wrapper.DistributionType.ALL
+	gradleVersion = "5.2"
+}
+
 
 val bintrayUser = findProperty("bintrayUser") as String?
 val bintrayKey = findProperty("bintrayApiKey") as String??
