@@ -7,8 +7,8 @@ version = "0.9.1"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.20"
-	`kotlin-dsl`
+	kotlin("jvm") version "1.3.21"
+	`kotlin-dsl` version "1.2.2"
 	`maven-publish`
 	id("com.github.ben-manes.versions") version "0.20.0"
 	id("com.gradle.plugin-publish") version "0.10.1"
@@ -16,6 +16,7 @@ plugins {
 }
 
 dependencies {
+	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
@@ -55,12 +56,12 @@ sourceSets {
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "5.2"
+	gradleVersion = "5.2.1"
 }
 
 
 val bintrayUser = findProperty("bintrayUser") as String?
-val bintrayKey = findProperty("bintrayApiKey") as String??
+val bintrayKey = findProperty("bintrayApiKey") as String?
 if (bintrayUser != null && bintrayKey != null) {
 	val javadocJar by tasks.creating(Jar::class) {
 		archiveClassifier.set("javadoc")

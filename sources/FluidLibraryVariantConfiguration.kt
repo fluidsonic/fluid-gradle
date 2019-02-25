@@ -77,6 +77,7 @@ class FluidLibraryVariantConfiguration private constructor(
 		}
 
 		dependencies {
+			_api(platform(kotlin("bom")))
 			_api(kotlin("stdlib-${jdk.moduleId}"))
 		}
 
