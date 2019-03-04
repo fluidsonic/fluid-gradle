@@ -10,7 +10,7 @@ plugins {
 	kotlin("jvm") version "1.3.21"
 	`kotlin-dsl` version "1.2.2"
 	`maven-publish`
-	id("com.github.ben-manes.versions") version "0.20.0"
+	id("com.github.ben-manes.versions") version "0.21.0"
 	id("com.gradle.plugin-publish") version "0.10.1"
 	id("com.jfrog.bintray") version "1.8.4"
 }
@@ -19,7 +19,7 @@ dependencies {
 	implementation(kotlin("gradle-plugin"))
 
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.20.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.21.0")
 }
 
 gradlePlugin {
