@@ -16,7 +16,6 @@ plugins {
 }
 
 dependencies {
-	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
