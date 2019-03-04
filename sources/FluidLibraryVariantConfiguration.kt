@@ -22,6 +22,7 @@ class FluidLibraryVariantConfiguration private constructor(
 	private val project: Project
 ) {
 
+	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
 	var jdk = JDK.v1_7
 
@@ -65,16 +66,17 @@ class FluidLibraryVariantConfiguration private constructor(
 		group = "com.github.fluidsonic"
 		version = fluidLibrary.version
 
-		configurations {
-			all {
-				resolutionStrategy.eachDependency {
-					if (requested.group == "org.jetbrains.kotlin") {
-						useVersion(getKotlinPluginVersion()!!)
-						because("All Kotlin modules must have the same version.")
+		if (enforcesSameVersionForAllKotlinDependencies)
+			configurations {
+				all {
+					resolutionStrategy.eachDependency {
+						if (requested.group == "org.jetbrains.kotlin") {
+							useVersion(getKotlinPluginVersion()!!)
+							because("All Kotlin modules must have the same version.")
+						}
 					}
 				}
 			}
-		}
 
 		dependencies {
 			_api(platform(kotlin("bom")))
