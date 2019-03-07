@@ -202,7 +202,7 @@ class FluidLibraryVariantConfiguration private constructor(
 
 		val sourcesJar by tasks.creating(Jar::class) {
 			archiveClassifier.set("sources")
-			from(sourceSets["main"].allSource)
+			from(sourceSets["main"].allSource, file("build/generated/source/kaptKotlin/main"))
 		}
 
 		artifacts {
