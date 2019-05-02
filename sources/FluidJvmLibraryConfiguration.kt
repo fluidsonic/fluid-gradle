@@ -2,11 +2,13 @@ package com.github.fluidsonic.fluid.library
 
 import com.github.benmanes.gradle.versions.VersionsPlugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.kotlin.dsl.*
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 
 
-class FluidLibraryConfiguration private constructor(
+class FluidJvmLibraryConfiguration private constructor(
 	private val project: Project
 ) {
 
@@ -16,8 +18,8 @@ class FluidLibraryConfiguration private constructor(
 
 
 	private fun Project.configureBasics() {
-		val libraryName = this@FluidLibraryConfiguration.name
-		val libraryVersion = this@FluidLibraryConfiguration.version
+		val libraryName = this@FluidJvmLibraryConfiguration.name
+		val libraryVersion = this@FluidJvmLibraryConfiguration.version
 
 		check(libraryName.isNotEmpty()) { "'name' must be set" }
 		check(libraryVersion.isNotEmpty()) { "'version' must be set" }
@@ -34,13 +36,18 @@ class FluidLibraryConfiguration private constructor(
 
 		tasks.withType<Wrapper> {
 			this.distributionType = Wrapper.DistributionType.ALL
-			this.gradleVersion = this@FluidLibraryConfiguration.gradleVersion
+			this.gradleVersion = this@FluidJvmLibraryConfiguration.gradleVersion
 		}
 
 		extensions.add("fluid-library", FluidLibraryPluginExtension(
 			name = libraryName,
 			version = libraryVersion
 		))
+
+		subprojects {
+			apply<KotlinPlatformJvmPlugin>()
+			apply<JavaLibraryPlugin>()
+		}
 	}
 
 
@@ -51,11 +58,11 @@ class FluidLibraryConfiguration private constructor(
 
 	companion object {
 
-		internal fun applyTo(project: Project, configure: FluidLibraryConfiguration.() -> Unit = {}) {
-			check(project.parent == null) { "fluidLibrary {} must only be used in the root project" }
+		internal fun applyTo(project: Project, configure: FluidJvmLibraryConfiguration.() -> Unit = {}) {
+			check(project.parent == null) { "fluidJvmLibrary {} must only be used in the root project" }
 			check(project.extensions.findByType<FluidLibraryPluginExtension>() == null) { "fluidLibrary/fluidJvmLibrary {} must only be used once" }
 
-			FluidLibraryConfiguration(project = project).apply(configure).configureProject()
+			FluidJvmLibraryConfiguration(project = project).apply(configure).configureProject()
 		}
 	}
 }

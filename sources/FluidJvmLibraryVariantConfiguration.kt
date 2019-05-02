@@ -3,19 +3,22 @@ package com.github.fluidsonic.fluid.library
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.plugins.MavenRepositoryHandlerConvention
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.api.tasks.Upload
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.SigningPlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
-class FluidLibraryVariantConfiguration private constructor(
+class FluidJvmLibraryVariantConfiguration private constructor(
 	private val project: Project
 ) {
 
@@ -57,7 +60,8 @@ class FluidLibraryVariantConfiguration private constructor(
 
 
 	private fun Project.configureBasics() {
-		apply<KotlinMultiplatformPluginWrapper>()
+		apply<KotlinPlatformJvmPlugin>()
+		apply<JavaLibraryPlugin>()
 
 		group = "com.github.fluidsonic"
 		version = fluidLibrary.version
@@ -74,56 +78,26 @@ class FluidLibraryVariantConfiguration private constructor(
 				}
 			}
 
-		kotlin {
-			jvm()
-
-			sourceSets {
-				commonMain {
-					kotlin.setSrcDirs(listOf("sources/common"))
-					resources.setSrcDirs(emptyList())
-
-					dependencies {
-						api(kotlin("stdlib-common"))
-					}
-				}
-
-				commonTest {
-					kotlin.setSrcDirs(listOf("sources/commonTest"))
-					resources.setSrcDirs(emptyList())
-
-					dependencies {
-						implementation(kotlin("test-common"))
-						implementation(kotlin("test-annotations-common"))
-					}
-				}
-
-				jvmMain {
-					kotlin.setSrcDirs(listOf("sources/jvm"))
-					resources.setSrcDirs(emptyList())
-
-					dependencies {
-						api(kotlin("stdlib-${jdk.moduleId}"))
-					}
-				}
-
-				jvmTest {
-					kotlin.setSrcDirs(listOf("sources/jvmTest"))
-					resources.setSrcDirs(emptyList())
-
-					dependencies {
-						implementation(kotlin("test-junit5"))
-						implementation("org.junit.jupiter:junit-jupiter-api:5.4.0")
-
-						runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.0")
-						runtimeOnly("org.junit.platform:junit-platform-runner:1.4.0")
-					}
-				}
-			}
+		dependencies {
+			api(platform(kotlin("bom")))
+			api(kotlin("stdlib-${jdk.moduleId}"))
 		}
 
 		java {
 			sourceCompatibility = jdk.toGradle()
 			targetCompatibility = jdk.toGradle()
+		}
+
+		sourceSets {
+			getByName("main") {
+				kotlin.setSrcDirs(listOf("sources"))
+				resources.setSrcDirs(listOf("resources"))
+			}
+
+			getByName("test") {
+				kotlin.setSrcDirs(listOf("tests/sources"))
+				resources.setSrcDirs(listOf("tests/resources"))
+			}
 		}
 
 		tasks {
@@ -221,8 +195,28 @@ class FluidLibraryVariantConfiguration private constructor(
 		apply<PublishingPlugin>()
 		apply<SigningPlugin>()
 
-		tasks.getByName<org.gradle.jvm.tasks.Jar>("jvmSourcesJar") {
-			from(file("build/generated/source/kaptKotlin/main"))
+		val javadocJar by tasks.creating(Jar::class) {
+			archiveClassifier.set("javadoc")
+			from(tasks["javadoc"])
+		}
+
+		val sourcesJar by tasks.creating(Jar::class) {
+			archiveClassifier.set("sources")
+			from(sourceSets["main"].allSource, file("build/generated/source/kaptKotlin/main"))
+		}
+
+		artifacts {
+			archives(javadocJar)
+			archives(sourcesJar)
+		}
+
+		publishing {
+			publications {
+				create<MavenPublication>("default") {
+					from(components["java"])
+					artifact(sourcesJar)
+				}
+			}
 		}
 
 		configureBintrayPublishing()
@@ -239,8 +233,8 @@ class FluidLibraryVariantConfiguration private constructor(
 
 	companion object {
 
-		internal fun applyTo(project: Project, configure: FluidLibraryVariantConfiguration.() -> Unit = {}) {
-			FluidLibraryVariantConfiguration(project = project).apply(configure).configureProject()
+		internal fun applyTo(project: Project, configure: FluidJvmLibraryVariantConfiguration.() -> Unit = {}) {
+			FluidJvmLibraryVariantConfiguration(project = project).apply(configure).configureProject()
 		}
 	}
 }

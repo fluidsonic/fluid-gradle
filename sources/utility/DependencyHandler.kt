@@ -3,7 +3,7 @@ package com.github.fluidsonic.fluid.library
 import org.gradle.api.artifacts.dsl.DependencyHandler
 
 
-internal fun DependencyHandler._api(dependencyNotation: Any) = // FIXME
+fun DependencyHandler.api(dependencyNotation: Any) =
 	add("api", dependencyNotation)
 
 
