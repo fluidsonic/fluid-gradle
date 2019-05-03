@@ -2,6 +2,7 @@ package com.github.fluidsonic.fluid.library
 
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.tasks.SourceSetContainer
@@ -44,6 +45,10 @@ internal val Project.kotlin: KotlinMultiplatformExtension
 
 internal fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) =
 	extensions.configure(KotlinMultiplatformExtension::class, configure)
+
+
+internal val Project.publishing
+	get() = (this as ExtensionAware).extensions.getByName("publishing") as PublishingExtension
 
 
 internal fun Project.publishing(configuration: PublishingExtension.() -> Unit) =

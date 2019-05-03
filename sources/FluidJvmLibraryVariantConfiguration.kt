@@ -184,7 +184,7 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 	private fun configureProject(): Unit = project.run {
 		configureBasics()
 
-		if (publishing)
+		if (this@FluidJvmLibraryVariantConfiguration.publishing)
 			configurePublishing()
 	}
 

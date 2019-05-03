@@ -2,9 +2,12 @@ package com.github.fluidsonic.fluid.library
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
+import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.Project
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.plugins.MavenRepositoryHandlerConvention
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.api.tasks.Upload
@@ -51,6 +54,25 @@ class FluidLibraryVariantConfiguration private constructor(
 					name = library.version
 					vcsTag = library.version
 				}
+
+				afterEvaluate {
+					setPublications(*publishing.publications.names.toTypedArray())
+				}
+			}
+		}
+
+		tasks.withType<BintrayUploadTask> {
+			doFirst {
+				publishing.publications
+					.filterIsInstance<MavenPublication>()
+					.forEach { publication ->
+						val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
+						if (moduleFile.exists()) {
+							publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
+								override fun getDefaultExtension() = "module"
+							})
+						}
+					}
 			}
 		}
 	}
@@ -210,7 +232,7 @@ class FluidLibraryVariantConfiguration private constructor(
 	private fun configureProject(): Unit = project.run {
 		configureBasics()
 
-		if (publishing)
+		if (this@FluidLibraryVariantConfiguration.publishing)
 			configurePublishing()
 	}
 
