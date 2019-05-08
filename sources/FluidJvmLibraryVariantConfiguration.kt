@@ -1,21 +1,17 @@
 package com.github.fluidsonic.fluid.library
 
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.BintrayPlugin
-import org.gradle.api.Project
-import org.gradle.api.plugins.JavaLibraryPlugin
-import org.gradle.api.plugins.MavenPlugin
-import org.gradle.api.plugins.MavenRepositoryHandlerConvention
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.api.publish.plugins.PublishingPlugin
-import org.gradle.api.tasks.Upload
-import org.gradle.api.tasks.bundling.Jar
+import com.jfrog.bintray.gradle.*
+import org.gradle.api.*
+import org.gradle.api.plugins.*
+import org.gradle.api.publish.maven.*
+import org.gradle.api.publish.maven.plugins.*
+import org.gradle.api.publish.plugins.*
+import org.gradle.api.tasks.*
+import org.gradle.api.tasks.bundling.*
 import org.gradle.kotlin.dsl.*
-import org.gradle.plugins.signing.SigningPlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
-import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.plugins.signing.*
+import org.jetbrains.kotlin.gradle.plugin.*
+import org.jetbrains.kotlin.gradle.tasks.*
 
 
 class FluidJvmLibraryVariantConfiguration private constructor(

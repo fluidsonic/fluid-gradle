@@ -1,11 +1,11 @@
 package com.github.fluidsonic.fluid.library
 
-import com.github.benmanes.gradle.versions.VersionsPlugin
-import org.gradle.api.Project
-import org.gradle.api.plugins.JavaLibraryPlugin
-import org.gradle.api.tasks.wrapper.Wrapper
+import com.github.benmanes.gradle.versions.*
+import org.gradle.api.*
+import org.gradle.api.plugins.*
+import org.gradle.api.tasks.wrapper.*
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
+import org.jetbrains.kotlin.gradle.plugin.*
 
 
 class FluidJvmLibraryConfiguration private constructor(

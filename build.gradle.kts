@@ -1,5 +1,5 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import com.jfrog.bintray.gradle.*
+import org.jetbrains.kotlin.gradle.plugin.*
 
 description = "Gradle plugin used to simplify configuration of all com.github.fluidsonic.* Kotlin libraries"
 group = "com.github.fluidsonic.fluid-library"

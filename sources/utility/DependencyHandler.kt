@@ -1,6 +1,6 @@
 package com.github.fluidsonic.fluid.library
 
-import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.*
 
 
 fun DependencyHandler.api(dependencyNotation: Any) =

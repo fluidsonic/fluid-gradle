@@ -1,6 +1,6 @@
 package com.github.fluidsonic.fluid.library
 
-import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
 
 

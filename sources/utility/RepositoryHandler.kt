@@ -1,6 +1,6 @@
 package com.github.fluidsonic.fluid.library
 
-import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.dsl.*
 import org.gradle.kotlin.dsl.*
 
 
