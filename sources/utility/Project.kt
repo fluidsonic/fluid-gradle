@@ -1,14 +1,12 @@
 package com.github.fluidsonic.fluid.library
 
-import org.gradle.api.Action
-import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.*
+import org.gradle.api.plugins.*
+import org.gradle.api.publish.*
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
-import org.gradle.plugins.signing.SigningExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.gradle.plugins.signing.*
+import org.jetbrains.kotlin.gradle.dsl.*
 
 
 internal val Project.fluidLibrary
@@ -39,11 +37,11 @@ internal fun Project.java(configuration: JavaPluginConvention.() -> Unit) =
 	configure(configuration)
 
 
-internal val Project.kotlin: KotlinMultiplatformExtension
+val Project.kotlin: KotlinMultiplatformExtension
 	get() = extensions.findByType(KotlinMultiplatformExtension::class)!!
 
 
-internal fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) =
+fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) =
 	extensions.configure(KotlinMultiplatformExtension::class, configure)
 
 
