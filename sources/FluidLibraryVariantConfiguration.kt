@@ -3,12 +3,10 @@ package com.github.fluidsonic.fluid.library
 import com.jfrog.bintray.gradle.*
 import com.jfrog.bintray.gradle.tasks.*
 import org.gradle.api.*
-import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.internal.artifact.*
 import org.gradle.api.publish.maven.plugins.*
-import org.gradle.api.publish.plugins.*
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.bundling.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.plugin.*
@@ -170,58 +168,63 @@ class FluidLibraryVariantConfiguration private constructor(
 		val sonatypePassword = findProperty("sonatypePassword") as String? ?: return
 
 		val library = fluidLibrary
+		val emptyJar by tasks.creating(Jar::class)
 
 		signing {
-			sign(configurations.archives.get())
+			sign(publishing.publications)
 		}
 
-		tasks.getByName<Upload>("uploadArchives") {
+		publishing {
 			repositories {
-				withConvention(MavenRepositoryHandlerConvention::class) {
-					mavenDeployer {
-						beforeDeployment {
-							signing.signPom(this)
-						}
-
-						withGroovyBuilder {
-							"repository"("url" to "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-								"authentication"("userName" to sonatypeUserName, "password" to sonatypePassword)
-							}
-
-							"snapshotRepository"("url" to "https://oss.sonatype.org/content/repositories/snapshots") {
-								"authentication"("userName" to sonatypeUserName, "password" to sonatypePassword)
-							}
-						}
-
-						pom.project {
-							withGroovyBuilder {
-								"name"(project.name)
-								"description"(project.description)
-								"packaging"("jar")
-								"url"("https://github.com/fluidsonic/${library.name}")
-								"developers" {
-									"developer" {
-										"id"("fluidsonic")
-										"name"("Marc Knaup")
-										"email"("marc@knaup.io")
-									}
-								}
-								"licenses" {
-									"license" {
-										"name"("Apache License 2.0")
-										"url"("https://github.com/fluidsonic/${library.name}/blob/master/LICENSE")
-									}
-								}
-								"scm" {
-									"connection"("scm:git:https://github.com/fluidsonic/${library.name}.git")
-									"developerConnection"("scm:git:git@github.com:fluidsonic/${library.name}.git")
-									"url"("https://github.com/fluidsonic/${library.name}")
-								}
-							}
-						}
+				maven {
+					setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+					credentials {
+						username = sonatypeUserName
+						password = sonatypePassword
 					}
 				}
 			}
+
+			publications.getByName<MavenPublication>("kotlinMultiplatform") {
+				artifact(emptyJar)
+			}
+
+			publications
+				.filterIsInstance<MavenPublication>()
+				.forEach { publication ->
+					publication.pom {
+						name.set(project.name)
+						description.set(project.description)
+						packaging = "jar"
+						url.set("https://github.com/fluidsonic/${library.name}")
+						developers {
+							developer {
+								id.set("fluidsonic")
+								name.set("Marc Knaup")
+								email.set("marc@knaup.io")
+							}
+						}
+						licenses {
+							license {
+								name.set("Apache License 2.0")
+								url.set("https://github.com/fluidsonic/${library.name}/blob/master/LICENSE")
+							}
+						}
+						scm {
+							connection.set("scm:git:https://github.com/fluidsonic/${library.name}.git")
+							developerConnection.set("scm:git:git@github.com:fluidsonic/${library.name}.git")
+							url.set("https://github.com/fluidsonic/${library.name}")
+						}
+					}
+				}
+		}
+
+		afterEvaluate {
+			publishing.publications
+				.filterIsInstance<MavenPublication>()
+				.filter { it.name != "kotlinMultiplatform" }
+				.filter { it.artifacts.none { artifact -> artifact.classifier == "javadoc" } }
+				.forEach { it.artifact(emptyJar) { classifier = "javadoc" } }
 		}
 	}
 
@@ -235,9 +238,7 @@ class FluidLibraryVariantConfiguration private constructor(
 
 
 	private fun Project.configurePublishing() {
-		apply<MavenPlugin>()
 		apply<MavenPublishPlugin>()
-		apply<PublishingPlugin>()
 		apply<SigningPlugin>()
 
 		tasks.getByName<org.gradle.jvm.tasks.Jar>("jvmSourcesJar") {
