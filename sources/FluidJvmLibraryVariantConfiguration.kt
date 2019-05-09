@@ -1,9 +1,11 @@
 package com.github.fluidsonic.fluid.library
 
 import com.jfrog.bintray.gradle.*
+import com.jfrog.bintray.gradle.tasks.*
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
+import org.gradle.api.publish.maven.internal.artifact.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.publish.plugins.*
 import org.gradle.api.tasks.*
@@ -21,38 +23,6 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
 	var jdk = JDK.v1_7
-
-
-	private fun Project.configureBintrayPublishing() {
-		val bintrayUser = findProperty("bintrayUser") as String? ?: return
-		val bintrayKey = findProperty("bintrayApiKey") as String? ?: return
-
-		val library = fluidLibrary
-
-		apply<BintrayPlugin>()
-		configure<BintrayExtension> {
-			user = bintrayUser
-			key = bintrayKey
-
-			setPublications("default")
-
-			pkg.apply {
-				repo = "maven"
-				issueTrackerUrl = "https://github.com/fluidsonic/${library.name}/issues"
-				name = library.name
-				publicDownloadNumbers = true
-				publish = true
-				vcsUrl = "https://github.com/fluidsonic/${library.name}"
-				websiteUrl = "https://github.com/fluidsonic/${library.name}"
-				setLicenses("Apache-2.0")
-
-				version.apply {
-					name = library.version
-					vcsTag = library.version
-				}
-			}
-		}
-	}
 
 
 	private fun Project.configureBasics() {
@@ -112,6 +82,57 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 			bintray("fluidsonic/maven")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")
+		}
+	}
+
+
+	private fun Project.configureBintrayPublishing() {
+		val bintrayUser = findProperty("bintrayUser") as String? ?: return
+		val bintrayKey = findProperty("bintrayApiKey") as String? ?: return
+
+		val library = fluidLibrary
+
+		apply<BintrayPlugin>()
+		configure<BintrayExtension> {
+			user = bintrayUser
+			key = bintrayKey
+
+			setPublications("default")
+
+			pkg.apply {
+				repo = "maven"
+				issueTrackerUrl = "https://github.com/fluidsonic/${library.name}/issues"
+				name = library.name
+				publicDownloadNumbers = true
+				publish = true
+				vcsUrl = "https://github.com/fluidsonic/${library.name}"
+				websiteUrl = "https://github.com/fluidsonic/${library.name}"
+				setLicenses("Apache-2.0")
+
+				version.apply {
+					name = library.version
+					vcsTag = library.version
+				}
+
+				afterEvaluate {
+					setPublications(*publishing.publications.names.toTypedArray())
+				}
+			}
+		}
+
+		tasks.withType<BintrayUploadTask> {
+			doFirst {
+				publishing.publications
+					.filterIsInstance<MavenPublication>()
+					.forEach { publication ->
+						val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
+						if (moduleFile.exists()) {
+							publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
+								override fun getDefaultExtension() = "module"
+							})
+						}
+					}
+			}
 		}
 	}
 
