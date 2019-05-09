@@ -94,6 +94,7 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 		configure<BintrayExtension> {
 			user = bintrayUser
 			key = bintrayKey
+			publish = true
 
 			setPublications("default")
 
@@ -102,7 +103,6 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 				issueTrackerUrl = "https://github.com/fluidsonic/${library.name}/issues"
 				name = library.name
 				publicDownloadNumbers = true
-				publish = true
 				vcsUrl = "https://github.com/fluidsonic/${library.name}"
 				websiteUrl = "https://github.com/fluidsonic/${library.name}"
 				setLicenses("Apache-2.0")
