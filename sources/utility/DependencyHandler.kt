@@ -11,7 +11,6 @@ fun DependencyHandler.testApi(dependencyNotation: Any) =
 	add("testApi", dependencyNotation)
 
 
-@Suppress("unused")
 fun DependencyHandler.fluid(name: String, version: String) =
 	"com.github.fluidsonic:fluid-$name:$version"
 
@@ -20,7 +19,6 @@ fun DependencyHandler.implementation(dependencyNotation: Any) =
 	add("implementation", dependencyNotation)
 
 
-@Suppress("unused")
 fun DependencyHandler.kotlinx(name: String, version: String) =
 	"org.jetbrains.kotlinx:kotlinx-$name:$version"
 
