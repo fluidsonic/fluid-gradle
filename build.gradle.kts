@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 
 description = "Gradle plugin used to simplify configuration of all com.github.fluidsonic.* Kotlin libraries"
 group = "com.github.fluidsonic.fluid-library"
-version = "0.9.11"
+version = "0.9.12"
 
 plugins {
 	`java-gradle-plugin`
