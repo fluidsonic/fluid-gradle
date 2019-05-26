@@ -7,7 +7,7 @@ version = "0.9.11"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.31"
+	kotlin("jvm") version "1.3.40-eap-32"
 	`kotlin-dsl`
 	`maven-publish`
 	id("com.github.ben-manes.versions") version "0.21.0"
@@ -18,6 +18,7 @@ plugins {
 dependencies {
 	implementation(kotlin("gradle-plugin"))
 
+	implementation(kotlin("serialization"))
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.21.0")
 }
@@ -44,6 +45,7 @@ pluginBundle {
 }
 
 repositories {
+	bintray("kotlin/kotlin-eap")
 	jcenter()
 }
 
@@ -111,6 +113,10 @@ if (bintrayUser != null && bintrayKey != null) {
 		}
 	}
 }
+
+
+fun RepositoryHandler.bintray(name: String) =
+	maven("https://dl.bintray.com/$name")
 
 
 val SourceSet.kotlin

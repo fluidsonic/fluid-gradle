@@ -11,6 +11,7 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.tasks.*
+import org.jetbrains.kotlinx.serialization.gradle.*
 
 
 class FluidLibraryVariantConfiguration private constructor(
@@ -24,6 +25,7 @@ class FluidLibraryVariantConfiguration private constructor(
 
 	private fun Project.configureBasics() {
 		apply<KotlinMultiplatformPluginWrapper>()
+		apply<SerializationGradleSubplugin>()
 
 		group = "com.github.fluidsonic"
 		version = fluidLibrary.version
@@ -46,7 +48,7 @@ class FluidLibraryVariantConfiguration private constructor(
 			sourceSets {
 				commonMain {
 					kotlin.setSrcDirs(listOf("sources/common"))
-					resources.setSrcDirs(emptyList())
+					resources.setSrcDirs(emptyList<Any>())
 
 					dependencies {
 						api(kotlin("stdlib-common"))
@@ -55,7 +57,7 @@ class FluidLibraryVariantConfiguration private constructor(
 
 				commonTest {
 					kotlin.setSrcDirs(listOf("sources/commonTest"))
-					resources.setSrcDirs(emptyList())
+					resources.setSrcDirs(emptyList<Any>())
 
 					dependencies {
 						implementation(kotlin("test-common"))
@@ -65,7 +67,7 @@ class FluidLibraryVariantConfiguration private constructor(
 
 				jvmMain {
 					kotlin.setSrcDirs(listOf("sources/jvm"))
-					resources.setSrcDirs(emptyList())
+					resources.setSrcDirs(emptyList<Any>())
 
 					dependencies {
 						api(kotlin("stdlib-${jdk.moduleId}"))
@@ -74,7 +76,7 @@ class FluidLibraryVariantConfiguration private constructor(
 
 				jvmTest {
 					kotlin.setSrcDirs(listOf("sources/jvmTest"))
-					resources.setSrcDirs(emptyList())
+					resources.setSrcDirs(emptyList<Any>())
 
 					dependencies {
 						implementation(kotlin("test-junit5"))
