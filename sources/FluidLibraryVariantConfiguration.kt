@@ -57,6 +57,17 @@ class FluidLibraryVariantConfiguration private constructor(
 			}
 
 		kotlin {
+			metadata {
+				compilations.forEach { compilation ->
+					compilation.kotlinOptions {
+						freeCompilerArgs = listOf(
+							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+							"-XXLanguage:+InlineClasses"
+						)
+					}
+				}
+			}
+
 			sourceSets {
 				commonMain {
 					kotlin.setSrcDirs(listOf("sources/common"))
