@@ -19,3 +19,11 @@ val NamedDomainObjectContainer<KotlinSourceSet>.jvmMain
 
 val NamedDomainObjectContainer<KotlinSourceSet>.jvmTest
 	get() = named<KotlinSourceSet>("jvmTest")
+
+
+val NamedDomainObjectContainer<KotlinSourceSet>.objcMain
+	get() = named<KotlinSourceSet>("objcMain")
+
+
+val NamedDomainObjectContainer<KotlinSourceSet>.objcTest
+	get() = named<KotlinSourceSet>("objcTest")

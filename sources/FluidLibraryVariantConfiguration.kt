@@ -3,6 +3,7 @@ package com.github.fluidsonic.fluid.library
 import com.jfrog.bintray.gradle.*
 import com.jfrog.bintray.gradle.tasks.*
 import org.gradle.api.*
+import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.internal.artifact.*
 import org.gradle.api.publish.maven.plugins.*
@@ -10,7 +11,6 @@ import org.gradle.api.tasks.bundling.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.tasks.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
@@ -20,7 +20,21 @@ class FluidLibraryVariantConfiguration private constructor(
 
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
-	var jdk = JDK.v1_7
+
+	private var jdk: JDK? = null
+	private var objcEnabled = false
+
+
+	fun jvm(jdk: JDK) {
+		check(this.jdk == null) { "Cannot call jvm(…) multiple times" }
+		this.jdk = jdk
+	}
+
+
+	fun objc() {
+		check(!objcEnabled) { "Cannot call objc() multiple times" }
+		objcEnabled = true
+	}
 
 
 	private fun Project.configureBasics() {
@@ -43,8 +57,6 @@ class FluidLibraryVariantConfiguration private constructor(
 			}
 
 		kotlin {
-			jvm()
-
 			sourceSets {
 				commonMain {
 					kotlin.setSrcDirs(listOf("sources/common"))
@@ -64,45 +76,11 @@ class FluidLibraryVariantConfiguration private constructor(
 						implementation(kotlin("test-annotations-common"))
 					}
 				}
-
-				jvmMain {
-					kotlin.setSrcDirs(listOf("sources/jvm"))
-					resources.setSrcDirs(emptyList<Any>())
-
-					dependencies {
-						api(kotlin("stdlib-${jdk.moduleId}"))
-					}
-				}
-
-				jvmTest {
-					kotlin.setSrcDirs(listOf("sources/jvmTest"))
-					resources.setSrcDirs(emptyList<Any>())
-
-					dependencies {
-						implementation(kotlin("test-junit5"))
-						implementation("org.junit.jupiter:junit-jupiter-api:5.4.0")
-
-						runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.0")
-						runtimeOnly("org.junit.platform:junit-platform-runner:1.4.0")
-					}
-				}
 			}
 		}
 
-		java {
-			sourceCompatibility = jdk.toGradle()
-			targetCompatibility = jdk.toGradle()
-		}
-
-		tasks {
-			withType<KotlinCompile> {
-				sourceCompatibility = jdk.toString()
-				targetCompatibility = jdk.toString()
-
-				kotlinOptions.freeCompilerArgs = listOf("-Xuse-experimental=kotlin.contracts.ExperimentalContracts")
-				kotlinOptions.jvmTarget = jdk.toKotlinTarget()
-			}
-		}
+		configureJvmTarget()
+		configureObjcTargets()
 
 		repositories {
 			mavenCentral()
@@ -160,6 +138,132 @@ class FluidLibraryVariantConfiguration private constructor(
 							})
 						}
 					}
+			}
+		}
+	}
+
+
+	private fun Project.configureJvmTarget() {
+		val jdk = jdk ?: return
+
+		kotlin {
+			jvm {
+				compilations.forEach { compilation ->
+					compilation.kotlinOptions {
+						freeCompilerArgs = listOf(
+							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+							"-XXLanguage:+InlineClasses"
+						)
+
+						jvmTarget = jdk.toKotlinTarget()
+					}
+				}
+			}
+
+			sourceSets {
+				jvmMain {
+					kotlin.setSrcDirs(listOf("sources/jvm"))
+					resources.setSrcDirs(emptyList<Any>())
+
+					dependencies {
+						api(kotlin("stdlib-${jdk.moduleId}"))
+					}
+				}
+
+				jvmTest {
+					kotlin.setSrcDirs(listOf("sources/jvmTest"))
+					resources.setSrcDirs(emptyList<Any>())
+
+					dependencies {
+						implementation(kotlin("test-junit5"))
+						implementation("org.junit.jupiter:junit-jupiter-api:5.4.0")
+
+						runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.0")
+						runtimeOnly("org.junit.platform:junit-platform-runner:1.4.0")
+					}
+				}
+			}
+		}
+
+		java {
+			sourceCompatibility = jdk.toGradle()
+			targetCompatibility = jdk.toGradle()
+		}
+	}
+
+
+	private fun Project.configureObjcTargets() {
+		if (!objcEnabled) return
+
+		kotlin {
+			val iosTest = tasks.create("iosTest")
+			val macosTest = tasks.create("macosTest")
+			val objcTest by tasks.creating {
+				dependsOn(iosTest)
+				dependsOn(macosTest)
+			}
+			tasks.named("check") {
+				dependsOn(objcTest)
+			}
+
+			val objcMainSourceSet = sourceSets.create("objcMain") {
+				kotlin.setSrcDirs(listOf("sources/objc"))
+				resources.setSrcDirs(emptyList<Any>())
+
+				dependencies {
+					implementation(kotlinx("serialization-runtime-native", "0.11.0"))
+				}
+			}
+
+			val objcTestSourceSet = sourceSets.create("objcTest") {
+				kotlin.setSrcDirs(listOf("sources/objcTest"))
+				resources.setSrcDirs(emptyList<Any>())
+			}
+
+			listOf(
+				iosX64(),
+				iosArm64(),
+				macosX64()
+			).forEach { target ->
+				target.compilations.forEach { compilation ->
+					when (compilation.compilationName) {
+						"main" -> compilation.defaultSourceSet.dependsOn(objcMainSourceSet)
+						"test" -> compilation.defaultSourceSet.dependsOn(objcTestSourceSet)
+					}
+
+					compilation.kotlinOptions.freeCompilerArgs = listOf(
+						"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+						"-XXLanguage:+InlineClasses"
+					)
+				}
+
+				when {
+					target.name.startsWith("iosX") -> {
+						val binary = target.binaries.first()
+
+						tasks.create<Task>("${target.name}Test") {
+							iosTest.dependsOn(this)
+
+							dependsOn(binary.linkTask)
+							group = JavaBasePlugin.VERIFICATION_GROUP
+
+							doLast {
+								if (binary.outputFile.exists()) {
+									val outputPath = binary.outputFile.absolutePath
+									exec {
+										val device = findProperty("iosTest.device")?.toString() ?: "iPhone X"
+
+										println("$ xcrun simctl spawn \"$device\" \"$outputPath\"")
+										commandLine("xcrun", "simctl", "spawn", device, outputPath)
+									}
+								}
+							}
+						}
+					}
+
+					target.name.startsWith("macos") ->
+						macosTest.dependsOn("${target.name}Test")
+				}
 			}
 		}
 	}

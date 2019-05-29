@@ -69,7 +69,10 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 				sourceCompatibility = jdk.toString()
 				targetCompatibility = jdk.toString()
 
-				kotlinOptions.freeCompilerArgs = listOf("-Xuse-experimental=kotlin.contracts.ExperimentalContracts")
+				kotlinOptions.freeCompilerArgs = listOf(
+					"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+					"-XXLanguage:+InlineClasses"
+				)
 				kotlinOptions.jvmTarget = jdk.toKotlinTarget()
 			}
 		}
