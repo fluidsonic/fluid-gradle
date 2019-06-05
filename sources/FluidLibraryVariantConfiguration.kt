@@ -218,7 +218,7 @@ class FluidLibraryVariantConfiguration private constructor(
 			}
 
 			val objcMainSourceSet = sourceSets.create("objcMain") {
-				kotlin.setSrcDirs(listOf("sources/objc"))
+				kotlin.setSrcDirs(emptyList<Any>())
 				resources.setSrcDirs(emptyList<Any>())
 
 				dependencies {
@@ -227,7 +227,7 @@ class FluidLibraryVariantConfiguration private constructor(
 			}
 
 			val objcTestSourceSet = sourceSets.create("objcTest") {
-				kotlin.setSrcDirs(listOf("sources/objcTest"))
+				kotlin.setSrcDirs(emptyList<Any>())
 				resources.setSrcDirs(emptyList<Any>())
 			}
 
@@ -238,8 +238,21 @@ class FluidLibraryVariantConfiguration private constructor(
 			).forEach { target ->
 				target.compilations.forEach { compilation ->
 					when (compilation.compilationName) {
-						"main" -> compilation.defaultSourceSet.dependsOn(objcMainSourceSet)
-						"test" -> compilation.defaultSourceSet.dependsOn(objcTestSourceSet)
+						"main" ->
+							compilation.defaultSourceSet {
+								kotlin.setSrcDirs(listOf("sources/${target.name}"))
+								resources.setSrcDirs(emptyList<Any>())
+
+								dependsOn(objcMainSourceSet)
+							}
+
+						"test" ->
+							compilation.defaultSourceSet {
+								kotlin.setSrcDirs(listOf("sources/$name"))
+								resources.setSrcDirs(emptyList<Any>())
+
+								dependsOn(objcTestSourceSet)
+							}
 					}
 
 					compilation.kotlinOptions.freeCompilerArgs = listOf(
