@@ -228,8 +228,8 @@ class FluidLibraryVariantConfiguration private constructor(
 			}
 
 			listOf(
-				iosX64(),
 				iosArm64(),
+				iosX64(),
 				macosX64()
 			).forEach { target ->
 				target.compilations.forEach { compilation ->
