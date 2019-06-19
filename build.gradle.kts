@@ -7,7 +7,7 @@ version = "0.9.16"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.31"
+	kotlin("jvm") version "1.3.40"
 	`kotlin-dsl`
 	`maven-publish`
 	id("com.github.ben-manes.versions") version "0.21.0"
