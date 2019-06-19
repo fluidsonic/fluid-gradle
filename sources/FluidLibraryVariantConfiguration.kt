@@ -220,10 +220,6 @@ class FluidLibraryVariantConfiguration private constructor(
 			val objcMainSourceSet = sourceSets.create("objcMain") {
 				kotlin.setSrcDirs(emptyList<Any>())
 				resources.setSrcDirs(emptyList<Any>())
-
-				dependencies {
-					implementation(kotlinx("serialization-runtime-native", "0.11.0"))
-				}
 			}
 
 			val objcTestSourceSet = sourceSets.create("objcTest") {
