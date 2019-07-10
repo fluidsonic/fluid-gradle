@@ -7,7 +7,7 @@ version = "0.9.19"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.40"
+	kotlin("jvm") version "1.3.41"
 	`kotlin-dsl`
 	`maven-publish`
 	id("com.github.ben-manes.versions") version "0.21.0"
@@ -57,7 +57,7 @@ sourceSets {
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "5.4.1"
+	gradleVersion = "5.5"
 }
 
 
