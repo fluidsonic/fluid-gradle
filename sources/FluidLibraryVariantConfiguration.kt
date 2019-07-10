@@ -3,6 +3,7 @@ package com.github.fluidsonic.fluid.library
 import com.jfrog.bintray.gradle.*
 import com.jfrog.bintray.gradle.tasks.*
 import org.gradle.api.*
+import org.gradle.api.attributes.java.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.internal.artifact.*
@@ -21,19 +22,23 @@ class FluidLibraryVariantConfiguration private constructor(
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
 
-	private var jdk: JDK? = null
-	private var objcEnabled = false
+	private val commonConfigurations: MutableList<CommonTargetConfigurator.() -> Unit> = mutableListOf()
+	private val jvmTargets: MutableMap<JvmTarget, MutableList<JvmTargetConfigurator.() -> Unit>> = mutableMapOf()
+	private val objcTargets: MutableMap<ObjcTarget, MutableList<ObjcTargetConfigurator.() -> Unit>> = mutableMapOf()
 
 
-	fun jvm(jdk: JDK) {
-		check(this.jdk == null) { "Cannot call jvm(…) multiple times" }
-		this.jdk = jdk
+	fun common(configure: CommonTargetConfigurator.() -> Unit = {}) {
+		commonConfigurations += configure
 	}
 
 
-	fun objc() {
-		check(!objcEnabled) { "Cannot call objc() multiple times" }
-		objcEnabled = true
+	fun jvm(target: JvmTarget, configure: JvmTargetConfigurator.() -> Unit = {}) {
+		jvmTargets.getOrPut(target) { mutableListOf() } += configure
+	}
+
+
+	fun objc(target: ObjcTarget, configure: ObjcTargetConfigurator.() -> Unit = {}) {
+		objcTargets.getOrPut(target) { mutableListOf() } += configure
 	}
 
 
@@ -69,7 +74,7 @@ class FluidLibraryVariantConfiguration private constructor(
 			}
 
 			sourceSets {
-				commonMain {
+				named(KotlinSourceSet.COMMON_MAIN_SOURCE_SET_NAME) {
 					kotlin.setSrcDirs(listOf("sources/common"))
 					resources.setSrcDirs(emptyList<Any>())
 
@@ -78,8 +83,8 @@ class FluidLibraryVariantConfiguration private constructor(
 					}
 				}
 
-				commonTest {
-					kotlin.setSrcDirs(listOf("sources/commonTest"))
+				named(KotlinSourceSet.COMMON_TEST_SOURCE_SET_NAME) {
+					kotlin.setSrcDirs(listOf("sources/common-test"))
 					resources.setSrcDirs(emptyList<Any>())
 
 					dependencies {
@@ -87,10 +92,13 @@ class FluidLibraryVariantConfiguration private constructor(
 						implementation(kotlin("test-annotations-common"))
 					}
 				}
+
+				for (configuration in commonConfigurations)
+					CommonTargetConfigurator.applyTo(this, configuration)
 			}
 		}
 
-		configureJvmTarget()
+		configureJvmTargets()
 		configureObjcTargets()
 
 		repositories {
@@ -154,107 +162,74 @@ class FluidLibraryVariantConfiguration private constructor(
 	}
 
 
-	private fun Project.configureJvmTarget() {
-		val jdk = jdk ?: return
-
+	private fun Project.configureJvmTargets() {
 		kotlin {
-			jvm {
-				compilations.forEach { compilation ->
-					compilation.kotlinOptions {
-						freeCompilerArgs = listOf(
-							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-							"-XXLanguage:+InlineClasses"
-						)
+			for ((jdk, configurations) in jvmTargets) {
+				jvm(jdk.kotlinTargetName) {
+					compilations.forEach { compilation ->
+						compilation.kotlinOptions {
+							freeCompilerArgs = listOf(
+								"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+								"-XXLanguage:+InlineClasses"
+							)
 
-						jvmTarget = jdk.toKotlinTarget()
+							jvmTarget = jdk.kotlinJvmTargetVersion
+						}
 					}
+
+					compilations["main"].defaultSourceSet {
+						kotlin.setSrcDirs(listOf("sources/${jdk.kotlinSourceDirectoryName}"))
+						resources.setSrcDirs(emptyList<Any>())
+
+						dependencies {
+							api(kotlin("stdlib-${jdk.kotlinStdlibVariant}"))
+						}
+					}
+
+					compilations["test"].defaultSourceSet {
+						kotlin.setSrcDirs(listOf("sources/${jdk.kotlinSourceDirectoryName}-test"))
+						resources.setSrcDirs(emptyList<Any>())
+
+						dependencies {
+							implementation(kotlin("test-junit5"))
+							implementation("org.junit.jupiter:junit-jupiter-api:5.5.0")
+
+							runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.0")
+							runtimeOnly("org.junit.platform:junit-platform-runner:1.5.0")
+						}
+					}
+
+					attributes {
+						attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, jdk.jvmVersionCode)
+					}
+
+					for (configuration in configurations)
+						JvmTargetConfigurator.applyTo(this, configuration)
 				}
 			}
-
-			sourceSets {
-				jvmMain {
-					kotlin.setSrcDirs(listOf("sources/jvm"))
-					resources.setSrcDirs(emptyList<Any>())
-
-					dependencies {
-						api(kotlin("stdlib-${jdk.moduleId}"))
-					}
-				}
-
-				jvmTest {
-					kotlin.setSrcDirs(listOf("sources/jvmTest"))
-					resources.setSrcDirs(emptyList<Any>())
-
-					dependencies {
-						implementation(kotlin("test-junit5"))
-						implementation("org.junit.jupiter:junit-jupiter-api:5.5.0")
-
-						runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.0")
-						runtimeOnly("org.junit.platform:junit-platform-runner:1.5.0")
-					}
-				}
-			}
-		}
-
-		java {
-			sourceCompatibility = jdk.toGradle()
-			targetCompatibility = jdk.toGradle()
 		}
 	}
 
 
 	private fun Project.configureObjcTargets() {
-		if (!objcEnabled) return
+		if (objcTargets.isEmpty()) return
 
 		kotlin {
-			val iosTest = tasks.create("iosTest")
-			val macosTest = tasks.create("macosTest")
-			val objcTest by tasks.creating {
-				dependsOn(iosTest)
-				dependsOn(macosTest)
-			}
-			tasks.named("check") {
-				dependsOn(objcTest)
-			}
+			for ((objc, configurations) in objcTargets) {
+				val target = when (objc) {
+					ObjcTarget.iosArm64 -> iosArm64()
+					ObjcTarget.iosX64 -> iosX64()
+					ObjcTarget.macosX64 -> macosX64()
+				}
 
-			val objcMainSourceSet = sourceSets.create("objcMain") {
-				kotlin.setSrcDirs(emptyList<Any>())
-				resources.setSrcDirs(emptyList<Any>())
-			}
+				target.compilations["main"].defaultSourceSet {
+					kotlin.setSrcDirs(listOf("sources/${objc.kotlinSourceDirectoryName}"))
+					resources.setSrcDirs(emptyList<Any>())
+				}
 
-			val objcTestSourceSet = sourceSets.create("objcTest") {
-				kotlin.setSrcDirs(emptyList<Any>())
-				resources.setSrcDirs(emptyList<Any>())
-			}
-
-			listOf(
-				iosArm64(),
-				iosX64(),
-				macosX64()
-			).forEach { target ->
-				target.compilations.forEach { compilation ->
-					when (compilation.compilationName) {
-						"main" ->
-							compilation.defaultSourceSet {
-								kotlin.setSrcDirs(listOf("sources/${target.name}"))
-								resources.setSrcDirs(emptyList<Any>())
-
-								dependsOn(objcMainSourceSet)
-							}
-
-						"test" ->
-							compilation.defaultSourceSet {
-								kotlin.setSrcDirs(listOf("sources/$name"))
-								resources.setSrcDirs(emptyList<Any>())
-
-								dependsOn(objcTestSourceSet)
-							}
-					}
-
-					compilation.kotlinOptions.freeCompilerArgs = listOf(
-						"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-						"-XXLanguage:+InlineClasses"
-					)
+				target.compilations["test"].defaultSourceSet {
+					kotlin.setSrcDirs(listOf("sources/${objc.kotlinSourceDirectoryName}-test"))
+					resources.setSrcDirs(emptyList<Any>())
 				}
 
 				when {
@@ -262,7 +237,7 @@ class FluidLibraryVariantConfiguration private constructor(
 						val binary = target.binaries.first()
 
 						tasks.create<Task>("${target.name}Test") {
-							iosTest.dependsOn(this)
+							tasks.maybeCreate("iosTest").dependsOn(this)
 
 							dependsOn(binary.linkTask)
 							group = JavaBasePlugin.VERIFICATION_GROUP
@@ -282,9 +257,21 @@ class FluidLibraryVariantConfiguration private constructor(
 					}
 
 					target.name.startsWith("macos") ->
-						macosTest.dependsOn("${target.name}Test")
+						tasks.maybeCreate("macosTest").dependsOn("${target.name}Test")
 				}
+
+				for (configuration in configurations)
+					ObjcTargetConfigurator.applyTo(target, configuration)
 			}
+		}
+
+		val objcTest by tasks.creating {
+			tasks.findByName("iosTest")?.let { dependsOn(it) }
+			tasks.findByName("macosTest")?.let { dependsOn(it) }
+		}
+
+		tasks.named("check") {
+			dependsOn(objcTest)
 		}
 	}
 
@@ -367,10 +354,6 @@ class FluidLibraryVariantConfiguration private constructor(
 		apply<MavenPublishPlugin>()
 		apply<SigningPlugin>()
 
-		tasks.getByName<org.gradle.jvm.tasks.Jar>("jvmSourcesJar") {
-			from(file("build/generated/source/kaptKotlin/main"))
-		}
-
 		configureBintrayPublishing()
 		configureSonatypePublishing()
 	}
@@ -388,5 +371,41 @@ class FluidLibraryVariantConfiguration private constructor(
 		internal fun applyTo(project: Project, configure: FluidLibraryVariantConfiguration.() -> Unit = {}) {
 			FluidLibraryVariantConfiguration(project = project).apply(configure).configureProject()
 		}
+
+
+		val JvmTarget.jvmVersionCode
+			get() = when (this) {
+				JvmTarget.jdk7 -> 7
+				JvmTarget.jdk8 -> 8
+			}
+
+
+		val JvmTarget.kotlinJvmTargetVersion
+			get() = when (this) {
+				JvmTarget.jdk7 -> "1.6"
+				JvmTarget.jdk8 -> "1.8"
+			}
+
+
+		val JvmTarget.kotlinSourceDirectoryName
+			get() = "jvm-$kotlinTargetName"
+
+
+		val JvmTarget.kotlinStdlibVariant
+			get() = when (this) {
+				JvmTarget.jdk7 -> "jdk7"
+				JvmTarget.jdk8 -> "jdk8"
+			}
+
+
+		val JvmTarget.kotlinTargetName
+			get() = when (this) {
+				JvmTarget.jdk7 -> "jdk7"
+				JvmTarget.jdk8 -> "jdk8"
+			}
+
+
+		val ObjcTarget.kotlinSourceDirectoryName
+			get() = "objc-${name.toLowerCase()}"
 	}
 }

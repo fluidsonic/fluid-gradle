@@ -20,7 +20,7 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
-	var jdk = JDK.v1_7
+	var jdk = JvmTarget.jdk7
 
 
 	private fun Project.configureBasics() {
@@ -44,12 +44,12 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 
 		dependencies {
 			api(platform(kotlin("bom")))
-			api(kotlin("stdlib-${jdk.moduleId}"))
+			api(kotlin("stdlib-${jdk.kotlinStdlibVariant}"))
 		}
 
 		java {
-			sourceCompatibility = jdk.toGradle()
-			targetCompatibility = jdk.toGradle()
+			sourceCompatibility = jdk.gradleJavaVersion
+			targetCompatibility = jdk.gradleJavaVersion
 		}
 
 		sourceSets {
@@ -73,7 +73,7 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 					"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
 					"-XXLanguage:+InlineClasses"
 				)
-				kotlinOptions.jvmTarget = jdk.toKotlinTarget()
+				kotlinOptions.jvmTarget = jdk.kotlinJvmTargetVersion
 			}
 		}
 
@@ -240,5 +240,27 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 		internal fun applyTo(project: Project, configure: FluidJvmLibraryVariantConfiguration.() -> Unit = {}) {
 			FluidJvmLibraryVariantConfiguration(project = project).apply(configure).configureProject()
 		}
+
+
+		val JvmTarget.gradleJavaVersion
+			get() = when (this) {
+				JvmTarget.jdk7 -> JavaVersion.VERSION_1_7
+				JvmTarget.jdk8 -> JavaVersion.VERSION_1_8
+			}
+
+
+		val JvmTarget.kotlinStdlibVariant
+			get() = when (this) {
+				JvmTarget.jdk7 -> "jdk7"
+				JvmTarget.jdk8 -> "jdk8"
+			}
+
+
+		val JvmTarget.kotlinJvmTargetVersion
+			get() = when (this) {
+				JvmTarget.jdk7 -> "1.6"
+				JvmTarget.jdk8 -> "1.8"
+			}
+
 	}
 }
