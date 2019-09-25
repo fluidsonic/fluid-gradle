@@ -246,7 +246,7 @@ class FluidLibraryVariantConfiguration private constructor(
 								if (binary.outputFile.exists()) {
 									val outputPath = binary.outputFile.absolutePath
 									exec {
-										val device = findProperty("iosTest.device")?.toString() ?: "iPhone X"
+										val device = findProperty("iosTest.device")?.toString() ?: "iPhone 11"
 
 										println("$ xcrun simctl spawn \"$device\" \"$outputPath\"")
 										commandLine("xcrun", "simctl", "spawn", device, outputPath)
