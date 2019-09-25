@@ -192,10 +192,10 @@ class FluidLibraryVariantConfiguration private constructor(
 
 						dependencies {
 							implementation(kotlin("test-junit5"))
-							implementation("org.junit.jupiter:junit-jupiter-api:5.5.0")
+							implementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
 
-							runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.0")
-							runtimeOnly("org.junit.platform:junit-platform-runner:1.5.0")
+							runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
+							runtimeOnly("org.junit.platform:junit-platform-runner:1.5.2")
 						}
 					}
 
