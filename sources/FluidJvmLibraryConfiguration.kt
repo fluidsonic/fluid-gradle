@@ -12,7 +12,7 @@ class FluidJvmLibraryConfiguration private constructor(
 	private val project: Project
 ) {
 
-	var gradleVersion = "5.5"
+	var gradleVersion = "5.6.2"
 	var name = ""
 	var version = ""
 

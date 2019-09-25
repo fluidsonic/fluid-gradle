@@ -7,20 +7,20 @@ version = "0.9.21"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.41"
+	kotlin("jvm") version "1.3.50"
 	`kotlin-dsl`
 	`maven-publish`
-	id("com.github.ben-manes.versions") version "0.21.0"
+	id("com.github.ben-manes.versions") version "0.25.0"
 	id("com.gradle.plugin-publish") version "0.10.1"
 	id("com.jfrog.bintray") version "1.8.4"
 }
 
 dependencies {
+	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
-
 	implementation(kotlin("serialization"))
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.25.0")
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.21.0")
 }
 
 gradlePlugin {
@@ -57,7 +57,7 @@ sourceSets {
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "5.5"
+	gradleVersion = "5.6.2"
 }
 
 
