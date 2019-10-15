@@ -308,7 +308,6 @@ class FluidLibraryVariantConfiguration private constructor(
 					publication.pom {
 						name.set(project.name)
 						description.set(project.description)
-						packaging = "jar"
 						url.set("https://github.com/fluidsonic/${library.name}")
 						developers {
 							developer {
@@ -336,8 +335,13 @@ class FluidLibraryVariantConfiguration private constructor(
 			publishing.publications
 				.filterIsInstance<MavenPublication>()
 				.filter { it.name != "kotlinMultiplatform" }
-				.filter { it.artifacts.none { artifact -> artifact.classifier == "javadoc" } }
-				.forEach { it.artifact(emptyJar) { classifier = "javadoc" } }
+				.forEach { publication ->
+					if (publication.artifacts.none { it.classifier.isNullOrEmpty() && it.extension == "jar" })
+						publication.artifact(emptyJar)
+
+					if (publication.artifacts.none { it.classifier == "javadoc" })
+						publication.artifact(emptyJar) { classifier = "javadoc" }
+				}
 		}
 	}
 
