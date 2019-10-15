@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 description = "Gradle plugin used to simplify configuration of all com.github.fluidsonic.* Kotlin libraries"
 group = "com.github.fluidsonic.fluid-library"
-version = "0.9.28"
+version = "0.9.29"
 
 plugins {
 	`java-gradle-plugin`
