@@ -1,5 +1,6 @@
 package com.github.fluidsonic.fluid.library
 
+import com.github.benmanes.gradle.versions.updates.*
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.*
@@ -7,6 +8,10 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.dsl.*
+
+
+fun Project.dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
+	tasks.withType(configuration)
 
 
 internal val Project.fluidLibrary
@@ -63,3 +68,7 @@ internal fun Project.signing(configuration: SigningExtension.() -> Unit) =
 
 internal val Project.sourceSets
 	get() = the<SourceSetContainer>()
+
+
+fun isUnstableVersion(version: String) =
+	Regex("\\b(alpha|beta|eap|rc|snapshot)\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)

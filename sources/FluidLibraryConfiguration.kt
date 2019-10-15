@@ -10,6 +10,7 @@ class FluidLibraryConfiguration private constructor(
 	private val project: Project
 ) {
 
+	var dependencyUpdatesIncludeUnstableVersions = false
 	var gradleVersion = "5.6.2"
 	var name = ""
 	var version = ""
@@ -35,6 +36,15 @@ class FluidLibraryConfiguration private constructor(
 		tasks.withType<Wrapper> {
 			this.distributionType = Wrapper.DistributionType.ALL
 			this.gradleVersion = this@FluidLibraryConfiguration.gradleVersion
+		}
+
+		dependencyUpdates {
+			outputFormatter = null
+
+			if (!dependencyUpdatesIncludeUnstableVersions)
+				rejectVersionIf {
+					isUnstableVersion(candidate.version) && !isUnstableVersion(currentVersion)
+				}
 		}
 
 		extensions.add("fluid-library", FluidLibraryPluginExtension(

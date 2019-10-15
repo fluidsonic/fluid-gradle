@@ -1,3 +1,4 @@
+import com.github.benmanes.gradle.versions.updates.*
 import com.jfrog.bintray.gradle.*
 import org.jetbrains.kotlin.gradle.plugin.*
 
@@ -10,7 +11,7 @@ plugins {
 	kotlin("jvm") version "1.3.50"
 	`kotlin-dsl`
 	`maven-publish`
-	id("com.github.ben-manes.versions") version "0.25.0"
+	id("com.github.ben-manes.versions") version "0.26.0"
 	id("com.gradle.plugin-publish") version "0.10.1"
 	id("com.jfrog.bintray") version "1.8.4"
 }
@@ -58,6 +59,14 @@ sourceSets {
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
 	gradleVersion = "5.6.2"
+}
+
+dependencyUpdates {
+	outputFormatter = null
+
+	rejectVersionIf {
+		isUnstableVersion(candidate.version) && !isUnstableVersion(currentVersion)
+	}
 }
 
 
@@ -121,3 +130,11 @@ fun RepositoryHandler.bintray(name: String) =
 
 val SourceSet.kotlin
 	get() = withConvention(KotlinSourceSet::class) { kotlin }
+
+
+fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
+	tasks.withType(configuration)
+
+
+fun isUnstableVersion(version: String) =
+	Regex("\\b(alpha|beta|eap|rc|snapshot)\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
