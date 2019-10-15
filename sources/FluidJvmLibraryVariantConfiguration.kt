@@ -1,11 +1,8 @@
 package com.github.fluidsonic.fluid.library
 
-import com.jfrog.bintray.gradle.*
-import com.jfrog.bintray.gradle.tasks.*
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
-import org.gradle.api.publish.maven.internal.artifact.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.bundling.*
 import org.gradle.kotlin.dsl.*
@@ -87,81 +84,51 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 	}
 
 
-	private fun Project.configureBintrayPublishing() {
-		val bintrayUser = findProperty("bintrayUser") as String? ?: return
-		val bintrayKey = findProperty("bintrayApiKey") as String? ?: return
+	private fun configureProject(): Unit = project.run {
+		configureBasics()
 
-		val library = fluidLibrary
-
-		apply<BintrayPlugin>()
-		configure<BintrayExtension> {
-			user = bintrayUser
-			key = bintrayKey
-			publish = true
-
-			setPublications("default")
-
-			pkg.apply {
-				repo = "maven"
-				issueTrackerUrl = "https://github.com/fluidsonic/${library.name}/issues"
-				name = library.name
-				publicDownloadNumbers = true
-				vcsUrl = "https://github.com/fluidsonic/${library.name}"
-				websiteUrl = "https://github.com/fluidsonic/${library.name}"
-				setLicenses("Apache-2.0")
-
-				version.apply {
-					name = library.version
-					vcsTag = library.version
-				}
-
-				afterEvaluate {
-					setPublications(*publishing.publications.names.toTypedArray())
-				}
-			}
-		}
-
-		tasks.withType<BintrayUploadTask> {
-			doFirst {
-				publishing.publications
-					.filterIsInstance<MavenPublication>()
-					.forEach { publication ->
-						val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
-						if (moduleFile.exists()) {
-							publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
-								override fun getDefaultExtension() = "module"
-							})
-						}
-					}
-			}
-		}
+		if (this@FluidJvmLibraryVariantConfiguration.publishing)
+			configurePublishing()
 	}
 
 
-	private fun Project.configureSonatypePublishing() {
-		val sonatypeUserName = findProperty("sonatypeUserName") as String? ?: return
-		val sonatypePassword = findProperty("sonatypePassword") as String? ?: return
-
+	private fun Project.configurePublishing() {
+		val bintrayUser = findProperty("bintrayUser") as String? ?: return
+		val bintrayKey = findProperty("bintrayApiKey") as String? ?: return
 		val library = fluidLibrary
 
-		signing {
-			sign(publishing.publications)
+		apply<MavenPublishPlugin>()
+		apply<SigningPlugin>()
+
+		val javadocJar by tasks.creating(Jar::class) {
+			archiveClassifier.set("javadoc")
+			from(tasks["javadoc"])
+		}
+
+		val sourcesJar by tasks.creating(Jar::class) {
+			archiveClassifier.set("sources")
+			from(sourceSets["main"].allSource, file("build/generated/source/kaptKotlin/main"))
 		}
 
 		publishing {
 			repositories {
 				maven {
-					setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+					setUrl("https://api.bintray.com/maven/fluidsonic/maven/${library.name}/")
 					credentials {
-						username = sonatypeUserName
-						password = sonatypePassword
+						username = bintrayUser
+						password = bintrayKey
 					}
 				}
 			}
 
-			publications
-				.filterIsInstance<MavenPublication>()
-				.forEach { publication ->
+			publications {
+				create<MavenPublication>("default") {
+					from(components["java"])
+					artifact(javadocJar)
+					artifact(sourcesJar)
+				}
+
+				filterIsInstance<MavenPublication>().forEach { publication ->
 					publication.pom {
 						name.set(project.name)
 						description.set(project.description)
@@ -187,44 +154,12 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 						}
 					}
 				}
-		}
-	}
-
-
-	private fun configureProject(): Unit = project.run {
-		configureBasics()
-
-		if (this@FluidJvmLibraryVariantConfiguration.publishing)
-			configurePublishing()
-	}
-
-
-	private fun Project.configurePublishing() {
-		apply<MavenPublishPlugin>()
-		apply<SigningPlugin>()
-
-		val javadocJar by tasks.creating(Jar::class) {
-			archiveClassifier.set("javadoc")
-			from(tasks["javadoc"])
-		}
-
-		val sourcesJar by tasks.creating(Jar::class) {
-			archiveClassifier.set("sources")
-			from(sourceSets["main"].allSource, file("build/generated/source/kaptKotlin/main"))
-		}
-
-		publishing {
-			publications {
-				create<MavenPublication>("default") {
-					from(components["java"])
-					artifact(javadocJar)
-					artifact(sourcesJar)
-				}
 			}
 		}
 
-		configureBintrayPublishing()
-		configureSonatypePublishing()
+		signing {
+			sign(publishing.publications)
+		}
 	}
 
 

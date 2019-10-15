@@ -1,6 +1,6 @@
-import com.github.benmanes.gradle.versions.updates.*
-import com.jfrog.bintray.gradle.*
-import org.jetbrains.kotlin.gradle.plugin.*
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import com.jfrog.bintray.gradle.BintrayExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 description = "Gradle plugin used to simplify configuration of all com.github.fluidsonic.* Kotlin libraries"
 group = "com.github.fluidsonic.fluid-library"
@@ -21,7 +21,6 @@ dependencies {
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.26.0")
-	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
 }
 
 gradlePlugin {
@@ -48,6 +47,7 @@ pluginBundle {
 repositories {
 	bintray("kotlin/kotlin-eap")
 	jcenter()
+	mavenCentral()
 }
 
 sourceSets {
