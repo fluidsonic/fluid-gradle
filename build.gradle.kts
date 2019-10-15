@@ -20,7 +20,7 @@ dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.25.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.26.0")
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
 }
 
@@ -137,4 +137,4 @@ fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
 
 
 fun isUnstableVersion(version: String) =
-	Regex("\\b(alpha|beta|eap|rc|snapshot)\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
+	Regex("\\b(alpha|beta|eap|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
