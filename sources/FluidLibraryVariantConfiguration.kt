@@ -6,9 +6,12 @@ import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.bundling.*
+import org.gradle.api.tasks.testing.*
+import org.gradle.api.tasks.testing.logging.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import org.jetbrains.kotlin.gradle.targets.jvm.tasks.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
@@ -63,6 +66,7 @@ class FluidLibraryVariantConfiguration private constructor(
 				compilations.forEach { compilation ->
 					compilation.kotlinOptions {
 						freeCompilerArgs = listOf(
+							"-Xuse-experimental=kotlin.Experimental",
 							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
 							"-XXLanguage:+InlineClasses"
 						)
@@ -98,6 +102,15 @@ class FluidLibraryVariantConfiguration private constructor(
 		configureJvmTargets()
 		configureObjcTargets()
 
+		tasks.withType<Test> {
+			testLogging {
+				events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+				exceptionFormat = TestExceptionFormat.FULL
+				showExceptions = true
+				showStandardStreams = true
+			}
+		}
+
 		repositories {
 			mavenCentral()
 			jcenter()
@@ -112,9 +125,11 @@ class FluidLibraryVariantConfiguration private constructor(
 		kotlin {
 			for ((jdk, configurations) in jvmTargets) {
 				jvm(jdk.kotlinTargetName) {
+					AbstractKotlinTargetConfigurator.testTaskNameSuffix
 					compilations.forEach { compilation ->
 						compilation.kotlinOptions {
 							freeCompilerArgs = listOf(
+								"-Xuse-experimental=kotlin.Experimental",
 								"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
 								"-XXLanguage:+InlineClasses"
 							)
@@ -153,6 +168,10 @@ class FluidLibraryVariantConfiguration private constructor(
 						JvmTargetConfigurator.applyTo(this, configuration)
 				}
 			}
+		}
+
+		tasks.withType<KotlinJvmTest> {
+			useJUnitPlatform()
 		}
 	}
 
