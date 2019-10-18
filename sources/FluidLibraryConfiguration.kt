@@ -11,7 +11,7 @@ class FluidLibraryConfiguration private constructor(
 ) {
 
 	var dependencyUpdatesIncludeUnstableVersions = false
-	var gradleVersion = "5.6.2"
+	var gradleVersion = "5.6.3"
 	var name = ""
 	var version = ""
 

@@ -1,6 +1,6 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.jfrog.bintray.gradle.BintrayExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import com.github.benmanes.gradle.versions.updates.*
+import com.jfrog.bintray.gradle.*
+import org.jetbrains.kotlin.gradle.plugin.*
 
 description = "Gradle plugin used to simplify configuration of all com.github.fluidsonic.* Kotlin libraries"
 group = "com.github.fluidsonic.fluid-library"
@@ -11,7 +11,7 @@ plugins {
 	kotlin("jvm") version "1.3.50"
 	`kotlin-dsl`
 	`maven-publish`
-	id("com.github.ben-manes.versions") version "0.26.0"
+	id("com.github.ben-manes.versions") version "0.27.0"
 	id("com.gradle.plugin-publish") version "0.10.1"
 	id("com.jfrog.bintray") version "1.8.4"
 }
@@ -20,7 +20,7 @@ dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.26.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.27.0")
 }
 
 gradlePlugin {
@@ -58,7 +58,7 @@ sourceSets {
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "5.6.2"
+	gradleVersion = "5.6.3"
 }
 
 dependencyUpdates {
