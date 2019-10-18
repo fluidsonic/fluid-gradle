@@ -194,8 +194,8 @@ class FluidLibraryVariantConfiguration private constructor(
 									exec {
 										val device = findProperty("iosTest.device")?.toString() ?: "iPhone 11"
 
-										println("$ xcrun simctl spawn \"$device\" \"$outputPath\"")
-										commandLine("xcrun", "simctl", "spawn", device, outputPath)
+										println("$ xcrun simctl spawn --standalone \"$device\" \"$outputPath\"")
+										commandLine("xcrun", "simctl", "spawn", "--standalone", device, outputPath)
 									}
 								}
 							}
