@@ -125,7 +125,6 @@ class FluidLibraryVariantConfiguration private constructor(
 		kotlin {
 			for ((jdk, configurations) in jvmTargets) {
 				jvm(jdk.kotlinTargetName) {
-					AbstractKotlinTargetConfigurator.testTaskNameSuffix
 					compilations.forEach { compilation ->
 						compilation.kotlinOptions {
 							freeCompilerArgs = listOf(
@@ -185,6 +184,16 @@ class FluidLibraryVariantConfiguration private constructor(
 					ObjcTarget.iosArm64 -> iosArm64()
 					ObjcTarget.iosX64 -> iosX64()
 					ObjcTarget.macosX64 -> macosX64()
+				}
+
+				target.compilations.forEach { compilation ->
+					compilation.kotlinOptions {
+						freeCompilerArgs = listOf(
+							"-Xuse-experimental=kotlin.Experimental",
+							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+							"-XXLanguage:+InlineClasses"
+						)
+					}
 				}
 
 				target.compilations["main"].defaultSourceSet {
