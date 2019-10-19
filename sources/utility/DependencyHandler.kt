@@ -18,21 +18,9 @@ fun DependencyHandler.api(
 )
 
 
-fun DependencyHandler.testApi(dependencyNotation: Any) =
-	add("testApi", dependencyNotation)
-
-
-fun DependencyHandler.testApi(
-	dependencyNotation: String,
-	dependencyConfiguration: Action<ExternalModuleDependency>
-): ExternalModuleDependency = addDependencyTo(
-	this, "testApi", dependencyNotation, dependencyConfiguration
-)
-
-
 @Suppress("unused")
 fun DependencyHandler.fluid(name: String, version: String) =
-	"io.fluidsonic.$name:fluid-$name:$version"
+	"io.fluidsonic.${name.substringBefore('-')}:fluid-$name:$version"
 
 
 fun DependencyHandler.implementation(dependencyNotation: Any) =
@@ -61,6 +49,18 @@ fun DependencyHandler.runtimeOnly(
 	dependencyConfiguration: Action<ExternalModuleDependency>
 ): ExternalModuleDependency = addDependencyTo(
 	this, "runtimeOnly", dependencyNotation, dependencyConfiguration
+)
+
+
+fun DependencyHandler.testApi(dependencyNotation: Any) =
+	add("testApi", dependencyNotation)
+
+
+fun DependencyHandler.testApi(
+	dependencyNotation: String,
+	dependencyConfiguration: Action<ExternalModuleDependency>
+): ExternalModuleDependency = addDependencyTo(
+	this, "testApi", dependencyNotation, dependencyConfiguration
 )
 
 

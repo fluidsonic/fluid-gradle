@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 
 @Suppress("unused")
 fun KotlinDependencyHandler.fluid(name: String, version: String) =
-	"io.fluidsonic.$name:fluid-$name:$version"
+	"io.fluidsonic.${name.substringBefore('-')}:fluid-$name:$version"
 
 
 @Suppress("unused")
