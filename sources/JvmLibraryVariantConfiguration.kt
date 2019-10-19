@@ -1,13 +1,16 @@
 package io.fluidsonic.gradle
 
 import org.gradle.api.*
+import org.gradle.api.attributes.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.bundling.*
 import org.gradle.api.tasks.testing.logging.*
+import org.gradle.jvm.plugins.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
+import org.gradle.testing.base.plugins.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.tasks.*
 
@@ -26,6 +29,8 @@ class JvmLibraryVariantConfiguration internal constructor(
 
 		apply<KotlinPlatformJvmPlugin>()
 		apply<JavaLibraryPlugin>()
+		apply<JUnitTestSuitePlugin>()
+		apply<TestingBasePlugin>()
 
 		group = "io.fluidsonic.${library.name}"
 		version = library.version
@@ -85,13 +90,25 @@ class JvmLibraryVariantConfiguration internal constructor(
 		}
 
 		test {
-			useJUnitPlatform()
+			useJUnitPlatform {
+				includeEngines("junit-jupiter")
+			}
 
 			testLogging {
 				events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
 				exceptionFormat = TestExceptionFormat.FULL
 				showExceptions = true
 				showStandardStreams = true
+			}
+		}
+
+		configurations {
+			all {
+				// https://youtrack.jetbrains.com/issue/KT-31641
+				// https://youtrack.jetbrains.com/issue/KT-33206
+
+				if (name.contains("kapt"))
+					attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
 			}
 		}
 

@@ -171,7 +171,9 @@ class LibraryVariantConfiguration internal constructor(
 		}
 
 		tasks.withType<KotlinJvmTest> {
-			useJUnitPlatform()
+			useJUnitPlatform {
+				includeEngines("junit-jupiter")
+			}
 		}
 	}
 
@@ -283,6 +285,12 @@ class LibraryVariantConfiguration internal constructor(
 			publications {
 				getByName<MavenPublication>("kotlinMultiplatform") {
 					artifact(emptyJar)
+					artifact(emptyJar) {
+						classifier = "javadoc"
+					}
+					artifact(emptyJar) {
+						classifier = "sources"
+					}
 				}
 
 
