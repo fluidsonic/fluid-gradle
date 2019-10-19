@@ -1,10 +1,12 @@
-package com.github.fluidsonic.fluid.library
+package io.fluidsonic.gradle
 
 import com.github.benmanes.gradle.versions.updates.*
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.*
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.testing.*
+import org.gradle.api.tasks.wrapper.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -12,30 +14,6 @@ import org.jetbrains.kotlin.gradle.dsl.*
 
 fun Project.dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
 	tasks.withType(configuration)
-
-
-internal val Project.fluidLibrary
-	get() = rootProject.the<FluidLibraryPluginExtension>()
-
-
-fun Project.fluidJvmLibrary(configure: FluidJvmLibraryConfiguration.() -> Unit = {}) {
-	FluidJvmLibraryConfiguration.applyTo(project = this, configure = configure)
-}
-
-
-fun Project.fluidJvmLibraryVariant(configure: FluidJvmLibraryVariantConfiguration.() -> Unit = {}) {
-	FluidJvmLibraryVariantConfiguration.applyTo(project = this, configure = configure)
-}
-
-
-fun Project.fluidLibrary(configure: FluidLibraryConfiguration.() -> Unit = {}) {
-	FluidLibraryConfiguration.applyTo(project = this, configure = configure)
-}
-
-
-fun Project.fluidLibraryVariant(configure: FluidLibraryVariantConfiguration.() -> Unit = {}) {
-	FluidLibraryVariantConfiguration.applyTo(project = this, configure = configure)
-}
 
 
 internal fun Project.java(configuration: JavaPluginConvention.() -> Unit) =
@@ -68,6 +46,14 @@ internal fun Project.signing(configuration: SigningExtension.() -> Unit) =
 
 internal val Project.sourceSets
 	get() = the<SourceSetContainer>()
+
+
+fun Project.test(configuration: Test.() -> Unit) =
+	tasks.withType(configuration)
+
+
+fun Project.wrapper(configuration: Wrapper.() -> Unit) =
+	tasks.withType(configuration)
 
 
 fun isUnstableVersion(version: String) =

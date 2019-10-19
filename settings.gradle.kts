@@ -6,7 +6,7 @@ pluginManagement {
 	}
 }
 
-rootProject.name = "fluid-library"
+rootProject.name = "fluid-gradle"
 
 
 fun RepositoryHandler.bintray(name: String) =

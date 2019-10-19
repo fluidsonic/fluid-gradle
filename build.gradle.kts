@@ -1,19 +1,17 @@
 import com.github.benmanes.gradle.versions.updates.*
-import com.jfrog.bintray.gradle.*
 import org.jetbrains.kotlin.gradle.plugin.*
 
-description = "Gradle plugin used to simplify configuration of all com.github.fluidsonic.* Kotlin libraries"
-group = "com.github.fluidsonic.fluid-library"
-version = "0.9.33"
+description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
+group = "io.fluidsonic.gradle"
+version = "1.0.0"
 
 plugins {
 	`java-gradle-plugin`
 	kotlin("jvm") version "1.3.50"
 	`kotlin-dsl`
 	`maven-publish`
+	signing
 	id("com.github.ben-manes.versions") version "0.27.0"
-	id("com.gradle.plugin-publish") version "0.10.1"
-	id("com.jfrog.bintray") version "1.8.4"
 }
 
 dependencies {
@@ -25,23 +23,17 @@ dependencies {
 
 gradlePlugin {
 	plugins {
-		register("com.github.fluidsonic.fluid-library.plugin") {
-			displayName = "fluid-* library configuration"
-			description = "Very optionated plugin to unify & simplify configuration of all the com.github.fluidsonic.* Kotlin libraries."
-			id = "com.github.fluidsonic.fluid-library"
-			implementationClass = "com.github.fluidsonic.fluid.library.FluidLibraryPlugin"
+		register("io.fluidsonic.gradle") {
+			displayName = "fluidsonic library gradle configurator"
+			description = "Optionated plugin to unify & simplify configuration of all the io.fluidsonic.* Kotlin libraries."
+			id = "io.fluidsonic.gradle"
+			implementationClass = "io.fluidsonic.gradle.FluidsonicPlugin"
 		}
 	}
 }
 
 kotlinDslPluginOptions {
 	experimentalWarning.set(false)
-}
-
-pluginBundle {
-	tags = listOf("project-configuration")
-	website = "https://github.com/fluidsonic/fluid-library"
-	vcsUrl = "https://github.com/fluidsonic/fluid-library.git"
 }
 
 repositories {
@@ -88,36 +80,51 @@ if (bintrayUser != null && bintrayKey != null) {
 		archives(sourcesJar)
 	}
 
-	configure<PublishingExtension> {
-		publications {
-			create<MavenPublication>("default") {
-				artifactId = "com.github.fluidsonic.fluid-library.gradle.plugin"
-
-				from(components["java"])
-				artifact(sourcesJar)
+	publishing {
+		repositories {
+			maven {
+				setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/gradle/")
+				credentials {
+					username = bintrayUser
+					password = bintrayKey
+				}
 			}
 		}
-	}
 
-	configure<BintrayExtension> {
-		user = bintrayUser
-		key = bintrayKey
+		publications {
+			create<MavenPublication>("default") {
+				artifactId = "io.fluidsonic.gradle"
 
-		setPublications("default")
+				from(components["java"])
+				artifact(javadocJar)
+				artifact(sourcesJar)
+			}
 
-		pkg.apply {
-			repo = "maven"
-			issueTrackerUrl = "https://github.com/fluidsonic/${project.name}/issues"
-			name = project.name
-			publicDownloadNumbers = true
-			publish = true
-			vcsUrl = "https://github.com/fluidsonic/${project.name}"
-			websiteUrl = "https://github.com/fluidsonic/${project.name}"
-			setLicenses("Apache-2.0")
-
-			version.apply {
-				name = project.version.toString()
-				vcsTag = project.version.toString()
+			filterIsInstance<MavenPublication>().forEach { publication ->
+				publication.pom {
+					name.set(project.name)
+					description.set(project.description)
+					packaging = "jar"
+					url.set("https://github.com/fluidsonic/${project.name}")
+					developers {
+						developer {
+							id.set("fluidsonic")
+							name.set("Marc Knaup")
+							email.set("marc@knaup.io")
+						}
+					}
+					licenses {
+						license {
+							name.set("Apache License 2.0")
+							url.set("https://github.com/fluidsonic/${project.name}/blob/master/LICENSE")
+						}
+					}
+					scm {
+						connection.set("scm:git:https://github.com/fluidsonic/${project.name}.git")
+						developerConnection.set("scm:git:git@github.com:fluidsonic/${project.name}.git")
+						url.set("https://github.com/fluidsonic/${project.name}")
+					}
+				}
 			}
 		}
 	}

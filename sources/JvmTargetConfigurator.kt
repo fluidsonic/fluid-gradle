@@ -1,4 +1,4 @@
-package com.github.fluidsonic.fluid.library
+package io.fluidsonic.gradle
 
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*

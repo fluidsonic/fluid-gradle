@@ -1,31 +1,34 @@
-package com.github.fluidsonic.fluid.library
+package io.fluidsonic.gradle
 
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.bundling.*
+import org.gradle.api.tasks.testing.logging.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.tasks.*
 
 
-class FluidJvmLibraryVariantConfiguration private constructor(
+class JvmLibraryVariantConfiguration internal constructor(
+	var target: JvmTarget,
 	private val project: Project
 ) {
 
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
-	var jdk = JvmTarget.jdk7
 
 
-	private fun Project.configureBasics() {
+	private fun configureBasics(): Unit = project.run {
+		val library = fluidLibrary
+
 		apply<KotlinPlatformJvmPlugin>()
 		apply<JavaLibraryPlugin>()
 
-		group = "com.github.fluidsonic"
-		version = fluidLibrary.version
+		group = "io.fluidsonic.${library.name}"
+		version = library.version
 
 		if (enforcesSameVersionForAllKotlinDependencies)
 			configurations {
@@ -41,12 +44,18 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 
 		dependencies {
 			api(platform(kotlin("bom")))
-			api(kotlin("stdlib-${jdk.kotlinStdlibVariant}"))
+			api(kotlin("stdlib-${target.kotlinStdlibVariant}"))
+
+			testImplementation(kotlin("test-junit5"))
+			testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.junitJupiter}")
+
+			testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
+			testRuntimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
 		}
 
 		java {
-			sourceCompatibility = jdk.gradleJavaVersion
-			targetCompatibility = jdk.gradleJavaVersion
+			sourceCompatibility = target.gradleJavaVersion
+			targetCompatibility = target.gradleJavaVersion
 		}
 
 		sourceSets {
@@ -63,37 +72,48 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 
 		tasks {
 			withType<KotlinCompile> {
-				sourceCompatibility = jdk.toString()
-				targetCompatibility = jdk.toString()
+				sourceCompatibility = target.toString()
+				targetCompatibility = target.toString()
 
 				kotlinOptions.freeCompilerArgs = listOf(
 					"-Xuse-experimental=kotlin.Experimental",
 					"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
 					"-XXLanguage:+InlineClasses"
 				)
-				kotlinOptions.jvmTarget = jdk.kotlinJvmTargetVersion
+				kotlinOptions.jvmTarget = target.kotlinJvmTargetVersion
+			}
+		}
+
+		test {
+			useJUnitPlatform()
+
+			testLogging {
+				events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+				exceptionFormat = TestExceptionFormat.FULL
+				showExceptions = true
+				showStandardStreams = true
 			}
 		}
 
 		repositories {
 			mavenCentral()
 			jcenter()
-			bintray("fluidsonic/maven")
+			bintray("fluidsonic/kotlin")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")
 		}
 	}
 
 
-	private fun configureProject(): Unit = project.run {
+	internal fun configureProject() {
 		configureBasics()
 
-		if (this@FluidJvmLibraryVariantConfiguration.publishing)
+		if (publishing)
 			configurePublishing()
 	}
 
 
-	private fun Project.configurePublishing() {
+	private fun configurePublishing(): Unit = project.run {
 		val bintrayUser = findProperty("bintrayUser") as String? ?: return
 		val bintrayKey = findProperty("bintrayApiKey") as String? ?: return
 		val library = fluidLibrary
@@ -114,7 +134,7 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 		publishing {
 			repositories {
 				maven {
-					setUrl("https://api.bintray.com/maven/fluidsonic/maven/${library.name}/")
+					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${library.name}/")
 					credentials {
 						username = bintrayUser
 						password = bintrayKey
@@ -131,10 +151,10 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 
 				filterIsInstance<MavenPublication>().forEach { publication ->
 					publication.pom {
-						name.set(project.name)
+						name.set(library.fullName)
 						description.set(project.description)
 						packaging = "jar"
-						url.set("https://github.com/fluidsonic/${library.name}")
+						url.set("https://github.com/fluidsonic/${library.fullName}")
 						developers {
 							developer {
 								id.set("fluidsonic")
@@ -145,13 +165,13 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 						licenses {
 							license {
 								name.set("Apache License 2.0")
-								url.set("https://github.com/fluidsonic/${library.name}/blob/master/LICENSE")
+								url.set("https://github.com/fluidsonic/${library.fullName}/blob/master/LICENSE")
 							}
 						}
 						scm {
-							connection.set("scm:git:https://github.com/fluidsonic/${library.name}.git")
-							developerConnection.set("scm:git:git@github.com:fluidsonic/${library.name}.git")
-							url.set("https://github.com/fluidsonic/${library.name}")
+							connection.set("scm:git:https://github.com/fluidsonic/${library.fullName}.git")
+							developerConnection.set("scm:git:git@github.com:fluidsonic/${library.fullName}.git")
+							url.set("https://github.com/fluidsonic/${library.fullName}")
 						}
 					}
 				}
@@ -172,11 +192,6 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 
 
 	companion object {
-
-		internal fun applyTo(project: Project, configure: FluidJvmLibraryVariantConfiguration.() -> Unit = {}) {
-			FluidJvmLibraryVariantConfiguration(project = project).apply(configure).configureProject()
-		}
-
 
 		val JvmTarget.gradleJavaVersion
 			get() = when (this) {
@@ -199,4 +214,9 @@ class FluidJvmLibraryVariantConfiguration private constructor(
 			}
 
 	}
+}
+
+
+fun Project.fluidJvmLibraryVariant(target: JvmTarget, configure: JvmLibraryVariantConfiguration.() -> Unit = {}) {
+	JvmLibraryVariantConfiguration(target = target, project = project).apply(configure).configureProject()
 }

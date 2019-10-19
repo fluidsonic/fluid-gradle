@@ -1,4 +1,4 @@
-package com.github.fluidsonic.fluid.library
+package io.fluidsonic.gradle
 
 import org.gradle.api.artifacts.dsl.*
 

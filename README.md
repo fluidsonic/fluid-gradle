@@ -1,7 +1,7 @@
-fluid-library
+fluid-gradle
 =============
 
-Gradle plugin used to simplify configuration of all `com.github.fluidsonic.*` Kotlin libraries.
+Gradle plugin for simplifying the configuration of `io.fluidsonic.*` Kotlin libraries
 
 
 License

@@ -1,4 +1,4 @@
-package com.github.fluidsonic.fluid.library
+package io.fluidsonic.gradle
 
 
 enum class ObjcTarget {

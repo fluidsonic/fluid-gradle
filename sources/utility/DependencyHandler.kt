@@ -1,4 +1,4 @@
-package com.github.fluidsonic.fluid.library
+package io.fluidsonic.gradle
 
 import org.gradle.api.*
 import org.gradle.api.artifacts.*
@@ -32,7 +32,7 @@ fun DependencyHandler.testApi(
 
 @Suppress("unused")
 fun DependencyHandler.fluid(name: String, version: String) =
-	"com.github.fluidsonic:fluid-$name:$version"
+	"io.fluidsonic.$name:fluid-$name:$version"
 
 
 fun DependencyHandler.implementation(dependencyNotation: Any) =
