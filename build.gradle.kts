@@ -92,10 +92,7 @@ if (bintrayUser != null && bintrayKey != null) {
 		}
 
 		publications {
-			create<MavenPublication>("default") {
-				artifactId = "io.fluidsonic.gradle"
-
-				from(components["java"])
+			create<MavenPublication>("pluginMaven") {
 				artifact(javadocJar)
 				artifact(sourcesJar)
 			}
