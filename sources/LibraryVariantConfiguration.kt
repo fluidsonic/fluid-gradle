@@ -274,7 +274,7 @@ class LibraryVariantConfiguration internal constructor(
 		publishing {
 			repositories {
 				maven {
-					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${library.name}/")
+					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${library.name}/;publish=1")
 					credentials {
 						username = bintrayUser
 						password = bintrayKey
