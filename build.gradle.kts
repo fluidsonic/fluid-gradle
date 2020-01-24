@@ -1,5 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
@@ -32,6 +33,11 @@ gradlePlugin {
 	}
 }
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_7
+	targetCompatibility = JavaVersion.VERSION_1_7
+}
+
 kotlinDslPluginOptions {
 	experimentalWarning.set(false)
 }
@@ -48,9 +54,18 @@ sourceSets {
 	}
 }
 
-tasks.withType<Wrapper> {
-	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "6.1"
+tasks {
+	withType<KotlinCompile> {
+		sourceCompatibility = "1.7"
+		targetCompatibility = "1.7"
+
+		kotlinOptions.jvmTarget = "1.6"
+	}
+
+	withType<Wrapper> {
+		distributionType = Wrapper.DistributionType.ALL
+		gradleVersion = "6.1"
+	}
 }
 
 dependencyUpdates {
