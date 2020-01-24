@@ -59,6 +59,11 @@ class JvmLibraryVariantConfiguration internal constructor(
 			testRuntimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
 		}
 
+		java {
+			sourceCompatibility = target.gradleJavaVersion
+			targetCompatibility = target.gradleJavaVersion
+		}
+
 		sourceSets {
 			getByName("main") {
 				kotlin.setSrcDirs(listOf("sources"))
