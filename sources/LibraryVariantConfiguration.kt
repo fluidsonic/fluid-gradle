@@ -20,6 +20,7 @@ class LibraryVariantConfiguration internal constructor(
 
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
+	var usesNewInference = true
 
 	private val commonConfigurations: MutableList<CommonTargetConfigurator.() -> Unit> = mutableListOf()
 	private val jvmTargets: MutableMap<JvmTarget, MutableList<JvmTargetConfigurator.() -> Unit>> = mutableMapOf()
@@ -66,10 +67,11 @@ class LibraryVariantConfiguration internal constructor(
 			metadata {
 				compilations.forEach { compilation ->
 					compilation.kotlinOptions {
-						freeCompilerArgs = listOf(
+						freeCompilerArgs = listOfNotNull(
 							"-Xuse-experimental=kotlin.Experimental",
 							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-							"-XXLanguage:+InlineClasses"
+							"-XXLanguage:+InlineClasses",
+							if (usesNewInference) "-Xnew-inference" else null
 						)
 					}
 				}
@@ -128,10 +130,11 @@ class LibraryVariantConfiguration internal constructor(
 				jvm(jdk.kotlinTargetName) {
 					compilations.forEach { compilation ->
 						compilation.kotlinOptions {
-							freeCompilerArgs = listOf(
+							freeCompilerArgs = listOfNotNull(
 								"-Xuse-experimental=kotlin.Experimental",
 								"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-								"-XXLanguage:+InlineClasses"
+								"-XXLanguage:+InlineClasses",
+								if (usesNewInference) "-Xnew-inference" else null
 							)
 
 							jvmTarget = jdk.kotlinJvmTargetVersion
@@ -191,10 +194,11 @@ class LibraryVariantConfiguration internal constructor(
 
 				target.compilations.forEach { compilation ->
 					compilation.kotlinOptions {
-						freeCompilerArgs = listOf(
+						freeCompilerArgs = listOfNotNull(
 							"-Xuse-experimental=kotlin.Experimental",
 							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-							"-XXLanguage:+InlineClasses"
+							"-XXLanguage:+InlineClasses",
+							if (usesNewInference) "-Xnew-inference" else null
 						)
 					}
 				}

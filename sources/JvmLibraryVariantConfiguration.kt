@@ -7,7 +7,6 @@ import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.bundling.*
 import org.gradle.api.tasks.testing.logging.*
-import org.gradle.jvm.plugins.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.gradle.testing.base.plugins.*
@@ -22,6 +21,7 @@ class JvmLibraryVariantConfiguration internal constructor(
 
 	var enforcesSameVersionForAllKotlinDependencies = true
 	var publishing = true
+	var usesNewInference = true
 
 
 	private fun configureBasics(): Unit = project.run {
@@ -29,7 +29,6 @@ class JvmLibraryVariantConfiguration internal constructor(
 
 		apply<KotlinPlatformJvmPlugin>()
 		apply<JavaLibraryPlugin>()
-		apply<JUnitTestSuitePlugin>()
 		apply<TestingBasePlugin>()
 
 		group = "io.fluidsonic.${library.name}"
@@ -80,10 +79,11 @@ class JvmLibraryVariantConfiguration internal constructor(
 				sourceCompatibility = target.toString()
 				targetCompatibility = target.toString()
 
-				kotlinOptions.freeCompilerArgs = listOf(
+				kotlinOptions.freeCompilerArgs = listOfNotNull(
 					"-Xuse-experimental=kotlin.Experimental",
 					"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-					"-XXLanguage:+InlineClasses"
+					"-XXLanguage:+InlineClasses",
+					if (usesNewInference) "-Xnew-inference" else null
 				)
 				kotlinOptions.jvmTarget = target.kotlinJvmTargetVersion
 			}
