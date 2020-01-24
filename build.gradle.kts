@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.0.4"
+version = "1.0.5"
 
 plugins {
 	`java-gradle-plugin`
@@ -65,6 +65,9 @@ dependencyUpdates {
 val bintrayUser = findProperty("bintrayUser") as String?
 val bintrayKey = findProperty("bintrayApiKey") as String?
 if (bintrayUser != null && bintrayKey != null) {
+	// https://github.com/gradle/gradle/issues/11412#issuecomment-555413327
+	System.setProperty("org.gradle.internal.publish.checksums.insecure", "true")
+
 	val javadocJar by tasks.creating(Jar::class) {
 		archiveClassifier.set("javadoc")
 		from(tasks["javadoc"])
