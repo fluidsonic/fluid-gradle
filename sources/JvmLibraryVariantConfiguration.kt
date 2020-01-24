@@ -6,6 +6,7 @@ import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.bundling.*
+import org.gradle.api.tasks.compile.*
 import org.gradle.api.tasks.testing.logging.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
@@ -26,6 +27,7 @@ class JvmLibraryVariantConfiguration internal constructor(
 
 	private fun configureBasics(): Unit = project.run {
 		val library = fluidLibrary
+		val testTarget = target.coerceAtLeast(JvmTarget.jdk8)
 
 		apply<KotlinPlatformJvmPlugin>()
 		apply<JavaLibraryPlugin>()
@@ -57,11 +59,6 @@ class JvmLibraryVariantConfiguration internal constructor(
 			testRuntimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
 		}
 
-		java {
-			sourceCompatibility = target.gradleJavaVersion
-			targetCompatibility = target.gradleJavaVersion
-		}
-
 		sourceSets {
 			getByName("main") {
 				kotlin.setSrcDirs(listOf("sources"))
@@ -75,6 +72,11 @@ class JvmLibraryVariantConfiguration internal constructor(
 		}
 
 		tasks {
+			withType<JavaCompile> {
+				sourceCompatibility = target.gradleJavaVersion.toString()
+				targetCompatibility = target.gradleJavaVersion.toString()
+			}
+
 			withType<KotlinCompile> {
 				sourceCompatibility = target.toString()
 				targetCompatibility = target.toString()
@@ -86,6 +88,18 @@ class JvmLibraryVariantConfiguration internal constructor(
 					if (usesNewInference) "-Xnew-inference" else null
 				)
 				kotlinOptions.jvmTarget = target.kotlinJvmTargetVersion
+			}
+
+			named<JavaCompile>("compileTestJava") {
+				sourceCompatibility = testTarget.gradleJavaVersion.toString()
+				targetCompatibility = testTarget.gradleJavaVersion.toString()
+			}
+
+			named<KotlinCompile>("compileTestKotlin") {
+				sourceCompatibility = testTarget.toString()
+				targetCompatibility = testTarget.toString()
+
+				kotlinOptions.jvmTarget = testTarget.kotlinJvmTargetVersion
 			}
 		}
 

@@ -141,30 +141,45 @@ class LibraryVariantConfiguration internal constructor(
 						}
 					}
 
-					compilations["main"].defaultSourceSet {
-						kotlin.setSrcDirs(listOf("sources/${jdk.kotlinSourceDirectoryName}"))
-						resources.setSrcDirs(emptyList<Any>())
+					compilations.named("main") {
+						attributes {
+							attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, jdk.jvmVersionCode)
+						}
 
-						dependencies {
-							api(kotlin("stdlib-${jdk.kotlinStdlibVariant}"))
+						defaultSourceSet {
+							kotlin.setSrcDirs(listOf("sources/${jdk.kotlinSourceDirectoryName}"))
+							resources.setSrcDirs(emptyList<Any>())
+
+							dependencies {
+								api(kotlin("stdlib-${jdk.kotlinStdlibVariant}"))
+							}
 						}
 					}
 
-					compilations["test"].defaultSourceSet {
-						kotlin.setSrcDirs(listOf("sources/${jdk.kotlinSourceDirectoryName}-test"))
-						resources.setSrcDirs(emptyList<Any>())
+					compilations.named("test") {
+						@Suppress("NAME_SHADOWING")
+						val jdk = jdk.coerceAtLeast(JvmTarget.jdk8)
 
-						dependencies {
-							implementation(kotlin("test-junit5"))
-							implementation("org.junit.jupiter:junit-jupiter-api:${Versions.junitJupiter}")
-
-							runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
-							runtimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
+						attributes {
+							attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, jdk.jvmVersionCode)
 						}
-					}
 
-					attributes {
-						attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, jdk.jvmVersionCode)
+						kotlinOptions {
+							jvmTarget = jdk.kotlinJvmTargetVersion
+						}
+
+						defaultSourceSet {
+							kotlin.setSrcDirs(listOf("sources/${jdk.kotlinSourceDirectoryName}-test"))
+							resources.setSrcDirs(emptyList<Any>())
+
+							dependencies {
+								implementation(kotlin("test-junit5"))
+								implementation("org.junit.jupiter:junit-jupiter-api:${Versions.junitJupiter}")
+
+								runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
+								runtimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
+							}
+						}
 					}
 
 					for (configuration in configurations)
@@ -354,39 +369,32 @@ class LibraryVariantConfiguration internal constructor(
 
 	companion object {
 
-		val JvmTarget.jvmVersionCode
-			get() = when (this) {
-				JvmTarget.jdk7 -> 7
-				JvmTarget.jdk8 -> 8
-			}
-
-
-		val JvmTarget.kotlinJvmTargetVersion
+		private val JvmTarget.kotlinJvmTargetVersion
 			get() = when (this) {
 				JvmTarget.jdk7 -> "1.6"
 				JvmTarget.jdk8 -> "1.8"
 			}
 
 
-		val JvmTarget.kotlinSourceDirectoryName
+		private val JvmTarget.kotlinSourceDirectoryName
 			get() = "jvm-$kotlinTargetName"
 
 
-		val JvmTarget.kotlinStdlibVariant
+		private val JvmTarget.kotlinStdlibVariant
 			get() = when (this) {
 				JvmTarget.jdk7 -> "jdk7"
 				JvmTarget.jdk8 -> "jdk8"
 			}
 
 
-		val JvmTarget.kotlinTargetName
+		private val JvmTarget.kotlinTargetName
 			get() = when (this) {
 				JvmTarget.jdk7 -> "jdk7"
 				JvmTarget.jdk8 -> "jdk8"
 			}
 
 
-		val ObjcTarget.kotlinSourceDirectoryName
+		private val ObjcTarget.kotlinSourceDirectoryName
 			get() = "objc-${name.toLowerCase()}"
 	}
 }
