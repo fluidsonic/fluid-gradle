@@ -70,6 +70,7 @@ class LibraryVariantConfiguration internal constructor(
 						freeCompilerArgs = listOfNotNull(
 							"-Xuse-experimental=kotlin.Experimental",
 							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+							"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
 							"-XXLanguage:+InlineClasses",
 							if (usesNewInference) "-Xnew-inference" else null
 						)
@@ -133,6 +134,7 @@ class LibraryVariantConfiguration internal constructor(
 							freeCompilerArgs = listOfNotNull(
 								"-Xuse-experimental=kotlin.Experimental",
 								"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+								"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
 								"-XXLanguage:+InlineClasses",
 								if (usesNewInference) "-Xnew-inference" else null
 							)
@@ -212,6 +214,7 @@ class LibraryVariantConfiguration internal constructor(
 						freeCompilerArgs = listOfNotNull(
 							"-Xuse-experimental=kotlin.Experimental",
 							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+							"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
 							"-XXLanguage:+InlineClasses",
 							if (usesNewInference) "-Xnew-inference" else null
 						)
