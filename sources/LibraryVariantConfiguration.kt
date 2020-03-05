@@ -68,9 +68,9 @@ class LibraryVariantConfiguration internal constructor(
 				compilations.forEach { compilation ->
 					compilation.kotlinOptions {
 						freeCompilerArgs = listOfNotNull(
-							"-Xuse-experimental=kotlin.Experimental",
-							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-							"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
+							"-Xopt-in=kotlin.Experimental",
+							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
+							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 							"-XXLanguage:+InlineClasses",
 							if (usesNewInference) "-Xnew-inference" else null
 						)
@@ -132,9 +132,9 @@ class LibraryVariantConfiguration internal constructor(
 					compilations.forEach { compilation ->
 						compilation.kotlinOptions {
 							freeCompilerArgs = listOfNotNull(
-								"-Xuse-experimental=kotlin.Experimental",
-								"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-								"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
+								"-Xopt-in=kotlin.Experimental",
+								"-Xopt-in=kotlin.contracts.ExperimentalContracts",
+								"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 								"-XXLanguage:+InlineClasses",
 								if (usesNewInference) "-Xnew-inference" else null
 							)
@@ -212,9 +212,9 @@ class LibraryVariantConfiguration internal constructor(
 				target.compilations.forEach { compilation ->
 					compilation.kotlinOptions {
 						freeCompilerArgs = listOfNotNull(
-							"-Xuse-experimental=kotlin.Experimental",
-							"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-							"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
+							"-Xopt-in=kotlin.Experimental",
+							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
+							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 							"-XXLanguage:+InlineClasses",
 							if (usesNewInference) "-Xnew-inference" else null
 						)
@@ -235,9 +235,7 @@ class LibraryVariantConfiguration internal constructor(
 					target.name.startsWith("iosX") -> {
 						val binary = target.binaries.first()
 
-						tasks.create<Task>("${target.name}Test") {
-							tasks.maybeCreate("iosTest").dependsOn(this)
-
+						tasks.named<Task>("${target.name}Test") {
 							dependsOn(binary.linkTask)
 							group = JavaBasePlugin.VERIFICATION_GROUP
 
@@ -253,6 +251,8 @@ class LibraryVariantConfiguration internal constructor(
 								}
 							}
 						}
+
+						tasks.maybeCreate("iosTest").dependsOn("${target.name}Test")
 					}
 
 					target.name.startsWith("macos") ->

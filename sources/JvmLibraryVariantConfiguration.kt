@@ -86,9 +86,9 @@ class JvmLibraryVariantConfiguration internal constructor(
 				targetCompatibility = target.toString()
 
 				kotlinOptions.freeCompilerArgs = listOfNotNull(
-					"-Xuse-experimental=kotlin.Experimental",
-					"-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-					"-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
+					"-Xopt-in=kotlin.Experimental",
+					"-Xopt-in=kotlin.contracts.ExperimentalContracts",
+					"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 					"-XXLanguage:+InlineClasses",
 					if (usesNewInference) "-Xnew-inference" else null
 				)
