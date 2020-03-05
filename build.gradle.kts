@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.0.8"
+version = "1.0.9"
 
 plugins {
 	`java-gradle-plugin`
