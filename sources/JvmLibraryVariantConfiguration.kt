@@ -1,6 +1,7 @@
 package io.fluidsonic.gradle
 
 import org.gradle.api.*
+import org.gradle.api.attributes.java.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
@@ -128,6 +129,20 @@ class JvmLibraryVariantConfiguration internal constructor(
 			bintray("fluidsonic/kotlin")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")
+		}
+
+		// https://github.com/gradle/gradle/issues/8930
+		configurations {
+			named("testCompileClasspath") {
+				attributes {
+					attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, testTarget.jvmVersionCode)
+				}
+			}
+			named("testRuntimeClasspath") {
+				attributes {
+					attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, testTarget.jvmVersionCode)
+				}
+			}
 		}
 	}
 
