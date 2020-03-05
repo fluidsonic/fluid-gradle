@@ -1,7 +1,6 @@
 package io.fluidsonic.gradle
 
 import org.gradle.api.*
-import org.gradle.api.attributes.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
@@ -119,16 +118,6 @@ class JvmLibraryVariantConfiguration internal constructor(
 				exceptionFormat = TestExceptionFormat.FULL
 				showExceptions = true
 				showStandardStreams = true
-			}
-		}
-
-		configurations {
-			all {
-				// https://youtrack.jetbrains.com/issue/KT-31641
-				// https://youtrack.jetbrains.com/issue/KT-33206
-
-				if (name.contains("kapt"))
-					attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
 			}
 		}
 
