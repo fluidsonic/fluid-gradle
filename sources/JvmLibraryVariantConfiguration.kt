@@ -86,7 +86,8 @@ class JvmLibraryVariantConfiguration internal constructor(
 				targetCompatibility = target.toString()
 
 				kotlinOptions.freeCompilerArgs = listOfNotNull(
-					"-Xopt-in=kotlin.Experimental",
+					"-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+					"-Xopt-in=kotlin.RequiresOptIn",
 					"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 					"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 					"-XXLanguage:+InlineClasses",

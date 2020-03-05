@@ -68,7 +68,8 @@ class LibraryVariantConfiguration internal constructor(
 				compilations.forEach { compilation ->
 					compilation.kotlinOptions {
 						freeCompilerArgs = listOfNotNull(
-							"-Xopt-in=kotlin.Experimental",
+							"-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+							"-Xopt-in=kotlin.RequiresOptIn",
 							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 							"-XXLanguage:+InlineClasses",
@@ -132,7 +133,8 @@ class LibraryVariantConfiguration internal constructor(
 					compilations.forEach { compilation ->
 						compilation.kotlinOptions {
 							freeCompilerArgs = listOfNotNull(
-								"-Xopt-in=kotlin.Experimental",
+								"-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+								"-Xopt-in=kotlin.RequiresOptIn",
 								"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 								"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 								"-XXLanguage:+InlineClasses",
@@ -212,7 +214,8 @@ class LibraryVariantConfiguration internal constructor(
 				target.compilations.forEach { compilation ->
 					compilation.kotlinOptions {
 						freeCompilerArgs = listOfNotNull(
-							"-Xopt-in=kotlin.Experimental",
+							"-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+							"-Xopt-in=kotlin.RequiresOptIn",
 							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
 							"-XXLanguage:+InlineClasses",
