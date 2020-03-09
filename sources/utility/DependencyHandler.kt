@@ -19,8 +19,9 @@ fun DependencyHandler.api(
 
 
 @Suppress("unused")
-fun DependencyHandler.fluid(name: String, version: String) =
-	"io.fluidsonic.${name.substringBefore('-')}:fluid-$name:$version"
+fun DependencyHandler.fluid(name: String, version: String, prefixName: Boolean = true) =
+	if (prefixName) "io.fluidsonic.${name.substringBefore('-')}:fluid-$name:$version"
+	else "io.fluidsonic.${name.substringBefore('-')}:$name:$version"
 
 
 fun DependencyHandler.implementation(dependencyNotation: Any) =

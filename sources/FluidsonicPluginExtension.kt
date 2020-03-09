@@ -5,13 +5,10 @@ import org.gradle.kotlin.dsl.*
 
 
 internal data class FluidsonicPluginExtension(
+	val fullName: String,
 	val name: String,
 	val version: String
 )
-
-
-internal val FluidsonicPluginExtension.fullName
-	get() = "fluid-$name"
 
 
 internal val Project.fluidLibrary

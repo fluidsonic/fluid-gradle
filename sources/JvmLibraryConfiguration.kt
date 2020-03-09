@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 
 
 class JvmLibraryConfiguration internal constructor(
+	val fullName: String,
 	val name: String,
 	private val project: Project,
 	val version: String
@@ -25,6 +26,7 @@ class JvmLibraryConfiguration internal constructor(
 
 
 	private fun configureBasics(): Unit = project.run {
+		val libraryFullName = this@JvmLibraryConfiguration.fullName
 		val libraryName = this@JvmLibraryConfiguration.name
 		val libraryVersion = this@JvmLibraryConfiguration.version
 
@@ -53,6 +55,7 @@ class JvmLibraryConfiguration internal constructor(
 		}
 
 		extensions.add("io.fluidsonic.gradle", FluidsonicPluginExtension(
+			fullName = libraryFullName,
 			name = libraryName,
 			version = libraryVersion
 		))
@@ -73,10 +76,22 @@ class JvmLibraryConfiguration internal constructor(
 }
 
 
-fun Project.fluidJvmLibrary(name: String, version: String, configure: JvmLibraryConfiguration.() -> Unit = {}) {
+fun Project.fluidJvmLibrary(
+	name: String,
+	version: String,
+	prefixName: Boolean = true,
+	configure: JvmLibraryConfiguration.() -> Unit = {}
+) {
+	val fullName = if (prefixName) "fluid-$name" else name
+
 	check(project.parent == null) { "fluidJvmLibrary(…) {} must only be used in the root project" }
 	check(project.extensions.findByType<FluidsonicPluginExtension>() == null) { "fluidLibrary/fluidJvmLibrary(…) {} must only be used once" }
-	check(project.name == "fluid-$name") { "Project name '${project.name}' must not differ from library name 'fluid-$name' in fluidJvmLibrary(…)" }
+	check(project.name == fullName) { "Project name '${project.name}' must not differ from library name '$fullName' in fluidJvmLibrary(…)" }
 
-	JvmLibraryConfiguration(name = name, project = project, version = version).apply(configure).configureProject()
+	JvmLibraryConfiguration(
+		fullName = fullName,
+		name = name,
+		project = project,
+		version = version
+	).apply(configure).configureProject()
 }

@@ -7,6 +7,7 @@ import org.gradle.kotlin.dsl.*
 
 
 class LibraryConfiguration internal constructor(
+	val fullName: String,
 	val name: String,
 	private val project: Project,
 	val version: String
@@ -23,6 +24,7 @@ class LibraryConfiguration internal constructor(
 
 
 	private fun configureBasics(): Unit = project.run {
+		val libraryFullName = this@LibraryConfiguration.fullName
 		val libraryName = this@LibraryConfiguration.name
 		val libraryVersion = this@LibraryConfiguration.version
 
@@ -51,6 +53,7 @@ class LibraryConfiguration internal constructor(
 		}
 
 		extensions.add("io.fluidsonic.gradle", FluidsonicPluginExtension(
+			fullName = libraryFullName,
 			name = libraryName,
 			version = libraryVersion
 		))
@@ -66,10 +69,22 @@ class LibraryConfiguration internal constructor(
 }
 
 
-fun Project.fluidLibrary(name: String, version: String, configure: LibraryConfiguration.() -> Unit = {}) {
+fun Project.fluidLibrary(
+	name: String,
+	version: String,
+	prefixName: Boolean = true,
+	configure: LibraryConfiguration.() -> Unit = {}
+) {
+	val fullName = if (prefixName) "fluid-$name" else name
+
 	check(project.parent == null) { "fluidLibrary(…) {} must only be used in the root project" }
 	check(project.extensions.findByType<FluidsonicPluginExtension>() == null) { "fluidLibrary/fluidJvmLibrary(…) {} must only be used once" }
-	check(project.name == "fluid-$name") { "Project name '${project.name}' must not differ from library name 'fluid-$name' in fluidLibrary(…)" }
+	check(project.name == fullName) { "Project name '${project.name}' must not differ from library name '$fullName' in fluidLibrary(…)" }
 
-	LibraryConfiguration(name = name, project = project, version = version).apply(configure).configureProject()
+	LibraryConfiguration(
+		fullName = fullName,
+		name = name,
+		project = project,
+		version = version
+	).apply(configure).configureProject()
 }
