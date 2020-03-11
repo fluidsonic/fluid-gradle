@@ -37,8 +37,9 @@ fun DependencyHandler.implementation(
 
 
 @Suppress("unused")
-fun DependencyHandler.kotlinx(name: String, version: String) =
-	"org.jetbrains.kotlinx:kotlinx-$name:$version"
+fun DependencyHandler.kotlinx(name: String, version: String, prefixName: Boolean = true) =
+	if (prefixName) "org.jetbrains.kotlinx:kotlinx-$name:$version"
+	else "org.jetbrains.kotlinx:$name:$version"
 
 
 fun DependencyHandler.runtimeOnly(dependencyNotation: Any) =

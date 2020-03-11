@@ -10,5 +10,6 @@ fun KotlinDependencyHandler.fluid(name: String, version: String, prefixName: Boo
 
 
 @Suppress("unused")
-fun KotlinDependencyHandler.kotlinx(name: String, version: String) =
-	"org.jetbrains.kotlinx:kotlinx-$name:$version"
+fun KotlinDependencyHandler.kotlinx(name: String, version: String, prefixName: Boolean = true) =
+	if (prefixName) "org.jetbrains.kotlinx:kotlinx-$name:$version"
+	else "org.jetbrains.kotlinx:$name:$version"
