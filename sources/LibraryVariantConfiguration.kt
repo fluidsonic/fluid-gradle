@@ -72,7 +72,7 @@ class LibraryVariantConfiguration internal constructor(
 							"-Xopt-in=kotlin.RequiresOptIn",
 							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
-							"-XXLanguage:+InlineClasses",
+							"-Xinline-classes",
 							if (usesNewInference) "-Xnew-inference" else null
 						)
 					}
@@ -137,7 +137,7 @@ class LibraryVariantConfiguration internal constructor(
 								"-Xopt-in=kotlin.RequiresOptIn",
 								"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 								"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
-								"-XXLanguage:+InlineClasses",
+								"-Xinline-classes",
 								if (usesNewInference) "-Xnew-inference" else null
 							)
 
@@ -218,7 +218,7 @@ class LibraryVariantConfiguration internal constructor(
 							"-Xopt-in=kotlin.RequiresOptIn",
 							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
 							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
-							"-XXLanguage:+InlineClasses",
+							"-Xinline-classes",
 							if (usesNewInference) "-Xnew-inference" else null
 						)
 					}
