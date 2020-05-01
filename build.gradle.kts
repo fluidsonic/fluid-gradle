@@ -69,6 +69,7 @@ tasks {
 }
 
 dependencyUpdates {
+	gradleReleaseChannel = "current"
 	outputFormatter = null
 
 	rejectVersionIf {

@@ -1,6 +1,7 @@
 package io.fluidsonic.gradle
 
 import com.github.benmanes.gradle.versions.*
+import com.github.benmanes.gradle.versions.updates.gradle.*
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.tasks.wrapper.*
@@ -46,6 +47,7 @@ class JvmLibraryConfiguration internal constructor(
 		}
 
 		dependencyUpdates {
+			gradleReleaseChannel = GradleReleaseChannel.CURRENT.id
 			outputFormatter = null
 
 			if (!dependencyUpdatesIncludeUnstableVersions)
