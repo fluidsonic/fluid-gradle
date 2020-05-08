@@ -57,4 +57,4 @@ fun Project.wrapper(configuration: Wrapper.() -> Unit) =
 
 
 fun isUnstableVersion(version: String) =
-	Regex("\\b(alpha|beta|eap|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
+	Regex("\\b(alpha|beta|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)

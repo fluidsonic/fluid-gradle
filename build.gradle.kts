@@ -8,25 +8,25 @@ version = "1.0.10"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.70"
+	kotlin("jvm") version "1.3.72"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.27.0"
+	id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.27.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.28.0")
 }
 
 gradlePlugin {
 	plugins {
 		register("io.fluidsonic.gradle") {
 			displayName = "fluidsonic library gradle configurator"
-			description = "Optionated plugin to unify & simplify configuration of all the io.fluidsonic.* Kotlin libraries."
+			description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 			id = "io.fluidsonic.gradle"
 			implementationClass = "io.fluidsonic.gradle.FluidsonicPlugin"
 		}
@@ -64,7 +64,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.2.2"
+		gradleVersion = "6.4"
 	}
 }
 
@@ -160,4 +160,4 @@ fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
 
 
 fun isUnstableVersion(version: String) =
-	Regex("\\b(alpha|beta|eap|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
+	Regex("\\b(alpha|beta|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
