@@ -160,4 +160,4 @@ fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
 
 
 fun isUnstableVersion(version: String) =
-	Regex("\\b(alpha|beta|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
+	Regex("\\b(alpha|beta|dev|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
