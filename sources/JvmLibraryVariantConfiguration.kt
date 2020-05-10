@@ -13,6 +13,7 @@ import org.gradle.plugins.signing.*
 import org.gradle.testing.base.plugins.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.tasks.*
+import java.io.*
 
 
 class JvmLibraryVariantConfiguration internal constructor(
@@ -66,11 +67,13 @@ class JvmLibraryVariantConfiguration internal constructor(
 
 		sourceSets {
 			getByName("main") {
+				java.setSrcDirs(emptyList<File>())
 				kotlin.setSrcDirs(listOf("sources"))
 				resources.setSrcDirs(listOf("resources"))
 			}
 
 			getByName("test") {
+				java.setSrcDirs(emptyList<File>())
 				kotlin.setSrcDirs(listOf("tests/sources"))
 				resources.setSrcDirs(listOf("tests/resources"))
 			}
