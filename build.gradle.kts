@@ -64,7 +64,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.4"
+		gradleVersion = "6.4.1"
 	}
 }
 
