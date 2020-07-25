@@ -10,7 +10,10 @@ import org.gradle.api.tasks.testing.logging.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.plugin.*
+import org.jetbrains.kotlin.gradle.plugin.mpp.*
+import org.jetbrains.kotlin.gradle.targets.js.*
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.*
+import org.jetbrains.kotlin.gradle.testing.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
@@ -23,12 +26,18 @@ class LibraryVariantConfiguration internal constructor(
 	var usesNewInference = true
 
 	private val commonConfigurations: MutableList<CommonTargetConfigurator.() -> Unit> = mutableListOf()
+	private val jsConfigurations: MutableList<KotlinJsTarget.() -> Unit> = mutableListOf()
 	private val jvmTargets: MutableMap<JvmTarget, MutableList<JvmTargetConfigurator.() -> Unit>> = mutableMapOf()
 	private val objcTargets: MutableMap<ObjcTarget, MutableList<ObjcTargetConfigurator.() -> Unit>> = mutableMapOf()
 
 
 	fun common(configure: CommonTargetConfigurator.() -> Unit = {}) {
 		commonConfigurations += configure
+	}
+
+
+	fun js(configure: KotlinJsTarget.() -> Unit = {}) {
+		jsConfigurations += configure
 	}
 
 
@@ -104,17 +113,9 @@ class LibraryVariantConfiguration internal constructor(
 			}
 		}
 
+		configureJsTargets()
 		configureJvmTargets()
 		configureObjcTargets()
-
-		test {
-			testLogging {
-				events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
-				exceptionFormat = TestExceptionFormat.FULL
-				showExceptions = true
-				showStandardStreams = true
-			}
-		}
 
 		repositories {
 			mavenCentral()
@@ -122,6 +123,75 @@ class LibraryVariantConfiguration internal constructor(
 			bintray("fluidsonic/kotlin")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")
+		}
+	}
+
+
+	private fun Project.configureJsTargets() {
+		if (jsConfigurations.isEmpty())
+			return
+
+		kotlin {
+			js {
+				compilations.forEach { compilation ->
+					compilation.kotlinOptions {
+						freeCompilerArgs = listOfNotNull(
+							"-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+							"-Xopt-in=kotlin.RequiresOptIn",
+							"-Xopt-in=kotlin.contracts.ExperimentalContracts",
+							"-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
+							"-Xinline-classes",
+							if (usesNewInference) "-Xnew-inference" else null
+						)
+					}
+				}
+
+				compilations.named("main") {
+					defaultSourceSet {
+						kotlin.setSrcDirs(listOf("sources/js"))
+						resources.setSrcDirs(emptyList<Any>())
+
+						dependencies {
+							api(kotlin("stdlib-js"))
+						}
+					}
+				}
+
+				compilations.named("test") {
+					defaultSourceSet {
+						kotlin.setSrcDirs(listOf("sources/js-test"))
+						resources.setSrcDirs(emptyList<Any>())
+
+						dependencies {
+							api(kotlin("test-js"))
+						}
+					}
+				}
+
+				whenBrowserConfigured {
+					testTask {
+						testLogging {
+							events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+							exceptionFormat = TestExceptionFormat.FULL
+							showExceptions = true
+							showStandardStreams = true
+						}
+					}
+				}
+				whenNodejsConfigured {
+					testTask {
+						testLogging {
+							events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+							exceptionFormat = TestExceptionFormat.FULL
+							showExceptions = true
+							showStandardStreams = true
+						}
+					}
+				}
+
+				for (configuration in jsConfigurations)
+					configuration()
+			}
 		}
 	}
 
@@ -182,6 +252,17 @@ class LibraryVariantConfiguration internal constructor(
 
 								runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
 								runtimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
+							}
+						}
+					}
+
+					testRuns.all {
+						executionTask {
+							testLogging {
+								events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+								exceptionFormat = TestExceptionFormat.FULL
+								showExceptions = true
+								showStandardStreams = true
 							}
 						}
 					}
@@ -261,6 +342,20 @@ class LibraryVariantConfiguration internal constructor(
 					target.name.startsWith("macos") ->
 						tasks.maybeCreate("macosTest").dependsOn("${target.name}Test")
 				}
+
+				if (target is KotlinNativeTargetWithTests<*>)
+					target.testRuns.all {
+						this as KotlinTaskTestRun<*, *>
+
+						executionTask {
+							testLogging {
+								events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+								exceptionFormat = TestExceptionFormat.FULL
+								showExceptions = true
+								showStandardStreams = true
+							}
+						}
+					}
 
 				for (configuration in configurations)
 					ObjcTargetConfigurator.applyTo(target, configuration)
