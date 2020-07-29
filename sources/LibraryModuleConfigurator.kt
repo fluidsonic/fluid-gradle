@@ -401,7 +401,7 @@ internal class LibraryModuleConfigurator(
 		publishing {
 			repositories {
 				maven {
-					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${libraryConfiguration.name}/;publish=1;overwrite=1")
+					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${libraryConfiguration.name}/;publish=1;override=1")
 					credentials {
 						username = bintrayUser
 						password = bintrayKey

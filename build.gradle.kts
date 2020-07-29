@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.1.1"
+version = "1.1.2"
 
 plugins {
 	`java-gradle-plugin`
@@ -105,7 +105,7 @@ if (bintrayUser != null && bintrayKey != null) {
 	publishing {
 		repositories {
 			maven {
-				setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/gradle/;publish=1;overwrite=1")
+				setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/gradle/;publish=1;override=1")
 				credentials {
 					username = bintrayUser
 					password = bintrayKey
