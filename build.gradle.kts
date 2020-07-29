@@ -8,7 +8,7 @@ version = "1.0.14"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.3.72"
+	kotlin("jvm") version "1.4.0-rc"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
@@ -28,9 +28,13 @@ gradlePlugin {
 			displayName = "fluidsonic library gradle configurator"
 			description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 			id = "io.fluidsonic.gradle"
-			implementationClass = "io.fluidsonic.gradle.FluidsonicPlugin"
+			implementationClass = "io.fluidsonic.gradle.LibraryPlugin"
 		}
 	}
+}
+
+kotlin {
+	explicitApi()
 }
 
 java {
@@ -43,7 +47,6 @@ kotlinDslPluginOptions {
 }
 
 repositories {
-	bintray("kotlin/kotlin-eap")
 	jcenter()
 	mavenCentral()
 }
@@ -56,10 +59,10 @@ sourceSets {
 
 tasks {
 	withType<KotlinCompile> {
-		sourceCompatibility = "1.7"
-		targetCompatibility = "1.7"
+		sourceCompatibility = "1.8"
+		targetCompatibility = "1.8"
 
-		kotlinOptions.jvmTarget = "1.6"
+		kotlinOptions.jvmTarget = "1.8"
 	}
 
 	withType<Wrapper> {
@@ -145,10 +148,6 @@ if (bintrayUser != null && bintrayKey != null) {
 		}
 	}
 }
-
-
-fun RepositoryHandler.bintray(name: String) =
-	maven("https://dl.bintray.com/$name")
 
 
 val SourceSet.kotlin

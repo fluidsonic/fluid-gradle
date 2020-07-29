@@ -4,31 +4,26 @@ import com.github.benmanes.gradle.versions.updates.*
 import org.gradle.api.*
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.*
-import org.gradle.api.tasks.*
-import org.gradle.api.tasks.testing.*
 import org.gradle.api.tasks.wrapper.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.dsl.*
 
 
-fun Project.dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
+public fun Project.dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit): DomainObjectCollection<DependencyUpdatesTask> =
 	tasks.withType(configuration)
 
 
-internal fun Project.java(configuration: JavaPluginConvention.() -> Unit) =
-	configure(configuration)
-
-
-val Project.kotlin: KotlinMultiplatformExtension
+public val Project.kotlin: KotlinMultiplatformExtension
 	get() = extensions.findByType(KotlinMultiplatformExtension::class)!!
 
 
-fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) =
+public fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) {
 	extensions.configure(KotlinMultiplatformExtension::class, configure)
+}
 
 
-internal val Project.publishing
+internal val Project.publishing: PublishingExtension
 	get() = (this as ExtensionAware).extensions.getByName("publishing") as PublishingExtension
 
 
@@ -36,25 +31,18 @@ internal fun Project.publishing(configuration: PublishingExtension.() -> Unit) =
 	configure(configuration)
 
 
-internal val Project.signing
-	get() = the<SigningExtension>()
+internal val Project.signing: SigningExtension
+	get() = the()
 
 
-internal fun Project.signing(configuration: SigningExtension.() -> Unit) =
+internal fun Project.signing(configuration: SigningExtension.() -> Unit) {
 	configure(configuration)
+}
 
 
-internal val Project.sourceSets
-	get() = the<SourceSetContainer>()
-
-
-fun Project.test(configuration: Test.() -> Unit) =
+public fun Project.wrapper(configuration: Wrapper.() -> Unit): DomainObjectCollection<Wrapper> =
 	tasks.withType(configuration)
 
 
-fun Project.wrapper(configuration: Wrapper.() -> Unit) =
-	tasks.withType(configuration)
-
-
-fun isUnstableVersion(version: String) =
+public fun isUnstableVersion(version: String): Boolean =
 	Regex("\\b(alpha|beta|dev|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)

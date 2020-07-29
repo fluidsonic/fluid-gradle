@@ -4,7 +4,7 @@ import org.gradle.api.*
 
 
 @Suppress("unused")
-class FluidsonicPlugin : Plugin<Project> {
+public class LibraryPlugin : Plugin<Project> {
 
 	override fun apply(project: Project) {
 		// https://github.com/gradle/gradle/issues/11412#issuecomment-555413327
