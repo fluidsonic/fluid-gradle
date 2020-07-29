@@ -11,6 +11,7 @@ import org.gradle.api.tasks.testing.logging.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.dsl.*
+import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.testing.*
@@ -58,21 +59,15 @@ internal class LibraryModuleConfigurator(
 
 		sourceSets {
 			named(KotlinSourceSet.COMMON_MAIN_SOURCE_SET_NAME) {
-				configureSourceSet(path = "common")
-
-				dependencies {
-					targetConfiguration.dependencyConfigurations.forEach { it() }
-				}
+				configureSourceSet(path = "common", dependencies = targetConfiguration.dependencies)
 			}
 
 			named(KotlinSourceSet.COMMON_TEST_SOURCE_SET_NAME) {
-				configureSourceSet(path = "common")
+				configureSourceSet(path = "common", dependencies = targetConfiguration.testDependencies)
 
 				dependencies {
 					implementation(kotlin("test-common"))
 					implementation(kotlin("test-annotations-common"))
-
-					targetConfiguration.testDependencyConfigurations.forEach { it() }
 				}
 			}
 		}
@@ -89,22 +84,16 @@ internal class LibraryModuleConfigurator(
 		js {
 			compilations.named(KotlinCompilation.MAIN_COMPILATION_NAME) {
 				defaultSourceSet {
-					configureSourceSet(path = "js")
-
-					dependencies {
-						targetConfiguration.dependencyConfigurations.forEach { it() }
-					}
+					configureSourceSet(path = "js", dependencies = targetConfiguration.dependencies)
 				}
 			}
 
 			compilations.named(KotlinCompilation.TEST_COMPILATION_NAME) {
 				defaultSourceSet {
-					configureSourceSet(path = "js")
+					configureSourceSet(path = "js", dependencies = targetConfiguration.testDependencies)
 
 					dependencies {
 						api(kotlin("test-js"))
-
-						targetConfiguration.testDependencyConfigurations.forEach { it() }
 					}
 				}
 			}
@@ -129,7 +118,15 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun KotlinMultiplatformExtension.configureJvmTargets() {
-		configuration.targets.jvm?.let { targetConfiguration ->
+		val jvmConfiguration = configuration.targets.jvm
+		val jvmJdk7Configuration = configuration.targets.jvmJdk7
+
+		if (jvmConfiguration != null && jvmJdk7Configuration != null
+			&& (jvmConfiguration.dependencies.kaptConfigurations.isNotEmpty() || jvmJdk7Configuration.dependencies.kaptConfigurations.isNotEmpty())
+		)
+			error("You cannot use 'kapt()' dependencies if you have multiple JVM targets.")
+
+		jvmConfiguration?.let { targetConfiguration ->
 			configureJvmTarget(
 				jdkVersion = JdkVersion.v8,
 				targetConfiguration = targetConfiguration,
@@ -137,7 +134,7 @@ internal class LibraryModuleConfigurator(
 				path = "jvm"
 			)
 		}
-		configuration.targets.jvmJdk7?.let { targetConfiguration ->
+		jvmJdk7Configuration?.let { targetConfiguration ->
 			configureJvmTarget(
 				jdkVersion = JdkVersion.v7,
 				targetConfiguration = targetConfiguration,
@@ -154,6 +151,9 @@ internal class LibraryModuleConfigurator(
 		targetName: String,
 		path: String
 	) {
+		if (targetConfiguration.dependencies.kaptConfigurations.isNotEmpty() && !targetConfiguration.includesJava)
+			error("withJava() must be used in target '$targetName' when using kapt() dependencies.")
+
 		jvm(targetName) {
 			if (targetConfiguration.includesJava)
 				withJava()
@@ -170,11 +170,7 @@ internal class LibraryModuleConfigurator(
 				}
 
 				defaultSourceSet {
-					configureSourceSet(path = path)
-
-					dependencies {
-						targetConfiguration.dependencyConfigurations.forEach { it() }
-					}
+					configureSourceSet(path = path, dependencies = targetConfiguration.dependencies)
 				}
 			}
 
@@ -188,7 +184,7 @@ internal class LibraryModuleConfigurator(
 				}
 
 				defaultSourceSet {
-					configureSourceSet(path = path)
+					configureSourceSet(path = path, dependencies = targetConfiguration.testDependencies)
 
 					dependencies {
 						if (jdkVersion >= JdkVersion.v8) {
@@ -200,8 +196,6 @@ internal class LibraryModuleConfigurator(
 						}
 						else
 							implementation(kotlin("test-junit"))
-
-						targetConfiguration.testDependencyConfigurations.forEach { it() }
 					}
 				}
 			}
@@ -218,6 +212,13 @@ internal class LibraryModuleConfigurator(
 			}
 
 			targetConfiguration.customConfigurations.forEach { it() }
+		}
+
+		if (targetConfiguration.dependencies.kaptConfigurations.isNotEmpty()) {
+			project.apply<Kapt3GradleSubplugin>()
+			project.dependencies {
+				targetConfiguration.dependencies.kaptConfigurations.forEach { it() }
+			}
 		}
 	}
 
@@ -249,13 +250,13 @@ internal class LibraryModuleConfigurator(
 			val nativeDarwinMain by creating {
 				dependsOn(commonMain)
 
-				configureSourceSet(path = "native-darwin")
+				configureSourceSet(path = "native-darwin", dependencies = targetConfiguration.dependencies)
 			}
 
 			val nativeDarwinTest by creating {
 				dependsOn(commonTest)
 
-				configureSourceSet(path = "native-darwin")
+				configureSourceSet(path = "native-darwin", dependencies = targetConfiguration.testDependencies)
 			}
 
 			if (!targetConfiguration.noIosArm64 || !targetConfiguration.noIosX64) {
@@ -318,11 +319,11 @@ internal class LibraryModuleConfigurator(
 		pathName: String
 	) {
 		compilations[KotlinCompilation.MAIN_COMPILATION_NAME].defaultSourceSet {
-			configureSourceSet(path = pathName)
+			configureSourceSet(path = pathName, dependencies = null)
 		}
 
 		compilations[KotlinCompilation.TEST_COMPILATION_NAME].defaultSourceSet {
-			configureSourceSet(path = pathName)
+			configureSourceSet(path = pathName, dependencies = null)
 		}
 
 		if (this is KotlinNativeTargetWithTests<*>)
@@ -338,7 +339,7 @@ internal class LibraryModuleConfigurator(
 	}
 
 
-	private fun KotlinSourceSet.configureSourceSet(path: String) {
+	private fun KotlinSourceSet.configureSourceSet(path: String, dependencies: LibraryModuleConfiguration.Dependencies?) {
 		val firstLevelPath = if (name.endsWith("Test")) "tests" else "sources"
 
 		kotlin.setSrcDirs(listOf("$firstLevelPath/$path"))
@@ -352,6 +353,11 @@ internal class LibraryModuleConfigurator(
 			if (!configuration.language.noNewInference)
 				enableLanguageFeature("NewInference")
 		}
+
+		if (dependencies != null)
+			dependencies {
+				dependencies.configurations.forEach { it() }
+			}
 	}
 
 
@@ -395,7 +401,7 @@ internal class LibraryModuleConfigurator(
 		publishing {
 			repositories {
 				maven {
-					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${libraryConfiguration.name}/;publish=1")
+					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${libraryConfiguration.name}/;publish=1;overwrite=1")
 					credentials {
 						username = bintrayUser
 						password = bintrayKey
@@ -447,7 +453,8 @@ internal class LibraryModuleConfigurator(
 		}
 
 		if (configuration.isPublishingSingleTargetAsModule) {
-			val targets = kotlin.targets.filter { it.name != "metadata" }
+			val metadataTarget = kotlin.targets["metadata"]
+			val targets = kotlin.targets.filter { it != metadataTarget }
 			val singleTarget = targets.singleOrNull()
 				?: error("'publishSingleTargetAsModule()' can only be used in modules with exactly one target: $targets")
 
@@ -456,7 +463,7 @@ internal class LibraryModuleConfigurator(
 				artifactId = project.name
 
 				tasks.withType<AbstractPublishToMaven> {
-					isEnabled = this.publication == publication
+					isEnabled = this.publication == publication || this.publication.name == "metadata"
 				}
 			}
 		}

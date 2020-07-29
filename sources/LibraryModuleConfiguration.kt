@@ -1,5 +1,6 @@
 package io.fluidsonic.gradle
 
+import org.gradle.api.artifacts.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
@@ -42,7 +43,28 @@ internal class LibraryModuleConfiguration(
 	}
 
 
-	data class Language(
+	class Dependencies(
+		val configurations: List<KotlinDependencyHandler.() -> Unit>,
+		val kaptConfigurations: List<DependencyHandler.() -> Unit>
+	) {
+
+		fun mergeWith(other: Dependencies) = Dependencies(
+			configurations = configurations + other.configurations,
+			kaptConfigurations = kaptConfigurations + other.kaptConfigurations
+		)
+
+
+		companion object {
+
+			val default = Dependencies(
+				configurations = emptyList(),
+				kaptConfigurations = emptyList()
+			)
+		}
+	}
+
+
+	class Language(
 		val customConfigurations: List<LanguageSettingsBuilder.() -> Unit>,
 		val experimentalApisToUse: Set<String>,
 		val languageFeaturesToEnable: Set<String>,
@@ -103,14 +125,14 @@ internal class LibraryModuleConfiguration(
 
 		class Common(
 			val customConfigurations: List<KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit>,
-			val dependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>,
-			val testDependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>
+			val dependencies: Dependencies = Dependencies.default,
+			val testDependencies: Dependencies = Dependencies.default
 		) {
 
 			fun mergeWith(other: Common) = Common(
 				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencyConfigurations = dependencyConfigurations + other.dependencyConfigurations,
-				testDependencyConfigurations = testDependencyConfigurations + other.testDependencyConfigurations
+				dependencies = dependencies.mergeWith(other.dependencies),
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 
 
@@ -118,8 +140,8 @@ internal class LibraryModuleConfiguration(
 
 				val default = Common(
 					customConfigurations = emptyList(),
-					dependencyConfigurations = emptyList(),
-					testDependencyConfigurations = emptyList()
+					dependencies = Dependencies.default,
+					testDependencies = Dependencies.default
 				)
 			}
 		}
@@ -127,54 +149,54 @@ internal class LibraryModuleConfiguration(
 
 		class Js(
 			val customConfigurations: List<KotlinJsTargetDsl.() -> Unit>,
-			val dependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
 			val noBrowser: Boolean,
 			val noNodeJs: Boolean,
-			val testDependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>
+			val testDependencies: Dependencies = Dependencies.default
 		) {
 
 			fun mergeWith(other: Js) = Js(
 				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencyConfigurations = dependencyConfigurations + other.dependencyConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
 				noBrowser = noBrowser || other.noBrowser,
 				noNodeJs = noNodeJs || other.noNodeJs,
-				testDependencyConfigurations = testDependencyConfigurations + other.testDependencyConfigurations
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}
 
 
 		class Jvm(
 			val customConfigurations: List<KotlinJvmTarget.() -> Unit>,
-			val dependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
 			val includesJava: Boolean,
-			val testDependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>
+			val testDependencies: Dependencies = Dependencies.default
 		) {
 
 			fun mergeWith(other: Jvm) = Jvm(
 				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencyConfigurations = dependencyConfigurations + other.dependencyConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
 				includesJava = includesJava || other.includesJava,
-				testDependencyConfigurations = testDependencyConfigurations + other.testDependencyConfigurations
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}
 
 
 		class NativeDarwin(
 			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
-			val dependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
 			val noIosArm64: Boolean,
 			val noIosX64: Boolean,
 			val noMacosX64: Boolean,
-			val testDependencyConfigurations: List<KotlinDependencyHandler.() -> Unit>
+			val testDependencies: Dependencies = Dependencies.default
 		) {
 
 			fun mergeWith(other: NativeDarwin) = NativeDarwin(
 				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencyConfigurations = dependencyConfigurations + other.dependencyConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
 				noIosArm64 = noIosArm64 || other.noIosArm64,
 				noIosX64 = noIosX64 || other.noIosX64,
 				noMacosX64 = noMacosX64 || other.noMacosX64,
-				testDependencyConfigurations = testDependencyConfigurations + other.testDependencyConfigurations
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}
 	}

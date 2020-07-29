@@ -1,6 +1,9 @@
 package io.fluidsonic.gradle
 
 import io.fluidsonic.gradle.LibraryModuleDsl.*
+import org.gradle.api.artifacts.*
+import org.gradle.api.artifacts.dsl.*
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
@@ -158,14 +161,14 @@ internal class LibraryModuleConfigurationBuilder(
 		class CommonBuilder : CommonTargetDsl {
 
 			private val customConfigurations: MutableList<KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit> = mutableListOf()
-			private val dependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
-			private val testDependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var dependencies = LibraryModuleConfiguration.Dependencies.default
+			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
 			fun build() = LibraryModuleConfiguration.Targets.Common(
 				customConfigurations = customConfigurations.toList(),
-				dependencyConfigurations = dependencyConfigurations.toList(),
-				testDependencyConfigurations = testDependencyConfigurations.toList()
+				dependencies = dependencies,
+				testDependencies = testDependencies
 			)
 
 
@@ -174,13 +177,113 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
-			override fun dependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				dependencyConfigurations += configure
+			override fun dependencies(configure: DependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.dependencies = this.dependencies.mergeWith(dependencies)
 			}
 
 
-			override fun testDependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				testDependencyConfigurations += configure
+			override fun testDependencies(configure: DependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.testDependencies = this.testDependencies.mergeWith(dependencies)
+			}
+		}
+
+
+		class DependenciesBuilder : JvmDependenciesDsl {
+
+			private val configurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private val kaptConfigurations: MutableList<DependencyHandler.() -> Unit> = mutableListOf()
+
+
+			fun build() = LibraryModuleConfiguration.Dependencies(
+				configurations = configurations.toList(),
+				kaptConfigurations = kaptConfigurations.toList()
+			)
+
+			override fun api(notation: Any) {
+				configurations += { api(resolve(notation)) }
+			}
+
+			override fun api(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
+				configurations += { api(dependencyNotation, configure) }
+			}
+
+			override fun compileOnly(notation: Any) {
+				configurations += { compileOnly(resolve(notation)) }
+			}
+
+			override fun compileOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
+				configurations += { compileOnly(dependencyNotation, configure) }
+			}
+
+			override fun custom(configure: KotlinDependencyHandler.() -> Unit) {
+				configurations += configure
+			}
+
+			override fun implementation(notation: Any) {
+				configurations += { implementation(resolve(notation)) }
+			}
+
+			override fun implementation(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
+				configurations += { implementation(dependencyNotation, configure) }
+			}
+
+			override fun kapt(notation: Any) {
+				kaptConfigurations += { add("kapt", resolve(notation)) }
+			}
+
+			override fun kapt(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
+				kaptConfigurations += { add("kapt", dependencyNotation, configure) }
+			}
+
+			override fun runtimeOnly(notation: Any) {
+				configurations += { runtimeOnly(resolve(notation)) }
+			}
+
+			override fun runtimeOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
+				configurations += { runtimeOnly(dependencyNotation, configure) }
+			}
+
+
+			private fun DependencyHandler.resolve(notation: Any) = when (notation) {
+				is SpecialDependency.Kotlin -> kotlin(notation.simpleModuleName, notation.version)
+				is SpecialDependency.Project -> project(notation.notation)
+				else -> notation
+			}
+
+
+			private fun KotlinDependencyHandler.resolve(notation: Any) = when (notation) {
+				is SpecialDependency.Kotlin -> kotlin(notation.simpleModuleName, notation.version)
+				is SpecialDependency.Project -> project(notation.notation)
+				else -> notation
+			}
+
+
+			override fun fluid(simpleModuleName: String, version: String, usePrefix: Boolean): Any =
+				if (usePrefix) "io.fluidsonic.${simpleModuleName.substringBefore('-')}:fluid-$simpleModuleName:$version"
+				else "io.fluidsonic.${simpleModuleName.substringBefore('-')}:$simpleModuleName:$version"
+
+
+			override fun kotlin(simpleModuleName: String, version: String?): Any =
+				SpecialDependency.Kotlin(simpleModuleName = simpleModuleName, version = version)
+
+
+			override fun kotlinx(simpleModuleName: String, version: String, usePrefix: Boolean): Any =
+				if (usePrefix) "org.jetbrains.kotlinx:kotlinx-$simpleModuleName:$version"
+				else "org.jetbrains.kotlinx:$simpleModuleName:$version"
+
+
+			override fun project(notation: Map<String, Any?>): Any =
+				SpecialDependency.Project(notation = notation)
+
+
+			private sealed class SpecialDependency {
+
+				class Kotlin(val simpleModuleName: String, val version: String?) : SpecialDependency()
+				class Project(val notation: Map<String, Any?>) : SpecialDependency()
 			}
 		}
 
@@ -188,18 +291,18 @@ internal class LibraryModuleConfigurationBuilder(
 		class JsBuilder : JsTargetDsl {
 
 			private val customConfigurations: MutableList<KotlinJsTargetDsl.() -> Unit> = mutableListOf()
-			private val dependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var dependencies = LibraryModuleConfiguration.Dependencies.default
 			private var noBrowser = false
 			private var noNodeJs = false
-			private val testDependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
 			fun build() = LibraryModuleConfiguration.Targets.Js(
 				customConfigurations = customConfigurations.toList(),
-				dependencyConfigurations = dependencyConfigurations.toList(),
+				dependencies = dependencies,
 				noBrowser = noBrowser,
 				noNodeJs = noNodeJs,
-				testDependencyConfigurations = testDependencyConfigurations.toList()
+				testDependencies = testDependencies
 			)
 
 
@@ -208,8 +311,17 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
-			override fun dependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				dependencyConfigurations += configure
+			override fun dependencies(configure: DependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.dependencies = this.dependencies.mergeWith(dependencies)
+			}
+
+
+			override fun testDependencies(configure: DependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.testDependencies = this.testDependencies.mergeWith(dependencies)
 			}
 
 
@@ -221,27 +333,22 @@ internal class LibraryModuleConfigurationBuilder(
 			override fun withoutNodeJs() {
 				noNodeJs = true
 			}
-
-
-			override fun testDependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				testDependencyConfigurations += configure
-			}
 		}
 
 
 		class JvmBuilder : JvmTargetDsl {
 
 			private val customConfigurations: MutableList<KotlinJvmTarget.() -> Unit> = mutableListOf()
-			private val dependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var dependencies = LibraryModuleConfiguration.Dependencies.default
 			private var includesJava = false
-			private val testDependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
 			fun build() = LibraryModuleConfiguration.Targets.Jvm(
 				customConfigurations = customConfigurations.toList(),
-				dependencyConfigurations = dependencyConfigurations.toList(),
+				dependencies = dependencies,
 				includesJava = includesJava,
-				testDependencyConfigurations = testDependencyConfigurations.toList()
+				testDependencies = testDependencies
 			)
 
 
@@ -250,13 +357,17 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
-			override fun dependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				dependencyConfigurations += configure
+			override fun dependencies(configure: JvmDependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.dependencies = this.dependencies.mergeWith(dependencies)
 			}
 
 
-			override fun testDependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				testDependencyConfigurations += configure
+			override fun testDependencies(configure: JvmDependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.testDependencies = this.testDependencies.mergeWith(dependencies)
 			}
 
 
@@ -269,20 +380,20 @@ internal class LibraryModuleConfigurationBuilder(
 		class NativeDarwinBuilder : NativeDarwinTargetDsl {
 
 			private val customConfigurations: MutableList<KotlinNativeTarget.() -> Unit> = mutableListOf()
-			private val dependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var dependencies = LibraryModuleConfiguration.Dependencies.default
 			private var noIosArm64 = false
 			private var noIosX64 = false
 			private var noMacosX64 = false
-			private val testDependencyConfigurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
+			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
 			fun build() = LibraryModuleConfiguration.Targets.NativeDarwin(
 				customConfigurations = customConfigurations.toList(),
-				dependencyConfigurations = dependencyConfigurations.toList(),
+				dependencies = dependencies,
 				noIosArm64 = noIosArm64,
 				noIosX64 = noIosX64,
 				noMacosX64 = noMacosX64,
-				testDependencyConfigurations = testDependencyConfigurations.toList()
+				testDependencies = testDependencies
 			)
 
 
@@ -291,8 +402,10 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
-			override fun dependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				dependencyConfigurations += configure
+			override fun dependencies(configure: DependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.dependencies = this.dependencies.mergeWith(dependencies)
 			}
 
 
@@ -311,8 +424,10 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
-			override fun testDependencies(configure: KotlinDependencyHandler.() -> Unit) {
-				testDependencyConfigurations += configure
+			override fun testDependencies(configure: DependenciesDsl.() -> Unit) {
+				val dependencies = DependenciesBuilder().apply(configure).build()
+
+				this.testDependencies = this.testDependencies.mergeWith(dependencies)
 			}
 		}
 	}

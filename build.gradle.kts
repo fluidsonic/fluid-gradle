@@ -105,7 +105,7 @@ if (bintrayUser != null && bintrayKey != null) {
 	publishing {
 		repositories {
 			maven {
-				setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/gradle/;publish=1")
+				setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/gradle/;publish=1;overwrite=1")
 				credentials {
 					username = bintrayUser
 					password = bintrayKey
