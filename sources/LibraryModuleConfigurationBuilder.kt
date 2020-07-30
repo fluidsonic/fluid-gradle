@@ -105,90 +105,48 @@ internal class LibraryModuleConfigurationBuilder(
 	}
 
 
-	class TargetsBuilder : TargetsDsl {
+	sealed class TargetBuilder<out Dependencies : DependenciesDsl, Custom> : TargetDsl<Dependencies, Custom> {
 
-		private var commonConfiguration: LibraryModuleConfiguration.Targets.Common? = null
-		private var jsConfiguration: LibraryModuleConfiguration.Targets.Js? = null
-		private var jvmConfiguration: LibraryModuleConfiguration.Targets.Jvm? = null
-		private var jvmJdk7Configuration: LibraryModuleConfiguration.Targets.Jvm? = null
-		private var nativeDarwinConfiguration: LibraryModuleConfiguration.Targets.NativeDarwin? = null
-
-
-		fun build() = LibraryModuleConfiguration.Targets(
-			common = commonConfiguration ?: LibraryModuleConfiguration.Targets.Common.default,
-			js = jsConfiguration,
-			jvm = jvmConfiguration,
-			jvmJdk7 = jvmJdk7Configuration,
-			nativeDarwin = nativeDarwinConfiguration
-		)
+		protected val customConfigurations: MutableList<Custom.() -> Unit> = mutableListOf()
+		protected var enforcesSameVersionForAllKotlinDependencies = true
+		protected var dependencies = LibraryModuleConfiguration.Dependencies.default
+		protected var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
-		override fun common(configure: CommonTargetDsl.() -> Unit) {
-			CommonBuilder().apply(configure).build().also { configuration ->
-				commonConfiguration = commonConfiguration?.mergeWith(configuration) ?: configuration
-			}
+		final override fun custom(configure: Custom.() -> Unit) {
+			customConfigurations += configure
 		}
 
 
-		override fun js(configure: JsTargetDsl.() -> Unit) {
-			JsBuilder().apply(configure).build().also { configuration ->
-				jsConfiguration = jsConfiguration?.mergeWith(configuration) ?: configuration
-			}
+		final override fun dependencies(configure: Dependencies.() -> Unit) {
+			@Suppress("UNCHECKED_CAST")
+			val dependencies = DependenciesBuilder().apply(configure as DependenciesDsl.() -> Unit).build()
+
+			this.dependencies = this.dependencies.mergeWith(dependencies)
 		}
 
 
-		override fun jvm(configure: JvmTargetDsl.() -> Unit) {
-			JvmBuilder().apply(configure).build().also { configuration ->
-				jvmConfiguration = jvmConfiguration?.mergeWith(configuration) ?: configuration
-			}
+		final override fun testDependencies(configure: Dependencies.() -> Unit) {
+			@Suppress("UNCHECKED_CAST")
+			val dependencies = DependenciesBuilder().apply(configure as DependenciesDsl.() -> Unit).build()
+
+			this.testDependencies = this.testDependencies.mergeWith(dependencies)
 		}
 
 
-		override fun jvmJdk7(configure: JvmTargetDsl.() -> Unit) {
-			JvmBuilder().apply(configure).build().also { configuration ->
-				jvmJdk7Configuration = jvmJdk7Configuration?.mergeWith(configuration) ?: configuration
-			}
+		final override fun withoutEnforcingSameVersionForAllKotlinDependencies() {
+			enforcesSameVersionForAllKotlinDependencies = false
 		}
 
 
-		override fun nativeDarwin(configure: NativeDarwinTargetDsl.() -> Unit) {
-			NativeDarwinBuilder().apply(configure).build().also { configuration ->
-				nativeDarwinConfiguration = nativeDarwinConfiguration?.mergeWith(configuration) ?: configuration
-			}
-		}
+		class CommonBuilder : TargetBuilder<DependenciesDsl, KotlinOnlyTarget<AbstractKotlinCompilation<*>>>(), CommonTargetDsl {
 
-
-		class CommonBuilder : CommonTargetDsl {
-
-			private val customConfigurations: MutableList<KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit> = mutableListOf()
-			private var dependencies = LibraryModuleConfiguration.Dependencies.default
-			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
-
-
-			fun build() = LibraryModuleConfiguration.Targets.Common(
+			fun build() = LibraryModuleConfiguration.Target.Common(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				testDependencies = testDependencies
 			)
-
-
-			override fun custom(configure: KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit) {
-				customConfigurations += configure
-			}
-
-
-			override fun dependencies(configure: DependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.dependencies = this.dependencies.mergeWith(dependencies)
-			}
-
-
-			override fun testDependencies(configure: DependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.testDependencies = this.testDependencies.mergeWith(dependencies)
-			}
 		}
 
 
@@ -288,41 +246,20 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class JsBuilder : JsTargetDsl {
+		class JsBuilder : TargetBuilder<DependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
 
-			private val customConfigurations: MutableList<KotlinJsTargetDsl.() -> Unit> = mutableListOf()
-			private var dependencies = LibraryModuleConfiguration.Dependencies.default
 			private var noBrowser = false
 			private var noNodeJs = false
-			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
-			fun build() = LibraryModuleConfiguration.Targets.Js(
+			fun build() = LibraryModuleConfiguration.Target.Js(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				noBrowser = noBrowser,
 				noNodeJs = noNodeJs,
 				testDependencies = testDependencies
 			)
-
-
-			override fun custom(configure: KotlinJsTargetDsl.() -> Unit) {
-				customConfigurations += configure
-			}
-
-
-			override fun dependencies(configure: DependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.dependencies = this.dependencies.mergeWith(dependencies)
-			}
-
-
-			override fun testDependencies(configure: DependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.testDependencies = this.testDependencies.mergeWith(dependencies)
-			}
 
 
 			override fun withoutBrowser() {
@@ -336,39 +273,18 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class JvmBuilder : JvmTargetDsl {
+		class JvmBuilder : TargetBuilder<JvmDependenciesDsl, KotlinJvmTarget>(), JvmTargetDsl {
 
-			private val customConfigurations: MutableList<KotlinJvmTarget.() -> Unit> = mutableListOf()
-			private var dependencies = LibraryModuleConfiguration.Dependencies.default
 			private var includesJava = false
-			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
-			fun build() = LibraryModuleConfiguration.Targets.Jvm(
+			fun build() = LibraryModuleConfiguration.Target.Jvm(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				includesJava = includesJava,
 				testDependencies = testDependencies
 			)
-
-
-			override fun custom(configure: KotlinJvmTarget.() -> Unit) {
-				customConfigurations += configure
-			}
-
-
-			override fun dependencies(configure: JvmDependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.dependencies = this.dependencies.mergeWith(dependencies)
-			}
-
-
-			override fun testDependencies(configure: JvmDependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.testDependencies = this.testDependencies.mergeWith(dependencies)
-			}
 
 
 			override fun withJava() {
@@ -377,36 +293,22 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class NativeDarwinBuilder : NativeDarwinTargetDsl {
+		class NativeDarwinBuilder : TargetBuilder<DependenciesDsl, KotlinNativeTarget>(), NativeDarwinTargetDsl {
 
-			private val customConfigurations: MutableList<KotlinNativeTarget.() -> Unit> = mutableListOf()
-			private var dependencies = LibraryModuleConfiguration.Dependencies.default
 			private var noIosArm64 = false
 			private var noIosX64 = false
 			private var noMacosX64 = false
-			private var testDependencies = LibraryModuleConfiguration.Dependencies.default
 
 
-			fun build() = LibraryModuleConfiguration.Targets.NativeDarwin(
+			fun build() = LibraryModuleConfiguration.Target.NativeDarwin(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				noIosArm64 = noIosArm64,
 				noIosX64 = noIosX64,
 				noMacosX64 = noMacosX64,
 				testDependencies = testDependencies
 			)
-
-
-			override fun custom(configure: KotlinNativeTarget.() -> Unit) {
-				customConfigurations += configure
-			}
-
-
-			override fun dependencies(configure: DependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
-
-				this.dependencies = this.dependencies.mergeWith(dependencies)
-			}
 
 
 			override fun withoutIosArm64() {
@@ -422,12 +324,59 @@ internal class LibraryModuleConfigurationBuilder(
 			override fun withoutMacosX64() {
 				noMacosX64 = true
 			}
+		}
+	}
 
 
-			override fun testDependencies(configure: DependenciesDsl.() -> Unit) {
-				val dependencies = DependenciesBuilder().apply(configure).build()
+	class TargetsBuilder : TargetsDsl {
 
-				this.testDependencies = this.testDependencies.mergeWith(dependencies)
+		private var commonConfiguration: LibraryModuleConfiguration.Target.Common? = null
+		private var jsConfiguration: LibraryModuleConfiguration.Target.Js? = null
+		private var jvmConfiguration: LibraryModuleConfiguration.Target.Jvm? = null
+		private var jvmJdk7Configuration: LibraryModuleConfiguration.Target.Jvm? = null
+		private var nativeDarwinConfiguration: LibraryModuleConfiguration.Target.NativeDarwin? = null
+
+
+		fun build() = LibraryModuleConfiguration.Targets(
+			common = commonConfiguration ?: LibraryModuleConfiguration.Target.Common.default,
+			js = jsConfiguration,
+			jvm = jvmConfiguration,
+			jvmJdk7 = jvmJdk7Configuration,
+			nativeDarwin = nativeDarwinConfiguration
+		)
+
+
+		override fun common(configure: CommonTargetDsl.() -> Unit) {
+			TargetBuilder.CommonBuilder().apply(configure).build().also { configuration ->
+				commonConfiguration = commonConfiguration?.mergeWith(configuration) ?: configuration
+			}
+		}
+
+
+		override fun js(configure: JsTargetDsl.() -> Unit) {
+			TargetBuilder.JsBuilder().apply(configure).build().also { configuration ->
+				jsConfiguration = jsConfiguration?.mergeWith(configuration) ?: configuration
+			}
+		}
+
+
+		override fun jvm(configure: JvmTargetDsl.() -> Unit) {
+			TargetBuilder.JvmBuilder().apply(configure).build().also { configuration ->
+				jvmConfiguration = jvmConfiguration?.mergeWith(configuration) ?: configuration
+			}
+		}
+
+
+		override fun jvmJdk7(configure: JvmTargetDsl.() -> Unit) {
+			TargetBuilder.JvmBuilder().apply(configure).build().also { configuration ->
+				jvmJdk7Configuration = jvmJdk7Configuration?.mergeWith(configuration) ?: configuration
+			}
+		}
+
+
+		override fun nativeDarwin(configure: NativeDarwinTargetDsl.() -> Unit) {
+			TargetBuilder.NativeDarwinBuilder().apply(configure).build().also { configuration ->
+				nativeDarwinConfiguration = nativeDarwinConfiguration?.mergeWith(configuration) ?: configuration
 			}
 		}
 	}

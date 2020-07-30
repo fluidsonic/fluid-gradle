@@ -94,12 +94,112 @@ internal class LibraryModuleConfiguration(
 	}
 
 
+	sealed class Target(
+		val enforcesSameVersionForAllKotlinDependencies: Boolean
+	) {
+
+		class Common(
+			val customConfigurations: List<KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
+			enforcesSameVersionForAllKotlinDependencies: Boolean,
+			val testDependencies: Dependencies = Dependencies.default
+		) : Target(
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+		) {
+
+			fun mergeWith(other: Common) = Common(
+				customConfigurations = customConfigurations + other.customConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
+			)
+
+
+			companion object {
+
+				val default = Common(
+					customConfigurations = emptyList(),
+					dependencies = Dependencies.default,
+					enforcesSameVersionForAllKotlinDependencies = true,
+					testDependencies = Dependencies.default
+				)
+			}
+		}
+
+
+		class Js(
+			val customConfigurations: List<KotlinJsTargetDsl.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
+			enforcesSameVersionForAllKotlinDependencies: Boolean,
+			val noBrowser: Boolean,
+			val noNodeJs: Boolean,
+			val testDependencies: Dependencies = Dependencies.default
+		) : Target(
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+		) {
+
+			fun mergeWith(other: Js) = Js(
+				customConfigurations = customConfigurations + other.customConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
+				noBrowser = noBrowser || other.noBrowser,
+				noNodeJs = noNodeJs || other.noNodeJs,
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
+			)
+		}
+
+
+		class Jvm(
+			val customConfigurations: List<KotlinJvmTarget.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
+			enforcesSameVersionForAllKotlinDependencies: Boolean,
+			val includesJava: Boolean,
+			val testDependencies: Dependencies = Dependencies.default
+		) : Target(
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+		) {
+
+			fun mergeWith(other: Jvm) = Jvm(
+				customConfigurations = customConfigurations + other.customConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
+				includesJava = includesJava || other.includesJava,
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
+			)
+		}
+
+
+		class NativeDarwin(
+			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
+			enforcesSameVersionForAllKotlinDependencies: Boolean,
+			val noIosArm64: Boolean,
+			val noIosX64: Boolean,
+			val noMacosX64: Boolean,
+			val testDependencies: Dependencies = Dependencies.default
+		) : Target(
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+		) {
+
+			fun mergeWith(other: NativeDarwin) = NativeDarwin(
+				customConfigurations = customConfigurations + other.customConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
+				noIosArm64 = noIosArm64 || other.noIosArm64,
+				noIosX64 = noIosX64 || other.noIosX64,
+				noMacosX64 = noMacosX64 || other.noMacosX64,
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
+			)
+		}
+	}
+
+
 	class Targets(
-		val common: Common,
-		val js: Js?,
-		val jvm: Jvm?,
-		val jvmJdk7: Jvm?,
-		val nativeDarwin: NativeDarwin?
+		val common: Target.Common,
+		val js: Target.Js?,
+		val jvm: Target.Jvm?,
+		val jvmJdk7: Target.Jvm?,
+		val nativeDarwin: Target.NativeDarwin?
 	) {
 
 		fun mergeWith(other: Targets, addAutomatically: Boolean) = Targets(
@@ -114,89 +214,11 @@ internal class LibraryModuleConfiguration(
 		companion object {
 
 			val default = Targets(
-				common = Common.default,
+				common = Target.Common.default,
 				js = null,
 				jvm = null,
 				jvmJdk7 = null,
 				nativeDarwin = null
-			)
-		}
-
-
-		class Common(
-			val customConfigurations: List<KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit>,
-			val dependencies: Dependencies = Dependencies.default,
-			val testDependencies: Dependencies = Dependencies.default
-		) {
-
-			fun mergeWith(other: Common) = Common(
-				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencies = dependencies.mergeWith(other.dependencies),
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
-			)
-
-
-			companion object {
-
-				val default = Common(
-					customConfigurations = emptyList(),
-					dependencies = Dependencies.default,
-					testDependencies = Dependencies.default
-				)
-			}
-		}
-
-
-		class Js(
-			val customConfigurations: List<KotlinJsTargetDsl.() -> Unit>,
-			val dependencies: Dependencies = Dependencies.default,
-			val noBrowser: Boolean,
-			val noNodeJs: Boolean,
-			val testDependencies: Dependencies = Dependencies.default
-		) {
-
-			fun mergeWith(other: Js) = Js(
-				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencies = dependencies.mergeWith(other.dependencies),
-				noBrowser = noBrowser || other.noBrowser,
-				noNodeJs = noNodeJs || other.noNodeJs,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
-			)
-		}
-
-
-		class Jvm(
-			val customConfigurations: List<KotlinJvmTarget.() -> Unit>,
-			val dependencies: Dependencies = Dependencies.default,
-			val includesJava: Boolean,
-			val testDependencies: Dependencies = Dependencies.default
-		) {
-
-			fun mergeWith(other: Jvm) = Jvm(
-				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencies = dependencies.mergeWith(other.dependencies),
-				includesJava = includesJava || other.includesJava,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
-			)
-		}
-
-
-		class NativeDarwin(
-			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
-			val dependencies: Dependencies = Dependencies.default,
-			val noIosArm64: Boolean,
-			val noIosX64: Boolean,
-			val noMacosX64: Boolean,
-			val testDependencies: Dependencies = Dependencies.default
-		) {
-
-			fun mergeWith(other: NativeDarwin) = NativeDarwin(
-				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencies = dependencies.mergeWith(other.dependencies),
-				noIosArm64 = noIosArm64 || other.noIosArm64,
-				noIosX64 = noIosX64 || other.noIosX64,
-				noMacosX64 = noMacosX64 || other.noMacosX64,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}
 	}

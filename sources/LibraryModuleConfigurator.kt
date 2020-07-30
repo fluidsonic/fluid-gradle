@@ -59,11 +59,11 @@ internal class LibraryModuleConfigurator(
 
 		sourceSets {
 			named(KotlinSourceSet.COMMON_MAIN_SOURCE_SET_NAME) {
-				configureSourceSet(path = "common", dependencies = targetConfiguration.dependencies)
+				configureSourceSetBasics(path = "common", dependencies = targetConfiguration.dependencies)
 			}
 
 			named(KotlinSourceSet.COMMON_TEST_SOURCE_SET_NAME) {
-				configureSourceSet(path = "common", dependencies = targetConfiguration.testDependencies)
+				configureSourceSetBasics(path = "common", dependencies = targetConfiguration.testDependencies)
 
 				dependencies {
 					implementation(kotlin("test-common"))
@@ -73,6 +73,8 @@ internal class LibraryModuleConfigurator(
 		}
 
 		metadata {
+			configureTargetBasics(targetConfiguration)
+
 			targetConfiguration.customConfigurations.forEach { it() }
 		}
 	}
@@ -82,15 +84,17 @@ internal class LibraryModuleConfigurator(
 		val targetConfiguration = configuration.targets.js ?: return
 
 		js {
+			configureTargetBasics(targetConfiguration)
+
 			compilations.named(KotlinCompilation.MAIN_COMPILATION_NAME) {
 				defaultSourceSet {
-					configureSourceSet(path = "js", dependencies = targetConfiguration.dependencies)
+					configureSourceSetBasics(path = "js", dependencies = targetConfiguration.dependencies)
 				}
 			}
 
 			compilations.named(KotlinCompilation.TEST_COMPILATION_NAME) {
 				defaultSourceSet {
-					configureSourceSet(path = "js", dependencies = targetConfiguration.testDependencies)
+					configureSourceSetBasics(path = "js", dependencies = targetConfiguration.testDependencies)
 
 					dependencies {
 						api(kotlin("test-js"))
@@ -147,7 +151,7 @@ internal class LibraryModuleConfigurator(
 
 	private fun KotlinMultiplatformExtension.configureJvmTarget(
 		jdkVersion: JdkVersion,
-		targetConfiguration: LibraryModuleConfiguration.Targets.Jvm,
+		targetConfiguration: LibraryModuleConfiguration.Target.Jvm,
 		targetName: String,
 		path: String
 	) {
@@ -157,6 +161,8 @@ internal class LibraryModuleConfigurator(
 		jvm(targetName) {
 			if (targetConfiguration.includesJava)
 				withJava()
+
+			configureTargetBasics(targetConfiguration)
 
 			compilations.forEach { compilation ->
 				compilation.kotlinOptions {
@@ -170,7 +176,7 @@ internal class LibraryModuleConfigurator(
 				}
 
 				defaultSourceSet {
-					configureSourceSet(path = path, dependencies = targetConfiguration.dependencies)
+					configureSourceSetBasics(path = path, dependencies = targetConfiguration.dependencies)
 				}
 			}
 
@@ -184,7 +190,7 @@ internal class LibraryModuleConfigurator(
 				}
 
 				defaultSourceSet {
-					configureSourceSet(path = path, dependencies = targetConfiguration.testDependencies)
+					configureSourceSetBasics(path = path, dependencies = targetConfiguration.testDependencies)
 
 					dependencies {
 						if (jdkVersion >= JdkVersion.v8) {
@@ -250,13 +256,13 @@ internal class LibraryModuleConfigurator(
 			val nativeDarwinMain by creating {
 				dependsOn(commonMain)
 
-				configureSourceSet(path = "native-darwin", dependencies = targetConfiguration.dependencies)
+				configureSourceSetBasics(path = "native-darwin", dependencies = targetConfiguration.dependencies)
 			}
 
 			val nativeDarwinTest by creating {
 				dependsOn(commonTest)
 
-				configureSourceSet(path = "native-darwin", dependencies = targetConfiguration.testDependencies)
+				configureSourceSetBasics(path = "native-darwin", dependencies = targetConfiguration.testDependencies)
 			}
 
 			if (!targetConfiguration.noIosArm64 || !targetConfiguration.noIosX64) {
@@ -315,15 +321,17 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun KotlinNativeTarget.configureTarget(
-		targetConfiguration: LibraryModuleConfiguration.Targets.NativeDarwin,
+		targetConfiguration: LibraryModuleConfiguration.Target.NativeDarwin,
 		pathName: String
 	) {
+		configureTargetBasics(targetConfiguration)
+
 		compilations[KotlinCompilation.MAIN_COMPILATION_NAME].defaultSourceSet {
-			configureSourceSet(path = pathName, dependencies = null)
+			configureSourceSetBasics(path = pathName, dependencies = null)
 		}
 
 		compilations[KotlinCompilation.TEST_COMPILATION_NAME].defaultSourceSet {
-			configureSourceSet(path = pathName, dependencies = null)
+			configureSourceSetBasics(path = pathName, dependencies = null)
 		}
 
 		if (this is KotlinNativeTargetWithTests<*>)
@@ -339,7 +347,7 @@ internal class LibraryModuleConfigurator(
 	}
 
 
-	private fun KotlinSourceSet.configureSourceSet(path: String, dependencies: LibraryModuleConfiguration.Dependencies?) {
+	private fun KotlinSourceSet.configureSourceSetBasics(path: String, dependencies: LibraryModuleConfiguration.Dependencies?) {
 		val firstLevelPath = if (name.endsWith("Test")) "tests" else "sources"
 
 		kotlin.setSrcDirs(listOf("$firstLevelPath/$path"))
@@ -358,6 +366,24 @@ internal class LibraryModuleConfigurator(
 			dependencies {
 				dependencies.configurations.forEach { it() }
 			}
+	}
+
+
+	private fun KotlinTarget.configureTargetBasics(targetConfiguration: LibraryModuleConfiguration.Target) {
+		if (targetConfiguration.enforcesSameVersionForAllKotlinDependencies) {
+			val kotlinVersion = project.getKotlinPluginVersion()!!
+
+			compilations.all {
+				project.configurations.getByName(compileDependencyConfigurationName) {
+					resolutionStrategy.eachDependency {
+						if (requested.group == "org.jetbrains.kotlin") {
+							useVersion(kotlinVersion)
+							because("All Kotlin modules must have the same version.")
+						}
+					}
+				}
+			}
+		}
 	}
 
 

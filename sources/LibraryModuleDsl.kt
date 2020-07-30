@@ -146,7 +146,7 @@ public interface LibraryModuleDsl {
 
 
 	@Dsl
-	public interface TargetDsl<Dependencies : DependenciesDsl, Custom> {
+	public interface TargetDsl<out Dependencies : DependenciesDsl, out Custom> {
 
 		@Dsl
 		public fun custom(configure: Custom.() -> Unit)
@@ -156,6 +156,9 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun testDependencies(configure: Dependencies.() -> Unit)
+
+		@Dsl
+		public fun withoutEnforcingSameVersionForAllKotlinDependencies()
 	}
 
 
