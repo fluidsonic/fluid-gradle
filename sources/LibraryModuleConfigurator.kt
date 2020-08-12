@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.testing.*
+import org.jetbrains.kotlin.gradle.utils.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
@@ -344,6 +345,17 @@ internal class LibraryModuleConfigurator(
 			}
 
 		targetConfiguration.customConfigurations.forEach { it() }
+
+		// FIXME Remove when Kotlin 1.4 is released. See https://youtrack.jetbrains.com/issue/KT-39051
+		@Suppress("INVISIBLE_MEMBER", "INVISIBLE_SETTER")
+		run {
+			val variant = kotlinComponents.singleOrNull()?.let { it as? KotlinVariant }
+			if (variant != null && variant.sourcesArtifacts.isEmpty()) {
+				val mainCompilation = compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
+
+				variant.sourcesArtifacts = setOf(sourcesJarArtifact(mainCompilation, targetName, dashSeparatedName(targetName.toLowerCase())))
+			}
+		}
 	}
 
 
