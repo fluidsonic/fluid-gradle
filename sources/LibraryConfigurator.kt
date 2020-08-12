@@ -15,8 +15,8 @@ internal class LibraryConfigurator(
 	fun configure() = project.run {
 		apply<VersionsPlugin>()
 
-		extensions.extraProperties.set("kotlin.mpp.enableGranularSourceSetsMetadata", true)
-		extensions.extraProperties.set("kotlin.native.enableDependencyPropagation", false)
+		extensions.extraProperties.set("kotlin.mpp.enableGranularSourceSetsMetadata", "true")
+		extensions.extraProperties.set("kotlin.native.enableDependencyPropagation", "false")
 
 		repositories {
 			mavenCentral()
