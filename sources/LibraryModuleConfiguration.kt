@@ -127,6 +127,42 @@ internal class LibraryModuleConfiguration(
 		}
 
 
+		class Darwin(
+			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
+			val dependencies: Dependencies = Dependencies.default,
+			enforcesSameVersionForAllKotlinDependencies: Boolean,
+			val noIosArm32: Boolean,
+			val noIosArm64: Boolean,
+			val noIosX64: Boolean,
+			val noMacosX64: Boolean,
+			val noTvosArm64: Boolean,
+			val noTvosX64: Boolean,
+			val noWatchosArm32: Boolean,
+			val noWatchosArm64: Boolean,
+			val noWatchosX86: Boolean,
+			val testDependencies: Dependencies = Dependencies.default
+		) : Target(
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+		) {
+
+			fun mergeWith(other: Darwin) = Darwin(
+				customConfigurations = customConfigurations + other.customConfigurations,
+				dependencies = dependencies.mergeWith(other.dependencies),
+				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
+				noIosArm32 = noIosArm32 || other.noIosArm32,
+				noIosArm64 = noIosArm64 || other.noIosArm64,
+				noIosX64 = noIosX64 || other.noIosX64,
+				noMacosX64 = noMacosX64 || other.noMacosX64,
+				noTvosArm64 = noTvosArm64 || other.noTvosArm64,
+				noTvosX64 = noTvosX64 || other.noTvosX64,
+				noWatchosArm32 = noWatchosArm32 || other.noWatchosArm32,
+				noWatchosArm64 = noWatchosArm64 || other.noWatchosArm64,
+				noWatchosX86 = noWatchosX86 || other.noWatchosX86,
+				testDependencies = testDependencies.mergeWith(other.testDependencies)
+			)
+		}
+
+
 		class Js(
 			val customConfigurations: List<KotlinJsTargetDsl.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
@@ -167,47 +203,23 @@ internal class LibraryModuleConfiguration(
 				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}
-
-
-		class NativeDarwin(
-			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
-			val dependencies: Dependencies = Dependencies.default,
-			enforcesSameVersionForAllKotlinDependencies: Boolean,
-			val noIosArm64: Boolean,
-			val noIosX64: Boolean,
-			val noMacosX64: Boolean,
-			val testDependencies: Dependencies = Dependencies.default
-		) : Target(
-			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
-		) {
-
-			fun mergeWith(other: NativeDarwin) = NativeDarwin(
-				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencies = dependencies.mergeWith(other.dependencies),
-				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
-				noIosArm64 = noIosArm64 || other.noIosArm64,
-				noIosX64 = noIosX64 || other.noIosX64,
-				noMacosX64 = noMacosX64 || other.noMacosX64,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
-			)
-		}
 	}
 
 
 	class Targets(
 		val common: Target.Common,
+		val darwin: Target.Darwin?,
 		val js: Target.Js?,
 		val jvm: Target.Jvm?,
-		val jvmJdk7: Target.Jvm?,
-		val nativeDarwin: Target.NativeDarwin?
+		val jvmJdk8: Target.Jvm?
 	) {
 
 		fun mergeWith(other: Targets, addAutomatically: Boolean) = Targets(
 			common = common.mergeWith(other.common),
+			darwin = other.darwin?.let { darwin?.mergeWith(it) } ?: other.darwin ?: darwin.takeIf { addAutomatically },
 			js = other.js?.let { js?.mergeWith(it) } ?: other.js ?: js.takeIf { addAutomatically },
 			jvm = other.jvm?.let { jvm?.mergeWith(it) } ?: other.jvm ?: jvm.takeIf { addAutomatically },
-			jvmJdk7 = other.jvmJdk7?.let { jvmJdk7?.mergeWith(it) } ?: other.jvmJdk7 ?: jvmJdk7.takeIf { addAutomatically },
-			nativeDarwin = other.nativeDarwin?.let { nativeDarwin?.mergeWith(it) } ?: other.nativeDarwin ?: nativeDarwin.takeIf { addAutomatically }
+			jvmJdk8 = other.jvmJdk8?.let { jvmJdk8?.mergeWith(it) } ?: other.jvmJdk8 ?: jvmJdk8.takeIf { addAutomatically }
 		)
 
 
@@ -215,10 +227,10 @@ internal class LibraryModuleConfiguration(
 
 			val default = Targets(
 				common = Target.Common.default,
+				darwin = null,
 				js = null,
 				jvm = null,
-				jvmJdk7 = null,
-				nativeDarwin = null
+				jvmJdk8 = null
 			)
 		}
 	}

@@ -132,7 +132,10 @@ public interface LibraryModuleDsl {
 
 
 	@Dsl
-	public interface NativeDarwinTargetDsl : TargetDsl<DependenciesDsl, KotlinNativeTarget> {
+	public interface DarwinTargetDsl : TargetDsl<DependenciesDsl, KotlinNativeTarget> {
+
+		@Dsl
+		public fun withoutIosArm32()
 
 		@Dsl
 		public fun withoutIosArm64()
@@ -142,6 +145,21 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun withoutMacosX64()
+
+		@Dsl
+		public fun withoutTvosArm64()
+
+		@Dsl
+		public fun withoutTvosX64()
+
+		@Dsl
+		public fun withoutWatchosArm32()
+
+		@Dsl
+		public fun withoutWatchosArm64()
+
+		@Dsl
+		public fun withoutWatchosX86()
 	}
 
 
@@ -169,16 +187,16 @@ public interface LibraryModuleDsl {
 		public fun common(configure: CommonTargetDsl.() -> Unit = {})
 
 		@Dsl
+		public fun darwin(configure: DarwinTargetDsl.() -> Unit = {})
+
+		@Dsl
 		public fun js(configure: JsTargetDsl.() -> Unit = {})
 
 		@Dsl
 		public fun jvm(configure: JvmTargetDsl.() -> Unit = {})
 
 		@Dsl
-		public fun jvmJdk7(configure: JvmTargetDsl.() -> Unit = {})
-
-		@Dsl
-		public fun nativeDarwin(configure: NativeDarwinTargetDsl.() -> Unit = {})
+		public fun jvmJdk8(configure: JvmTargetDsl.() -> Unit = {})
 	}
 }
 

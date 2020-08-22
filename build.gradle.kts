@@ -8,7 +8,7 @@ version = "1.1.5"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.4.0-rc"
+	kotlin("jvm") version "1.4.0"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
@@ -38,8 +38,8 @@ kotlin {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_7
-	targetCompatibility = JavaVersion.VERSION_1_7
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 kotlinDslPluginOptions {
@@ -62,7 +62,9 @@ tasks {
 		sourceCompatibility = "1.8"
 		targetCompatibility = "1.8"
 
+		kotlinOptions.apiVersion = "1.4"
 		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.languageVersion = "1.4"
 	}
 
 	withType<Wrapper> {

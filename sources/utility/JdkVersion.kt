@@ -6,6 +6,7 @@ internal enum class JdkVersion(
 	val kotlinJvmTargetValue: String
 ) {
 
+	v6(code = 6, kotlinJvmTargetValue = "1.6"),
 	v7(code = 7, kotlinJvmTargetValue = "1.6"),
 	v8(code = 8, kotlinJvmTargetValue = "1.8"),
 	v9(code = 9, kotlinJvmTargetValue = "9"),

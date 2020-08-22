@@ -15,7 +15,6 @@ import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.testing.*
-import org.jetbrains.kotlin.gradle.utils.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
@@ -81,6 +80,241 @@ internal class LibraryModuleConfigurator(
 	}
 
 
+	private fun KotlinMultiplatformExtension.configureDarwinTargets() {
+		val targetConfiguration = configuration.targets.darwin
+			?.takeIf {
+				!it.noIosArm32 ||
+					!it.noIosArm64 ||
+					!it.noIosX64 ||
+					!it.noMacosX64 ||
+					!it.noTvosArm64 ||
+					!it.noTvosX64 ||
+					!it.noWatchosArm32 ||
+					!it.noWatchosArm64 ||
+					!it.noWatchosX86
+			}
+			?: return
+
+		if (!targetConfiguration.noIosArm32)
+			iosArm32 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-arm32")
+			}
+
+		if (!targetConfiguration.noIosArm64)
+			iosArm64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-arm64")
+			}
+
+		if (!targetConfiguration.noIosX64)
+			iosX64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-x64")
+			}
+
+		if (!targetConfiguration.noMacosX64)
+			macosX64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "macos-x64")
+			}
+
+		if (!targetConfiguration.noTvosArm64)
+			tvosArm64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "tvos-arm64")
+			}
+
+		if (!targetConfiguration.noTvosX64)
+			tvosX64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "tvos-x64")
+			}
+
+		if (!targetConfiguration.noWatchosArm32)
+			watchosArm32 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "watchos-arm32")
+			}
+
+		if (!targetConfiguration.noWatchosArm64)
+			watchosArm64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "watchos-arm64")
+			}
+
+		if (!targetConfiguration.noWatchosX86)
+			watchosX86 {
+				configureTarget(targetConfiguration = targetConfiguration, pathName = "watchos-x86")
+			}
+
+		sourceSets {
+			val commonMain by getting
+			val commonTest by getting
+
+			val darwinMain by creating {
+				dependsOn(commonMain)
+
+				configureSourceSetBasics(path = "darwin", dependencies = targetConfiguration.dependencies)
+			}
+
+			val darwinTest by creating {
+				dependsOn(commonTest)
+
+				configureSourceSetBasics(path = "darwin", dependencies = targetConfiguration.testDependencies)
+			}
+
+			if (!targetConfiguration.noIosArm32 || !targetConfiguration.noIosArm64 || !targetConfiguration.noIosX64) {
+				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
+				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
+//				val iosMain by creating {
+//					dependsOn(darwinMain)
+//
+//					kotlin.setSrcDirs(listOf("sources/ios"))
+//					resources.setSrcDirs(emptyList<Any>())
+//
+//					configureSourceSet()
+//				}
+//
+//				val iosTest by creating {
+//					dependsOn(darwinTest)
+//
+//					kotlin.setSrcDirs(listOf("tests/ios"))
+//					resources.setSrcDirs(emptyList<Any>())
+//
+//					configureSourceSet()
+//				}
+
+				if (!targetConfiguration.noIosArm32) {
+					getByName("iosArm32Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("iosArm32Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
+				if (!targetConfiguration.noIosArm64) {
+					getByName("iosArm64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("iosArm64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
+				if (!targetConfiguration.noIosX64) {
+					getByName("iosX64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("iosX64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+			}
+
+			if (!targetConfiguration.noMacosX64) {
+				getByName("macosX64Main") {
+					dependsOn(darwinMain)
+				}
+
+				getByName("macosX64Test") {
+					dependsOn(darwinTest)
+				}
+			}
+
+			if (!targetConfiguration.noTvosArm64 || !targetConfiguration.noTvosX64) {
+				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
+				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
+//				val tvosMain by creating {
+//					dependsOn(darwinMain)
+//
+//					kotlin.setSrcDirs(listOf("sources/tvos"))
+//					resources.setSrcDirs(emptyList<Any>())
+//
+//					configureSourceSet()
+//				}
+//
+//				val tvosTest by creating {
+//					dependsOn(darwinTest)
+//
+//					kotlin.setSrcDirs(listOf("tests/tvos"))
+//					resources.setSrcDirs(emptyList<Any>())
+//
+//					configureSourceSet()
+//				}
+
+				if (!targetConfiguration.noTvosArm64) {
+					getByName("tvosArm64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("tvosArm64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
+				if (!targetConfiguration.noTvosX64) {
+					getByName("tvosX64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("tvosX64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+			}
+
+			if (!targetConfiguration.noWatchosArm32 || !targetConfiguration.noWatchosArm64 || !targetConfiguration.noWatchosX86) {
+				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
+				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
+//				val watchosMain by creating {
+//					dependsOn(darwinMain)
+//
+//					kotlin.setSrcDirs(listOf("sources/watchos"))
+//					resources.setSrcDirs(emptyList<Any>())
+//
+//					configureSourceSet()
+//				}
+//
+//				val watchosTest by creating {
+//					dependsOn(darwinTest)
+//
+//					kotlin.setSrcDirs(listOf("tests/watchos"))
+//					resources.setSrcDirs(emptyList<Any>())
+//
+//					configureSourceSet()
+//				}
+
+				if (!targetConfiguration.noWatchosArm32) {
+					getByName("watchosArm32Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("watchosArm32Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
+				if (!targetConfiguration.noWatchosArm64) {
+					getByName("watchosArm64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("watchosArm64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
+				if (!targetConfiguration.noWatchosX86) {
+					getByName("watchosX86Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("watchosX86Test") {
+						dependsOn(darwinTest)
+					}
+				}
+			}
+		}
+	}
+
+
 	private fun KotlinMultiplatformExtension.configureJsTargets() {
 		val targetConfiguration = configuration.targets.js ?: return
 
@@ -124,27 +358,27 @@ internal class LibraryModuleConfigurator(
 
 	private fun KotlinMultiplatformExtension.configureJvmTargets() {
 		val jvmConfiguration = configuration.targets.jvm
-		val jvmJdk7Configuration = configuration.targets.jvmJdk7
+		val jvmJdk8Configuration = configuration.targets.jvmJdk8
 
-		if (jvmConfiguration != null && jvmJdk7Configuration != null
-			&& (jvmConfiguration.dependencies.kaptConfigurations.isNotEmpty() || jvmJdk7Configuration.dependencies.kaptConfigurations.isNotEmpty())
+		if (jvmConfiguration != null && jvmJdk8Configuration != null
+			&& (jvmConfiguration.dependencies.kaptConfigurations.isNotEmpty() || jvmJdk8Configuration.dependencies.kaptConfigurations.isNotEmpty())
 		)
 			error("You cannot use 'kapt()' dependencies if you have multiple JVM targets.")
 
 		jvmConfiguration?.let { targetConfiguration ->
 			configureJvmTarget(
-				jdkVersion = JdkVersion.v8,
+				jdkVersion = JdkVersion.v6,
 				targetConfiguration = targetConfiguration,
 				targetName = "jvm",
 				path = "jvm"
 			)
 		}
-		jvmJdk7Configuration?.let { targetConfiguration ->
+		jvmJdk8Configuration?.let { targetConfiguration ->
 			configureJvmTarget(
-				jdkVersion = JdkVersion.v7,
+				jdkVersion = JdkVersion.v8,
 				targetConfiguration = targetConfiguration,
-				targetName = "jvmJdk7",
-				path = "jvm-jdk7"
+				targetName = "jvmJdk8",
+				path = "jvm-jdk8"
 			)
 		}
 	}
@@ -230,99 +464,8 @@ internal class LibraryModuleConfigurator(
 	}
 
 
-	private fun KotlinMultiplatformExtension.configureNativeDarwinTargets() {
-		val targetConfiguration = configuration.targets.nativeDarwin
-			?.takeIf { !it.noIosArm64 || !it.noIosX64 || !it.noMacosX64 }
-			?: return
-
-		if (!targetConfiguration.noIosArm64)
-			iosArm64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-arm64")
-			}
-
-		if (!targetConfiguration.noIosX64)
-			iosX64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-x64")
-			}
-
-		if (!targetConfiguration.noMacosX64)
-			macosX64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "macos-x64")
-			}
-
-		sourceSets {
-			val commonMain by getting
-			val commonTest by getting
-
-			val nativeDarwinMain by creating {
-				dependsOn(commonMain)
-
-				configureSourceSetBasics(path = "native-darwin", dependencies = targetConfiguration.dependencies)
-			}
-
-			val nativeDarwinTest by creating {
-				dependsOn(commonTest)
-
-				configureSourceSetBasics(path = "native-darwin", dependencies = targetConfiguration.testDependencies)
-			}
-
-			if (!targetConfiguration.noIosArm64 || !targetConfiguration.noIosX64) {
-				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
-				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
-//				val iosMain by creating {
-//					dependsOn(nativeDarwinMain)
-//
-//					kotlin.setSrcDirs(listOf("sources/ios"))
-//					resources.setSrcDirs(emptyList<Any>())
-//
-//					configureSourceSet()
-//				}
-//
-//				val iosTest by creating {
-//					dependsOn(nativeDarwinTest)
-//
-//					kotlin.setSrcDirs(listOf("tests/ios"))
-//					resources.setSrcDirs(emptyList<Any>())
-//
-//					configureSourceSet()
-//				}
-
-				if (!targetConfiguration.noIosArm64) {
-					getByName("iosArm64Main") {
-						dependsOn(nativeDarwinMain)
-					}
-
-					getByName("iosArm64Test") {
-						dependsOn(nativeDarwinTest)
-					}
-				}
-
-				if (!targetConfiguration.noIosX64) {
-					getByName("iosX64Main") {
-						dependsOn(nativeDarwinMain)
-					}
-
-					getByName("iosX64Test") {
-						dependsOn(nativeDarwinTest)
-					}
-				}
-			}
-
-			if (!targetConfiguration.noMacosX64) {
-				getByName("macosX64Main") {
-					dependsOn(nativeDarwinMain)
-				}
-
-				getByName("macosX64Test") {
-					dependsOn(nativeDarwinTest)
-				}
-			}
-		}
-	}
-
-
 	private fun KotlinNativeTarget.configureTarget(
-		targetConfiguration: LibraryModuleConfiguration.Target.NativeDarwin,
+		targetConfiguration: LibraryModuleConfiguration.Target.Darwin,
 		pathName: String
 	) {
 		configureTargetBasics(targetConfiguration)
@@ -345,17 +488,6 @@ internal class LibraryModuleConfigurator(
 			}
 
 		targetConfiguration.customConfigurations.forEach { it() }
-
-		// FIXME Remove when Kotlin 1.4 is released. See https://youtrack.jetbrains.com/issue/KT-39051
-		@Suppress("INVISIBLE_MEMBER", "INVISIBLE_SETTER")
-		run {
-			val variant = kotlinComponents.singleOrNull()?.let { it as? KotlinVariant }
-			if (variant != null && variant.sourcesArtifacts.isEmpty()) {
-				val mainCompilation = compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME)
-
-				variant.sourcesArtifacts = setOf(sourcesJarArtifact(mainCompilation, targetName, dashSeparatedName(targetName.toLowerCase())))
-			}
-		}
 	}
 
 
@@ -420,9 +552,9 @@ internal class LibraryModuleConfigurator(
 				explicitApi()
 
 			configureCommonTarget()
+			configureDarwinTargets()
 			configureJsTargets()
 			configureJvmTargets()
-			configureNativeDarwinTargets()
 		}
 	}
 

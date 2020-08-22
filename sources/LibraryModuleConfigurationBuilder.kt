@@ -293,22 +293,39 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class NativeDarwinBuilder : TargetBuilder<DependenciesDsl, KotlinNativeTarget>(), NativeDarwinTargetDsl {
+		class DarwinBuilder : TargetBuilder<DependenciesDsl, KotlinNativeTarget>(), DarwinTargetDsl {
 
+			private var noIosArm32 = false
 			private var noIosArm64 = false
 			private var noIosX64 = false
 			private var noMacosX64 = false
+			private var noTvosArm64 = false
+			private var noTvosX64 = false
+			private var noWatchosArm32 = false
+			private var noWatchosArm64 = false
+			private var noWatchosX86 = false
 
 
-			fun build() = LibraryModuleConfiguration.Target.NativeDarwin(
+			fun build() = LibraryModuleConfiguration.Target.Darwin(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
+				noIosArm32 = noIosArm32,
 				noIosArm64 = noIosArm64,
 				noIosX64 = noIosX64,
 				noMacosX64 = noMacosX64,
-				testDependencies = testDependencies
+				testDependencies = testDependencies,
+				noTvosArm64 = noTvosArm64,
+				noTvosX64 = noTvosX64,
+				noWatchosArm32 = noWatchosArm32,
+				noWatchosArm64 = noWatchosArm64,
+				noWatchosX86 = noWatchosX86
 			)
+
+
+			override fun withoutIosArm32() {
+				noIosArm32 = true
+			}
 
 
 			override fun withoutIosArm64() {
@@ -324,6 +341,31 @@ internal class LibraryModuleConfigurationBuilder(
 			override fun withoutMacosX64() {
 				noMacosX64 = true
 			}
+
+
+			override fun withoutTvosArm64() {
+				noTvosArm64 = true
+			}
+
+
+			override fun withoutTvosX64() {
+				noTvosX64 = true
+			}
+
+
+			override fun withoutWatchosArm32() {
+				noWatchosArm32 = true
+			}
+
+
+			override fun withoutWatchosArm64() {
+				noWatchosArm64 = true
+			}
+
+
+			override fun withoutWatchosX86() {
+				noWatchosX86 = true
+			}
 		}
 	}
 
@@ -331,24 +373,31 @@ internal class LibraryModuleConfigurationBuilder(
 	class TargetsBuilder : TargetsDsl {
 
 		private var commonConfiguration: LibraryModuleConfiguration.Target.Common? = null
+		private var darwinConfiguration: LibraryModuleConfiguration.Target.Darwin? = null
 		private var jsConfiguration: LibraryModuleConfiguration.Target.Js? = null
 		private var jvmConfiguration: LibraryModuleConfiguration.Target.Jvm? = null
-		private var jvmJdk7Configuration: LibraryModuleConfiguration.Target.Jvm? = null
-		private var nativeDarwinConfiguration: LibraryModuleConfiguration.Target.NativeDarwin? = null
+		private var jvmJdk8Configuration: LibraryModuleConfiguration.Target.Jvm? = null
 
 
 		fun build() = LibraryModuleConfiguration.Targets(
 			common = commonConfiguration ?: LibraryModuleConfiguration.Target.Common.default,
+			darwin = darwinConfiguration,
 			js = jsConfiguration,
 			jvm = jvmConfiguration,
-			jvmJdk7 = jvmJdk7Configuration,
-			nativeDarwin = nativeDarwinConfiguration
+			jvmJdk8 = jvmJdk8Configuration
 		)
 
 
 		override fun common(configure: CommonTargetDsl.() -> Unit) {
 			TargetBuilder.CommonBuilder().apply(configure).build().also { configuration ->
 				commonConfiguration = commonConfiguration?.mergeWith(configuration) ?: configuration
+			}
+		}
+
+
+		override fun darwin(configure: DarwinTargetDsl.() -> Unit) {
+			TargetBuilder.DarwinBuilder().apply(configure).build().also { configuration ->
+				darwinConfiguration = darwinConfiguration?.mergeWith(configuration) ?: configuration
 			}
 		}
 
@@ -367,16 +416,9 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		override fun jvmJdk7(configure: JvmTargetDsl.() -> Unit) {
+		override fun jvmJdk8(configure: JvmTargetDsl.() -> Unit) {
 			TargetBuilder.JvmBuilder().apply(configure).build().also { configuration ->
-				jvmJdk7Configuration = jvmJdk7Configuration?.mergeWith(configuration) ?: configuration
-			}
-		}
-
-
-		override fun nativeDarwin(configure: NativeDarwinTargetDsl.() -> Unit) {
-			TargetBuilder.NativeDarwinBuilder().apply(configure).build().also { configuration ->
-				nativeDarwinConfiguration = nativeDarwinConfiguration?.mergeWith(configuration) ?: configuration
+				jvmJdk8Configuration = jvmJdk8Configuration?.mergeWith(configuration) ?: configuration
 			}
 		}
 	}
