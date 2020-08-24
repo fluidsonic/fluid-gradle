@@ -164,6 +164,7 @@ internal class LibraryModuleConfiguration(
 
 
 		class Js(
+			val compiler: KotlinJsCompilerType?,
 			val customConfigurations: List<KotlinJsTargetDsl.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
@@ -175,6 +176,7 @@ internal class LibraryModuleConfiguration(
 		) {
 
 			fun mergeWith(other: Js) = Js(
+				compiler = compiler ?: other.compiler,
 				customConfigurations = customConfigurations + other.customConfigurations,
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,

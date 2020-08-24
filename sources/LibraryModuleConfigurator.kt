@@ -318,7 +318,7 @@ internal class LibraryModuleConfigurator(
 	private fun KotlinMultiplatformExtension.configureJsTargets() {
 		val targetConfiguration = configuration.targets.js ?: return
 
-		js(KotlinJsCompilerType.BOTH) {
+		js(targetConfiguration.compiler ?: KotlinJsCompilerType.BOTH) {
 			configureTargetBasics(targetConfiguration)
 
 			compilations.named(KotlinCompilation.MAIN_COMPILATION_NAME) {

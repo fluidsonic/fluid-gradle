@@ -190,7 +190,7 @@ public interface LibraryModuleDsl {
 		public fun darwin(configure: DarwinTargetDsl.() -> Unit = {})
 
 		@Dsl
-		public fun js(configure: JsTargetDsl.() -> Unit = {})
+		public fun js(compiler: KotlinJsCompilerType? = null, configure: JsTargetDsl.() -> Unit = {})
 
 		@Dsl
 		public fun jvm(configure: JvmTargetDsl.() -> Unit = {})

@@ -246,13 +246,16 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class JsBuilder : TargetBuilder<DependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
+		class JsBuilder(
+			private val compiler: KotlinJsCompilerType?
+		) : TargetBuilder<DependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
 
 			private var noBrowser = false
 			private var noNodeJs = false
 
 
 			fun build() = LibraryModuleConfiguration.Target.Js(
+				compiler = compiler,
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
@@ -402,8 +405,8 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		override fun js(configure: JsTargetDsl.() -> Unit) {
-			TargetBuilder.JsBuilder().apply(configure).build().also { configuration ->
+		override fun js(compiler: KotlinJsCompilerType?, configure: JsTargetDsl.() -> Unit) {
+			TargetBuilder.JsBuilder(compiler = compiler).apply(configure).build().also { configuration ->
 				jsConfiguration = jsConfiguration?.mergeWith(configuration) ?: configuration
 			}
 		}
