@@ -8,18 +8,18 @@ version = "1.1.8"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.4.0"
+	kotlin("jvm") version "1.4.10"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.29.0"
+	id("com.github.ben-manes.versions") version "0.31.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.29.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.31.0")
 }
 
 gradlePlugin {
@@ -69,7 +69,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.6"
+		gradleVersion = "6.6.1"
 	}
 }
 
