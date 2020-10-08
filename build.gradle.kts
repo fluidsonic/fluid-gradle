@@ -12,14 +12,14 @@ plugins {
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.31.0"
+	id("com.github.ben-manes.versions") version "0.33.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.31.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.33.0")
 }
 
 gradlePlugin {
