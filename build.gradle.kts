@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.1.11"
+version = "1.1.12"
 
 plugins {
 	`java-gradle-plugin`
@@ -12,14 +12,14 @@ plugins {
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.33.0"
+	id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.33.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.36.0")
 }
 
 gradlePlugin {
