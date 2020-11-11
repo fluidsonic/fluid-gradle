@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.jvm.*
+import java.io.*
 
 
 internal class LibraryModuleConfigurationBuilder(
@@ -150,7 +151,7 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class DependenciesBuilder : JvmDependenciesDsl {
+		class DependenciesBuilder : JsDependenciesDsl, JvmDependenciesDsl {
 
 			private val configurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
 			private val kaptConfigurations: MutableList<DependencyHandler.() -> Unit> = mutableListOf()
@@ -161,21 +162,65 @@ internal class LibraryModuleConfigurationBuilder(
 				kaptConfigurations = kaptConfigurations.toList()
 			)
 
+			override fun devNpm(name: String, version: String): Any =
+				SpecialDependency.DevNpmNameVersion(name = name, version = version)
+
+
+			override fun devNpm(name: String, directory: File): Any =
+				SpecialDependency.DevNpmNameDirectory(name = name, directory = directory)
+
+
+			override fun devNpm(directory: File): Any =
+				SpecialDependency.DevNpmDirectory(directory = directory)
+
+
+			override fun npm(name: String, version: String, generateExternals: Boolean): Any =
+				SpecialDependency.NpmNameVersion(generateExternals = generateExternals, name = name, version = version)
+
+
+			override fun npm(name: String, directory: File, generateExternals: Boolean): Any =
+				SpecialDependency.NpmNameDirectory(generateExternals = generateExternals, name = name, directory = directory)
+
+
+			override fun npm(directory: File, generateExternals: Boolean): Any =
+				SpecialDependency.NpmDirectory(generateExternals = generateExternals, directory = directory)
+
+
+			override fun optionalNpm(name: String, version: String, generateExternals: Boolean): Any =
+				SpecialDependency.OptionalNpmNameVersion(generateExternals = generateExternals, name = name, version = version)
+
+
+			override fun optionalNpm(name: String, directory: File, generateExternals: Boolean): Any =
+				SpecialDependency.OptionalNpmNameDirectory(generateExternals = generateExternals, name = name, directory = directory)
+
+
+			override fun optionalNpm(directory: File, generateExternals: Boolean): Any =
+				SpecialDependency.OptionalNpmDirectory(generateExternals = generateExternals, directory = directory)
+
+
+			override fun peerNpm(name: String, version: String): Any =
+				SpecialDependency.PeerNpmNameVersion(name = name, version = version)
+
+
 			override fun api(notation: Any) {
 				configurations += { api(resolve(notation)) }
 			}
+
 
 			override fun api(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
 				configurations += { api(dependencyNotation, configure) }
 			}
 
+
 			override fun compileOnly(notation: Any) {
 				configurations += { compileOnly(resolve(notation)) }
 			}
 
+
 			override fun compileOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
 				configurations += { compileOnly(dependencyNotation, configure) }
 			}
+
 
 			override fun custom(configure: KotlinDependencyHandler.() -> Unit) {
 				configurations += configure
@@ -185,21 +230,26 @@ internal class LibraryModuleConfigurationBuilder(
 				configurations += { implementation(resolve(notation)) }
 			}
 
+
 			override fun implementation(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
 				configurations += { implementation(dependencyNotation, configure) }
 			}
+
 
 			override fun kapt(notation: Any) {
 				kaptConfigurations += { add("kapt", resolve(notation)) }
 			}
 
+
 			override fun kapt(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
 				kaptConfigurations += { add("kapt", dependencyNotation, configure) }
 			}
 
+
 			override fun runtimeOnly(notation: Any) {
 				configurations += { runtimeOnly(resolve(notation)) }
 			}
+
 
 			override fun runtimeOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
 				configurations += { runtimeOnly(dependencyNotation, configure) }
@@ -209,12 +259,23 @@ internal class LibraryModuleConfigurationBuilder(
 			private fun DependencyHandler.resolve(notation: Any) = when (notation) {
 				is SpecialDependency.Kotlin -> kotlin(notation.simpleModuleName, notation.version)
 				is SpecialDependency.Project -> project(notation.notation)
+				is SpecialDependency -> error("Unsupported: $notation")
 				else -> notation
 			}
 
 
 			private fun KotlinDependencyHandler.resolve(notation: Any) = when (notation) {
 				is SpecialDependency.Kotlin -> kotlin(notation.simpleModuleName, notation.version)
+				is SpecialDependency.DevNpmDirectory -> devNpm(notation.directory)
+				is SpecialDependency.DevNpmNameDirectory -> devNpm(notation.name, notation.directory)
+				is SpecialDependency.DevNpmNameVersion -> devNpm(notation.name, notation.version)
+				is SpecialDependency.NpmDirectory -> npm(notation.directory)
+				is SpecialDependency.NpmNameDirectory -> npm(notation.name, notation.directory)
+				is SpecialDependency.NpmNameVersion -> npm(notation.name, notation.version)
+				is SpecialDependency.OptionalNpmDirectory -> optionalNpm(notation.directory)
+				is SpecialDependency.OptionalNpmNameDirectory -> optionalNpm(notation.name, notation.directory)
+				is SpecialDependency.OptionalNpmNameVersion -> optionalNpm(notation.name, notation.version)
+				is SpecialDependency.PeerNpmNameVersion -> peerNpm(notation.name, notation.version)
 				is SpecialDependency.Project -> project(notation.notation)
 				else -> notation
 			}
@@ -241,6 +302,16 @@ internal class LibraryModuleConfigurationBuilder(
 			private sealed class SpecialDependency {
 
 				class Kotlin(val simpleModuleName: String, val version: String?) : SpecialDependency()
+				class DevNpmDirectory(val directory: File) : SpecialDependency()
+				class DevNpmNameDirectory(val name: String, val directory: File) : SpecialDependency()
+				class DevNpmNameVersion(val name: String, val version: String) : SpecialDependency()
+				class NpmDirectory(val generateExternals: Boolean, val directory: File) : SpecialDependency()
+				class NpmNameDirectory(val generateExternals: Boolean, val name: String, val directory: File) : SpecialDependency()
+				class NpmNameVersion(val generateExternals: Boolean, val name: String, val version: String) : SpecialDependency()
+				class OptionalNpmDirectory(val generateExternals: Boolean, val directory: File) : SpecialDependency()
+				class OptionalNpmNameDirectory(val generateExternals: Boolean, val name: String, val directory: File) : SpecialDependency()
+				class OptionalNpmNameVersion(val generateExternals: Boolean, val name: String, val version: String) : SpecialDependency()
+				class PeerNpmNameVersion(val name: String, val version: String) : SpecialDependency()
 				class Project(val notation: Map<String, Any?>) : SpecialDependency()
 			}
 		}
@@ -248,7 +319,7 @@ internal class LibraryModuleConfigurationBuilder(
 
 		class JsBuilder(
 			private val compiler: KotlinJsCompilerType?
-		) : TargetBuilder<DependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
+		) : TargetBuilder<JsDependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
 
 			private var noBrowser = false
 			private var noNodeJs = false

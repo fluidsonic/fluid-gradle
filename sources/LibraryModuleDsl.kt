@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.jvm.*
+import java.io.*
 
 
 @Dsl
@@ -82,7 +83,42 @@ public interface LibraryModuleDsl {
 
 
 	@Dsl
-	public interface JsTargetDsl : TargetDsl<DependenciesDsl, KotlinJsTargetDsl> {
+	public interface JsDependenciesDsl : DependenciesDsl {
+
+		@Dsl
+		public fun devNpm(name: String, version: String): Any
+
+		@Dsl
+		public fun devNpm(name: String, directory: File): Any
+
+		@Dsl
+		public fun devNpm(directory: File): Any
+
+		@Dsl
+		public fun npm(name: String, version: String, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+
+		@Dsl
+		public fun npm(name: String, directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+
+		@Dsl
+		public fun npm(directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+
+		@Dsl
+		public fun optionalNpm(name: String, version: String, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+
+		@Dsl
+		public fun optionalNpm(name: String, directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+
+		@Dsl
+		public fun optionalNpm(directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+
+		@Dsl
+		public fun peerNpm(name: String, version: String): Any
+	}
+
+
+	@Dsl
+	public interface JsTargetDsl : TargetDsl<JsDependenciesDsl, KotlinJsTargetDsl> {
 
 		@Dsl
 		public fun withoutBrowser()
