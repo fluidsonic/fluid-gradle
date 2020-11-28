@@ -8,7 +8,7 @@ version = "1.1.12"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.4.10"
+	kotlin("jvm") version "1.4.20"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
@@ -69,7 +69,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.7"
+		gradleVersion = "6.7.1"
 	}
 }
 
