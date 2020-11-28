@@ -1,6 +1,7 @@
 package io.fluidsonic.gradle
 
 import io.fluidsonic.gradle.LibraryModuleDsl.*
+import java.io.*
 import org.gradle.api.artifacts.*
 import org.gradle.api.artifacts.dsl.*
 import org.gradle.kotlin.dsl.*
@@ -9,7 +10,6 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.jvm.*
-import java.io.*
 
 
 internal class LibraryModuleConfigurationBuilder(
@@ -75,8 +75,7 @@ internal class LibraryModuleConfigurationBuilder(
 			customConfigurations = customConfigurations.toList(),
 			experimentalApisToUse = experimentalApisToUse.toSet(),
 			languageFeaturesToEnable = languageFeaturesToEnable.toSet(),
-			noExplicitApi = noExplicitApi,
-			noNewInference = noNewInference
+			noExplicitApi = noExplicitApi
 		)
 
 

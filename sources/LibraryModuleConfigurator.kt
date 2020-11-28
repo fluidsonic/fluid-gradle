@@ -38,6 +38,14 @@ internal class LibraryModuleConfigurator(
 				configurePublishing()
 
 			kotlin {
+				sourceSets.all {
+					languageSettings.apply {
+						configuration.language.experimentalApisToUse.forEach { useExperimentalAnnotation(it) }
+						configuration.language.languageFeaturesToEnable.forEach { enableLanguageFeature(it) }
+						configuration.language.customConfigurations.forEach { it() }
+					}
+				}
+
 				configuration.customConfigurations.forEach { it() }
 			}
 		}
@@ -496,15 +504,6 @@ internal class LibraryModuleConfigurator(
 
 		kotlin.setSrcDirs(listOf("$firstLevelPath/$path"))
 		resources.setSrcDirs(listOf("$firstLevelPath/$path-resources"))
-
-		languageSettings.apply {
-			configuration.language.experimentalApisToUse.forEach { useExperimentalAnnotation(it) }
-			configuration.language.languageFeaturesToEnable.forEach { enableLanguageFeature(it) }
-			configuration.language.customConfigurations.forEach { it() }
-
-			if (!configuration.language.noNewInference)
-				enableLanguageFeature("NewInference")
-		}
 
 		if (dependencies != null)
 			dependencies {
