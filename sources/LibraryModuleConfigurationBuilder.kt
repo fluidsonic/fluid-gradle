@@ -1,7 +1,6 @@
 package io.fluidsonic.gradle
 
 import io.fluidsonic.gradle.LibraryModuleDsl.*
-import java.io.*
 import org.gradle.api.artifacts.*
 import org.gradle.api.artifacts.dsl.*
 import org.gradle.kotlin.dsl.*
@@ -10,6 +9,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.jvm.*
+import java.io.*
 
 
 internal class LibraryModuleConfigurationBuilder(
@@ -68,7 +68,6 @@ internal class LibraryModuleConfigurationBuilder(
 		private val experimentalApisToUse: MutableSet<String> = mutableSetOf()
 		private val languageFeaturesToEnable: MutableSet<String> = mutableSetOf()
 		private var noExplicitApi = false
-		private var noNewInference = false
 
 
 		fun build() = LibraryModuleConfiguration.Language(
@@ -96,11 +95,6 @@ internal class LibraryModuleConfigurationBuilder(
 
 		override fun withoutExplicitApi() {
 			noExplicitApi = true
-		}
-
-
-		override fun withoutNewInference() {
-			noNewInference = true
 		}
 	}
 

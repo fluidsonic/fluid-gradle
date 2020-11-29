@@ -161,9 +161,6 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun withoutExplicitApi()
-
-		@Dsl
-		public fun withoutNewInference()
 	}
 
 
