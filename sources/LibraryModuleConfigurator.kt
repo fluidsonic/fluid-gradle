@@ -579,16 +579,6 @@ internal class LibraryModuleConfigurator(
 			}
 
 			publications {
-				getByName<MavenPublication>("kotlinMultiplatform") {
-					artifact(emptyJar)
-					artifact(emptyJar) {
-						classifier = "javadoc"
-					}
-					artifact(emptyJar) {
-						classifier = "sources"
-					}
-				}
-
 				filterIsInstance<MavenPublication>().forEach { publication ->
 					publication.pom {
 						name.set(libraryConfiguration.fullName)
