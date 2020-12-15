@@ -227,9 +227,6 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun jvm(configure: JvmTargetDsl.() -> Unit = {})
-
-		@Dsl
-		public fun jvmJdk8(configure: JvmTargetDsl.() -> Unit = {})
 	}
 }
 

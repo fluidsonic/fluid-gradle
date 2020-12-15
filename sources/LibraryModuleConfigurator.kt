@@ -67,11 +67,11 @@ internal class LibraryModuleConfigurator(
 
 		sourceSets {
 			named(KotlinSourceSet.COMMON_MAIN_SOURCE_SET_NAME) {
-				configureSourceSetBasics(path = "common", dependencies = targetConfiguration.dependencies)
+				configureSourceSetBasics(pathSuffix = "", dependencies = targetConfiguration.dependencies)
 			}
 
 			named(KotlinSourceSet.COMMON_TEST_SOURCE_SET_NAME) {
-				configureSourceSetBasics(path = "common", dependencies = targetConfiguration.testDependencies)
+				configureSourceSetBasics(pathSuffix = "", dependencies = targetConfiguration.testDependencies)
 
 				dependencies {
 					implementation(kotlin("test-common"))
@@ -105,47 +105,47 @@ internal class LibraryModuleConfigurator(
 
 		if (!targetConfiguration.noIosArm32)
 			iosArm32 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-arm32")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-arm32")
 			}
 
 		if (!targetConfiguration.noIosArm64)
 			iosArm64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-arm64")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-arm64")
 			}
 
 		if (!targetConfiguration.noIosX64)
 			iosX64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "ios-x64")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-x64")
 			}
 
 		if (!targetConfiguration.noMacosX64)
 			macosX64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "macos-x64")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-macos-x64")
 			}
 
 		if (!targetConfiguration.noTvosArm64)
 			tvosArm64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "tvos-arm64")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-tvos-arm64")
 			}
 
 		if (!targetConfiguration.noTvosX64)
 			tvosX64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "tvos-x64")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-tvos-x64")
 			}
 
 		if (!targetConfiguration.noWatchosArm32)
 			watchosArm32 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "watchos-arm32")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-arm32")
 			}
 
 		if (!targetConfiguration.noWatchosArm64)
 			watchosArm64 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "watchos-arm64")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-arm64")
 			}
 
 		if (!targetConfiguration.noWatchosX86)
 			watchosX86 {
-				configureTarget(targetConfiguration = targetConfiguration, pathName = "watchos-x86")
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-x86")
 			}
 
 		sourceSets {
@@ -155,13 +155,13 @@ internal class LibraryModuleConfigurator(
 			val darwinMain by creating {
 				dependsOn(commonMain)
 
-				configureSourceSetBasics(path = "darwin", dependencies = targetConfiguration.dependencies)
+				configureSourceSetBasics(pathSuffix = "-darwin", dependencies = targetConfiguration.dependencies)
 			}
 
 			val darwinTest by creating {
 				dependsOn(commonTest)
 
-				configureSourceSetBasics(path = "darwin", dependencies = targetConfiguration.testDependencies)
+				configureSourceSetBasics(pathSuffix = "-darwin", dependencies = targetConfiguration.testDependencies)
 			}
 
 			if (!targetConfiguration.noIosArm32 || !targetConfiguration.noIosArm64 || !targetConfiguration.noIosX64) {
@@ -331,13 +331,13 @@ internal class LibraryModuleConfigurator(
 
 			compilations.named(KotlinCompilation.MAIN_COMPILATION_NAME) {
 				defaultSourceSet {
-					configureSourceSetBasics(path = "js", dependencies = targetConfiguration.dependencies)
+					configureSourceSetBasics(pathSuffix = "-js", dependencies = targetConfiguration.dependencies)
 				}
 			}
 
 			compilations.named(KotlinCompilation.TEST_COMPILATION_NAME) {
 				defaultSourceSet {
-					configureSourceSetBasics(path = "js", dependencies = targetConfiguration.testDependencies)
+					configureSourceSetBasics(pathSuffix = "-js", dependencies = targetConfiguration.testDependencies)
 
 					dependencies {
 						api(kotlin("test-js"))
@@ -364,40 +364,14 @@ internal class LibraryModuleConfigurator(
 	}
 
 
-	private fun KotlinMultiplatformExtension.configureJvmTargets() {
-		val jvmConfiguration = configuration.targets.jvm
-		val jvmJdk8Configuration = configuration.targets.jvmJdk8
-
-		if (jvmConfiguration != null && jvmJdk8Configuration != null
-			&& (jvmConfiguration.dependencies.kaptConfigurations.isNotEmpty() || jvmJdk8Configuration.dependencies.kaptConfigurations.isNotEmpty())
-		)
-			error("You cannot use 'kapt()' dependencies if you have multiple JVM targets.")
-
-		jvmConfiguration?.let { targetConfiguration ->
-			configureJvmTarget(
-				jdkVersion = JdkVersion.v6,
-				targetConfiguration = targetConfiguration,
-				targetName = "jvm",
-				path = "jvm"
-			)
-		}
-		jvmJdk8Configuration?.let { targetConfiguration ->
-			configureJvmTarget(
-				jdkVersion = JdkVersion.v8,
-				targetConfiguration = targetConfiguration,
-				targetName = "jvmJdk8",
-				path = "jvm-jdk8"
-			)
-		}
-	}
-
-
 	private fun KotlinMultiplatformExtension.configureJvmTarget(
 		jdkVersion: JdkVersion,
 		targetConfiguration: LibraryModuleConfiguration.Target.Jvm,
 		targetName: String,
-		path: String
+		pathSuffix: String
 	) {
+		require(jdkVersion >= JdkVersion.v8)
+
 		if (targetConfiguration.dependencies.kaptConfigurations.isNotEmpty() && !targetConfiguration.includesJava)
 			error("withJava() must be used in target '$targetName' when using kapt() dependencies.")
 
@@ -419,7 +393,7 @@ internal class LibraryModuleConfigurator(
 				}
 
 				defaultSourceSet {
-					configureSourceSetBasics(path = path, dependencies = targetConfiguration.dependencies)
+					configureSourceSetBasics(pathSuffix = pathSuffix, dependencies = targetConfiguration.dependencies)
 				}
 			}
 
@@ -433,28 +407,23 @@ internal class LibraryModuleConfigurator(
 				}
 
 				defaultSourceSet {
-					configureSourceSetBasics(path = path, dependencies = targetConfiguration.testDependencies)
+					configureSourceSetBasics(pathSuffix = pathSuffix, dependencies = targetConfiguration.testDependencies)
 
 					dependencies {
-						if (jdkVersion >= JdkVersion.v8) {
-							implementation(kotlin("test-junit5"))
-							implementation("org.junit.jupiter:junit-jupiter-api:${Versions.junitJupiter}")
+						implementation(kotlin("test-junit5"))
+						implementation("org.junit.jupiter:junit-jupiter-api:${Versions.junitJupiter}")
 
-							runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
-							runtimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
-						}
-						else
-							implementation(kotlin("test-junit"))
+						runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
+						runtimeOnly("org.junit.platform:junit-platform-runner:${Versions.junitPlatform}")
 					}
 				}
 			}
 
 			testRuns.all {
 				executionTask {
-					if (jdkVersion >= JdkVersion.v8)
-						useJUnitPlatform {
-							includeEngines("junit-jupiter")
-						}
+					useJUnitPlatform {
+						includeEngines("junit-jupiter")
+					}
 
 					configureTestTask()
 				}
@@ -472,18 +441,30 @@ internal class LibraryModuleConfigurator(
 	}
 
 
+	private fun KotlinMultiplatformExtension.configureJvmTargets() {
+		val jvmConfiguration = configuration.targets.jvm ?: return
+
+		configureJvmTarget(
+			jdkVersion = JdkVersion.v8,
+			targetConfiguration = jvmConfiguration,
+			targetName = "jvm",
+			pathSuffix = "-jvm"
+		)
+	}
+
+
 	private fun KotlinNativeTarget.configureTarget(
 		targetConfiguration: LibraryModuleConfiguration.Target.Darwin,
-		pathName: String
+		pathSuffix: String
 	) {
 		configureTargetBasics(targetConfiguration)
 
 		compilations[KotlinCompilation.MAIN_COMPILATION_NAME].defaultSourceSet {
-			configureSourceSetBasics(path = pathName, dependencies = null)
+			configureSourceSetBasics(pathSuffix = pathSuffix, dependencies = null)
 		}
 
 		compilations[KotlinCompilation.TEST_COMPILATION_NAME].defaultSourceSet {
-			configureSourceSetBasics(path = pathName, dependencies = null)
+			configureSourceSetBasics(pathSuffix = pathSuffix, dependencies = null)
 		}
 
 		if (this is KotlinNativeTargetWithTests<*>)
@@ -499,11 +480,17 @@ internal class LibraryModuleConfigurator(
 	}
 
 
-	private fun KotlinSourceSet.configureSourceSetBasics(path: String, dependencies: LibraryModuleConfiguration.Dependencies?) {
-		val firstLevelPath = if (name.endsWith("Test")) "tests" else "sources"
-
-		kotlin.setSrcDirs(listOf("$firstLevelPath/$path"))
-		resources.setSrcDirs(listOf("$firstLevelPath/$path-resources"))
+	private fun KotlinSourceSet.configureSourceSetBasics(pathSuffix: String, dependencies: LibraryModuleConfiguration.Dependencies?) {
+		when {
+			name.endsWith("Test") -> {
+				kotlin.setSrcDirs(listOf("tests$pathSuffix"))
+				resources.setSrcDirs(listOf("test-resources$pathSuffix"))
+			}
+			else -> {
+				kotlin.setSrcDirs(listOf("sources$pathSuffix"))
+				resources.setSrcDirs(listOf("resources$pathSuffix"))
+			}
+		}
 
 		if (dependencies != null)
 			dependencies {

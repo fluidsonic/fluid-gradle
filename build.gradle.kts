@@ -8,7 +8,7 @@ version = "1.1.14"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.4.20"
+	kotlin("jvm") version "1.4.21"
 	`kotlin-dsl`
 	`maven-publish`
 	signing

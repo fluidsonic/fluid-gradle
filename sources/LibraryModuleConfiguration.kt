@@ -209,16 +209,14 @@ internal class LibraryModuleConfiguration(
 		val common: Target.Common,
 		val darwin: Target.Darwin?,
 		val js: Target.Js?,
-		val jvm: Target.Jvm?,
-		val jvmJdk8: Target.Jvm?
+		val jvm: Target.Jvm?
 	) {
 
 		fun mergeWith(other: Targets, addAutomatically: Boolean) = Targets(
 			common = common.mergeWith(other.common),
 			darwin = other.darwin?.let { darwin?.mergeWith(it) } ?: other.darwin ?: darwin.takeIf { addAutomatically },
 			js = other.js?.let { js?.mergeWith(it) } ?: other.js ?: js.takeIf { addAutomatically },
-			jvm = other.jvm?.let { jvm?.mergeWith(it) } ?: other.jvm ?: jvm.takeIf { addAutomatically },
-			jvmJdk8 = other.jvmJdk8?.let { jvmJdk8?.mergeWith(it) } ?: other.jvmJdk8 ?: jvmJdk8.takeIf { addAutomatically }
+			jvm = other.jvm?.let { jvm?.mergeWith(it) } ?: other.jvm ?: jvm.takeIf { addAutomatically }
 		)
 
 
@@ -228,8 +226,7 @@ internal class LibraryModuleConfiguration(
 				common = Target.Common.default,
 				darwin = null,
 				js = null,
-				jvm = null,
-				jvmJdk8 = null
+				jvm = null
 			)
 		}
 	}

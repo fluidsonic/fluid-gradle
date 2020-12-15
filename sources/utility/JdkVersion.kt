@@ -15,7 +15,7 @@ internal enum class JdkVersion(
 	v12(code = 12, kotlinJvmTargetValue = "12"),
 	v13(code = 13, kotlinJvmTargetValue = "13"),
 	v14(code = 14, kotlinJvmTargetValue = "14"),
-	v15(code = 15, kotlinJvmTargetValue = "14");
+	v15(code = 15, kotlinJvmTargetValue = "15");
 
 
 	override fun toString() =

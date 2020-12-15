@@ -443,15 +443,13 @@ internal class LibraryModuleConfigurationBuilder(
 		private var darwinConfiguration: LibraryModuleConfiguration.Target.Darwin? = null
 		private var jsConfiguration: LibraryModuleConfiguration.Target.Js? = null
 		private var jvmConfiguration: LibraryModuleConfiguration.Target.Jvm? = null
-		private var jvmJdk8Configuration: LibraryModuleConfiguration.Target.Jvm? = null
 
 
 		fun build() = LibraryModuleConfiguration.Targets(
 			common = commonConfiguration ?: LibraryModuleConfiguration.Target.Common.default,
 			darwin = darwinConfiguration,
 			js = jsConfiguration,
-			jvm = jvmConfiguration,
-			jvmJdk8 = jvmJdk8Configuration
+			jvm = jvmConfiguration
 		)
 
 
@@ -479,13 +477,6 @@ internal class LibraryModuleConfigurationBuilder(
 		override fun jvm(configure: JvmTargetDsl.() -> Unit) {
 			TargetBuilder.JvmBuilder().apply(configure).build().also { configuration ->
 				jvmConfiguration = jvmConfiguration?.mergeWith(configuration) ?: configuration
-			}
-		}
-
-
-		override fun jvmJdk8(configure: JvmTargetDsl.() -> Unit) {
-			TargetBuilder.JvmBuilder().apply(configure).build().also { configuration ->
-				jvmJdk8Configuration = jvmJdk8Configuration?.mergeWith(configuration) ?: configuration
 			}
 		}
 	}
