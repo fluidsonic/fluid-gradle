@@ -13,6 +13,7 @@ plugins {
 	`maven-publish`
 	signing
 	id("com.github.ben-manes.versions") version "0.36.0"
+	id("com.gradle.plugin-publish") version "0.12.0"
 }
 
 dependencies {
@@ -29,6 +30,19 @@ gradlePlugin {
 			description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 			id = "io.fluidsonic.gradle"
 			implementationClass = "io.fluidsonic.gradle.LibraryPlugin"
+		}
+	}
+}
+
+pluginBundle {
+	website = "https://github.com/fluidsonic/fluid-gradle"
+	vcsUrl = "https://github.com/fluidsonic/fluid-gradle.git"
+	description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
+	tags = listOf("fluid-libraries")
+
+	plugins {
+		named("io.fluidsonic.gradle") {
+			displayName = "fluidsonic library gradle configurator"
 		}
 	}
 }
