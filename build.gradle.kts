@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.1.16"
+version = "1.1.17"
 
 plugins {
 	`java-gradle-plugin`
@@ -83,7 +83,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.7.1"
+		gradleVersion = "6.8"
 	}
 }
 
