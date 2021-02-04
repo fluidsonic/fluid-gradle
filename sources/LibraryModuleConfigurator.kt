@@ -411,7 +411,6 @@ internal class LibraryModuleConfigurator(
 				compilation.kotlinOptions {
 					jvmTarget = jdkVersion.kotlinJvmTargetValue
 					useIR = !targetConfiguration.noIR
-					println("$useIR - ${compilation.name} - $targetName")
 				}
 			}
 
