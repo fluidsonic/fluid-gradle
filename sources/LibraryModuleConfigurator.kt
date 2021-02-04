@@ -40,6 +40,8 @@ internal class LibraryModuleConfigurator(
 			kotlin {
 				sourceSets.all {
 					languageSettings.apply {
+						languageVersion = configuration.language.version ?: LibraryModuleConfiguration.Language.default.version
+
 						configuration.language.experimentalApisToUse.forEach { useExperimentalAnnotation(it) }
 						configuration.language.languageFeaturesToEnable.forEach { enableLanguageFeature(it) }
 						configuration.language.customConfigurations.forEach { it() }
@@ -99,6 +101,7 @@ internal class LibraryModuleConfigurator(
 					!it.noTvosX64 ||
 					!it.noWatchosArm32 ||
 					!it.noWatchosArm64 ||
+					!it.noWatchosX64 ||
 					!it.noWatchosX86
 			}
 			?: return
@@ -141,6 +144,11 @@ internal class LibraryModuleConfigurator(
 		if (!targetConfiguration.noWatchosArm64)
 			watchosArm64 {
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-arm64")
+			}
+
+		if (!targetConfiguration.noWatchosX64)
+			watchosX64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-x64")
 			}
 
 		if (!targetConfiguration.noWatchosX86)
@@ -268,7 +276,12 @@ internal class LibraryModuleConfigurator(
 				}
 			}
 
-			if (!targetConfiguration.noWatchosArm32 || !targetConfiguration.noWatchosArm64 || !targetConfiguration.noWatchosX86) {
+			if (
+				!targetConfiguration.noWatchosArm32
+				|| !targetConfiguration.noWatchosArm64
+				|| !targetConfiguration.noWatchosX64
+				|| !targetConfiguration.noWatchosX86
+			) {
 				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
 				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
 //				val watchosMain by creating {
@@ -309,6 +322,16 @@ internal class LibraryModuleConfigurator(
 					}
 				}
 
+				if (!targetConfiguration.noWatchosX64) {
+					getByName("watchosX64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("watchosX64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
 				if (!targetConfiguration.noWatchosX86) {
 					getByName("watchosX86Main") {
 						dependsOn(darwinMain)
@@ -326,8 +349,12 @@ internal class LibraryModuleConfigurator(
 	private fun KotlinMultiplatformExtension.configureJsTargets() {
 		val targetConfiguration = configuration.targets.js ?: return
 
-		js(targetConfiguration.compiler ?: KotlinJsCompilerType.BOTH) {
+		js(targetConfiguration.compiler ?: KotlinJsCompilerType.IR) {
 			configureTargetBasics(targetConfiguration)
+
+			compilations.forEach { compilation ->
+				compilation.kotlinOptions.freeCompilerArgs += "-Xir-property-lazy-initialization"
+			}
 
 			compilations.named(KotlinCompilation.MAIN_COMPILATION_NAME) {
 				defaultSourceSet {
@@ -384,6 +411,7 @@ internal class LibraryModuleConfigurator(
 			compilations.forEach { compilation ->
 				compilation.kotlinOptions {
 					jvmTarget = jdkVersion.kotlinJvmTargetValue
+					useIR = !targetConfiguration.noIR
 				}
 			}
 
@@ -504,6 +532,8 @@ internal class LibraryModuleConfigurator(
 			val kotlinVersion = project.getKotlinPluginVersion()!!
 
 			compilations.all {
+				kotlinOptions.freeCompilerArgs += "-Xinline-classes"
+
 				project.configurations.getByName(compileDependencyConfigurationName) {
 					resolutionStrategy.eachDependency {
 						if (requested.group == "org.jetbrains.kotlin") {
@@ -527,7 +557,6 @@ internal class LibraryModuleConfigurator(
 
 		repositories {
 			mavenCentral()
-			jcenter()
 			bintray("fluidsonic/kotlin")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")

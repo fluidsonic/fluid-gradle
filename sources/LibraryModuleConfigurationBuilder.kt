@@ -68,18 +68,25 @@ internal class LibraryModuleConfigurationBuilder(
 		private val experimentalApisToUse: MutableSet<String> = mutableSetOf()
 		private val languageFeaturesToEnable: MutableSet<String> = mutableSetOf()
 		private var noExplicitApi = false
+		private var version: String? = null
 
 
 		fun build() = LibraryModuleConfiguration.Language(
 			customConfigurations = customConfigurations.toList(),
 			experimentalApisToUse = experimentalApisToUse.toSet(),
 			languageFeaturesToEnable = languageFeaturesToEnable.toSet(),
-			noExplicitApi = noExplicitApi
+			noExplicitApi = noExplicitApi,
+			version = version
 		)
 
 
 		override fun custom(configure: LanguageSettingsBuilder.() -> Unit) {
 			customConfigurations += configure
+		}
+
+
+		override fun version(version: String) {
+			this.version = version
 		}
 
 
@@ -343,6 +350,7 @@ internal class LibraryModuleConfigurationBuilder(
 		class JvmBuilder : TargetBuilder<JvmDependenciesDsl, KotlinJvmTarget>(), JvmTargetDsl {
 
 			private var includesJava = false
+			private var noIR = false
 
 
 			fun build() = LibraryModuleConfiguration.Target.Jvm(
@@ -350,8 +358,14 @@ internal class LibraryModuleConfigurationBuilder(
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				includesJava = includesJava,
+				noIR = noIR,
 				testDependencies = testDependencies
 			)
+
+
+			override fun noIR() {
+				noIR = true
+			}
 
 
 			override fun withJava() {
@@ -370,6 +384,7 @@ internal class LibraryModuleConfigurationBuilder(
 			private var noTvosX64 = false
 			private var noWatchosArm32 = false
 			private var noWatchosArm64 = false
+			private var noWatchosX64 = false
 			private var noWatchosX86 = false
 
 
@@ -386,6 +401,7 @@ internal class LibraryModuleConfigurationBuilder(
 				noTvosX64 = noTvosX64,
 				noWatchosArm32 = noWatchosArm32,
 				noWatchosArm64 = noWatchosArm64,
+				noWatchosX64 = noWatchosX64,
 				noWatchosX86 = noWatchosX86
 			)
 
@@ -427,6 +443,11 @@ internal class LibraryModuleConfigurationBuilder(
 
 			override fun withoutWatchosArm64() {
 				noWatchosArm64 = true
+			}
+
+
+			override fun withoutWatchosX64() {
+				noWatchosX64 = true
 			}
 
 

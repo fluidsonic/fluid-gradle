@@ -143,6 +143,9 @@ public interface LibraryModuleDsl {
 	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget> {
 
 		@Dsl
+		public fun noIR()
+
+		@Dsl
 		public fun withJava()
 	}
 
@@ -158,6 +161,9 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun withLanguageFeature(name: String)
+
+		@Dsl
+		public fun version(version: String)
 
 		@Dsl
 		public fun withoutExplicitApi()
@@ -190,6 +196,9 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun withoutWatchosArm64()
+
+		@Dsl
+		public fun withoutWatchosX64()
 
 		@Dsl
 		public fun withoutWatchosX86()

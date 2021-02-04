@@ -47,8 +47,6 @@ public fun Project.fluidLibrary(
 						withExperimentalApi("kotlin.RequiresOptIn")
 						withExperimentalApi("kotlin.contracts.ExperimentalContracts")
 						withExperimentalApi("kotlin.experimental.ExperimentalTypeInference")
-
-						withLanguageFeature("InlineClasses")
 					}
 				}
 			}

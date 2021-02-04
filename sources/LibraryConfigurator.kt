@@ -20,7 +20,6 @@ internal class LibraryConfigurator(
 
 		repositories {
 			mavenCentral()
-			jcenter()
 			bintray("fluidsonic/kotlin")
 			bintray("kotlin/kotlin-eap")
 			bintray("kotlin/kotlinx")

@@ -68,14 +68,16 @@ internal class LibraryModuleConfiguration(
 		val customConfigurations: List<LanguageSettingsBuilder.() -> Unit>,
 		val experimentalApisToUse: Set<String>,
 		val languageFeaturesToEnable: Set<String>,
-		val noExplicitApi: Boolean
+		val noExplicitApi: Boolean,
+		val version: String?
 	) {
 
 		fun mergeWith(other: Language) = Language(
 			customConfigurations = customConfigurations + other.customConfigurations,
 			experimentalApisToUse = experimentalApisToUse + other.experimentalApisToUse,
 			languageFeaturesToEnable = languageFeaturesToEnable + other.languageFeaturesToEnable,
-			noExplicitApi = noExplicitApi || other.noExplicitApi
+			noExplicitApi = noExplicitApi || other.noExplicitApi,
+			version = version ?: other.version
 		)
 
 
@@ -85,7 +87,8 @@ internal class LibraryModuleConfiguration(
 				customConfigurations = emptyList(),
 				experimentalApisToUse = emptySet(),
 				languageFeaturesToEnable = emptySet(),
-				noExplicitApi = false
+				noExplicitApi = false,
+				version = "1.5"
 			)
 		}
 	}
@@ -137,6 +140,7 @@ internal class LibraryModuleConfiguration(
 			val noWatchosArm32: Boolean,
 			val noWatchosArm64: Boolean,
 			val noWatchosX86: Boolean,
+			val noWatchosX64: Boolean,
 			val testDependencies: Dependencies = Dependencies.default
 		) : Target(
 			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
@@ -154,6 +158,7 @@ internal class LibraryModuleConfiguration(
 				noTvosX64 = noTvosX64 || other.noTvosX64,
 				noWatchosArm32 = noWatchosArm32 || other.noWatchosArm32,
 				noWatchosArm64 = noWatchosArm64 || other.noWatchosArm64,
+				noWatchosX64 = noWatchosX64 || other.noWatchosX64,
 				noWatchosX86 = noWatchosX86 || other.noWatchosX86,
 				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
@@ -189,6 +194,7 @@ internal class LibraryModuleConfiguration(
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
 			val includesJava: Boolean,
+			val noIR: Boolean,
 			val testDependencies: Dependencies = Dependencies.default
 		) : Target(
 			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
@@ -199,6 +205,7 @@ internal class LibraryModuleConfiguration(
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
 				includesJava = includesJava || other.includesJava,
+				noIR = noIR || other.noIR,
 				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}

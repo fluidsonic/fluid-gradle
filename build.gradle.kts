@@ -8,7 +8,7 @@ version = "1.1.17"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.4.21"
+	kotlin("jvm") version "1.4.30"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
@@ -49,6 +49,12 @@ pluginBundle {
 
 kotlin {
 	explicitApi()
+
+	target {
+		compilations.all {
+			kotlinOptions.useIR = true
+		}
+	}
 }
 
 java {
@@ -61,8 +67,8 @@ kotlinDslPluginOptions {
 }
 
 repositories {
-	jcenter()
 	mavenCentral()
+	gradlePluginPortal()
 }
 
 sourceSets {
@@ -78,12 +84,12 @@ tasks {
 
 		kotlinOptions.apiVersion = "1.4"
 		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.languageVersion = "1.4"
+		kotlinOptions.languageVersion = "1.5"
 	}
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.8"
+		gradleVersion = "6.8.1"
 	}
 }
 
