@@ -12,7 +12,6 @@ internal class LibraryModuleConfiguration(
 	val customConfigurations: List<KotlinMultiplatformExtension.() -> Unit>,
 	val description: String?,
 	val isPublishingEnabled: Boolean,
-	val isPublishingSingleTargetAsModule: Boolean,
 	val language: Language,
 	val targets: Targets
 ) {
@@ -25,7 +24,6 @@ internal class LibraryModuleConfiguration(
 		description = other.description ?: description,
 		language = language.mergeWith(other.language),
 		isPublishingEnabled = isPublishingEnabled && other.isPublishingEnabled,
-		isPublishingSingleTargetAsModule = isPublishingSingleTargetAsModule || other.isPublishingSingleTargetAsModule,
 		targets = targets.mergeWith(other.targets, addAutomatically = addTargetsAutomatically)
 	)
 
@@ -37,7 +35,6 @@ internal class LibraryModuleConfiguration(
 			description = null,
 			language = Language.default,
 			isPublishingEnabled = true,
-			isPublishingSingleTargetAsModule = false,
 			targets = Targets.default
 		)
 	}

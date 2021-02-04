@@ -18,7 +18,6 @@ internal class LibraryModuleConfigurationBuilder(
 
 	private val customConfigurations: MutableList<KotlinMultiplatformExtension.() -> Unit> = mutableListOf()
 	private var isPublishingEnabled = true
-	private var isPublishingSingleTargetAsModule = false
 	private var languageConfiguration: LibraryModuleConfiguration.Language? = null
 	private var targetsConfiguration: LibraryModuleConfiguration.Targets? = null
 
@@ -27,7 +26,6 @@ internal class LibraryModuleConfigurationBuilder(
 		customConfigurations = customConfigurations.toList(),
 		description = description,
 		isPublishingEnabled = isPublishingEnabled,
-		isPublishingSingleTargetAsModule = isPublishingSingleTargetAsModule,
 		language = languageConfiguration ?: LibraryModuleConfiguration.Language.default,
 		targets = targetsConfiguration ?: LibraryModuleConfiguration.Targets.default
 	)
@@ -42,11 +40,6 @@ internal class LibraryModuleConfigurationBuilder(
 		LanguageBuilder().apply(configure).build().also { configuration ->
 			languageConfiguration = languageConfiguration?.mergeWith(configuration) ?: configuration
 		}
-	}
-
-
-	override fun publishSingleTargetAsModule() {
-		isPublishingSingleTargetAsModule = true
 	}
 
 

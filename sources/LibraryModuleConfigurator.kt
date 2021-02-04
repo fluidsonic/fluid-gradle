@@ -4,7 +4,6 @@ import org.gradle.api.*
 import org.gradle.api.attributes.java.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
-import org.gradle.api.publish.maven.tasks.*
 import org.gradle.api.tasks.bundling.*
 import org.gradle.api.tasks.testing.*
 import org.gradle.api.tasks.testing.logging.*
@@ -412,6 +411,7 @@ internal class LibraryModuleConfigurator(
 				compilation.kotlinOptions {
 					jvmTarget = jdkVersion.kotlinJvmTargetValue
 					useIR = !targetConfiguration.noIR
+					println("$useIR - ${compilation.name} - $targetName")
 				}
 			}
 
@@ -625,22 +625,6 @@ internal class LibraryModuleConfigurator(
 
 		signing {
 			sign(publishing.publications)
-		}
-
-		if (configuration.isPublishingSingleTargetAsModule) {
-			val metadataTarget = kotlin.targets["metadata"]
-			val targets = kotlin.targets.filter { it != metadataTarget }
-			val singleTarget = targets.singleOrNull()
-				?: error("'publishSingleTargetAsModule()' can only be used in modules with exactly one target: $targets")
-
-			singleTarget.mavenPublication {
-				val publication = this
-				artifactId = project.name
-
-				tasks.withType<AbstractPublishToMaven> {
-					isEnabled = this.publication == publication || this.publication.name == "metadata"
-				}
-			}
 		}
 
 		afterEvaluate {

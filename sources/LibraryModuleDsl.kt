@@ -1,5 +1,6 @@
 package io.fluidsonic.gradle
 
+import java.io.*
 import org.gradle.api.*
 import org.gradle.api.artifacts.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -7,7 +8,6 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.jvm.*
-import java.io.*
 
 
 @Dsl
@@ -18,9 +18,6 @@ public interface LibraryModuleDsl {
 
 	@Dsl
 	public fun language(configure: LanguageDsl.() -> Unit)
-
-	@Dsl
-	public fun publishSingleTargetAsModule()
 
 	@Dsl
 	public fun targets(configure: TargetsDsl.() -> Unit)
