@@ -4,9 +4,9 @@ import org.gradle.api.*
 import org.gradle.api.attributes.java.*
 import org.gradle.api.publish.maven.*
 import org.gradle.api.publish.maven.plugins.*
-import org.gradle.api.tasks.bundling.*
 import org.gradle.api.tasks.testing.*
 import org.gradle.api.tasks.testing.logging.*
+import org.gradle.jvm.tasks.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -574,23 +574,35 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configurePublishing() {
-		val bintrayUser = findProperty("bintrayUser") as String? ?: return
-		val bintrayKey = findProperty("bintrayApiKey") as String? ?: return
+		val githubActor: String? = System.getenv("GITHUB_ACTOR")
+		val githubToken: String? = System.getenv("GITHUB_TOKEN")
+		val ossrhUsername: String? = System.getenv("OSSRH_USERNAME")
+		val ossrhPassword: String? = System.getenv("OSSRH_PASSWORD")
 
 		apply<MavenPublishPlugin>()
 		apply<SigningPlugin>()
 
-		val emptyJar by tasks.creating(Jar::class)
-
 		publishing {
 			repositories {
-				maven {
-					setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/${libraryConfiguration.name}/;publish=1;override=1")
-					credentials {
-						username = bintrayUser
-						password = bintrayKey
+				if (ossrhUsername != null && ossrhPassword != null)
+					maven {
+						name = "OSSRH"
+						setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+						credentials {
+							username = ossrhUsername
+							password = ossrhPassword
+						}
 					}
-				}
+
+				if (githubActor != null && githubToken != null)
+					maven {
+						name = "GitHubPackages"
+						setUrl("https://maven.pkg.github.com/fluidsonic/${libraryConfiguration.fullName}")
+						credentials {
+							username = githubActor
+							password = githubToken
+						}
+					}
 			}
 
 			publications {
@@ -626,14 +638,13 @@ internal class LibraryModuleConfigurator(
 			sign(publishing.publications)
 		}
 
+		val emptyJar by tasks.creating(Jar::class)
+
 		afterEvaluate {
 			publishing.publications
 				.filterIsInstance<MavenPublication>()
 				.filter { it.name != "kotlinMultiplatform" }
 				.forEach { publication ->
-					if (publication.artifacts.none { it.classifier.isNullOrEmpty() && it.extension == "jar" })
-						publication.artifact(emptyJar)
-
 					if (publication.artifacts.none { it.classifier == "javadoc" })
 						publication.artifact(emptyJar) { classifier = "javadoc" }
 				}
