@@ -89,7 +89,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.8.1"
+		gradleVersion = "6.8.2"
 	}
 }
 
