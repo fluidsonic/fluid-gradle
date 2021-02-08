@@ -351,6 +351,8 @@ internal class LibraryModuleConfigurator(
 		js(targetConfiguration.compiler ?: KotlinJsCompilerType.IR) {
 			configureTargetBasics(targetConfiguration)
 
+			useCommonJs()
+
 			compilations.forEach { compilation ->
 				compilation.kotlinOptions.freeCompilerArgs += "-Xir-property-lazy-initialization"
 			}
