@@ -638,7 +638,10 @@ internal class LibraryModuleConfigurator(
 			sign(publishing.publications)
 		}
 
-		val emptyJar by tasks.creating(Jar::class)
+		val emptyJar by tasks.creating(Jar::class) {
+			// If you don't set this then the main JAR of the `kotlinMultiplatform` publication will be replaced by this empty JAR. WTF?
+			archiveAppendix.set("empty")
+		}
 
 		afterEvaluate {
 			publishing.publications
