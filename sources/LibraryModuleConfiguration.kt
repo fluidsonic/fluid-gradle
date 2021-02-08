@@ -85,7 +85,7 @@ internal class LibraryModuleConfiguration(
 				experimentalApisToUse = emptySet(),
 				languageFeaturesToEnable = emptySet(),
 				noExplicitApi = false,
-				version = "1.5"
+				version = null
 			)
 		}
 	}

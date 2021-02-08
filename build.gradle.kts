@@ -84,7 +84,7 @@ tasks {
 
 		kotlinOptions.apiVersion = "1.4"
 		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.languageVersion = "1.5"
+		kotlinOptions.languageVersion = "1.4"
 	}
 
 	withType<Wrapper> {
