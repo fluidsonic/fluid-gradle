@@ -353,10 +353,6 @@ internal class LibraryModuleConfigurator(
 
 			useCommonJs()
 
-			compilations.forEach { compilation ->
-				compilation.kotlinOptions.freeCompilerArgs += "-Xir-property-lazy-initialization"
-			}
-
 			compilations.named(KotlinCompilation.MAIN_COMPILATION_NAME) {
 				defaultSourceSet {
 					configureSourceSetBasics(pathSuffix = "-js", dependencies = targetConfiguration.dependencies)
