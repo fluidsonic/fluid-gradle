@@ -408,7 +408,7 @@ internal class LibraryModuleConfigurator(
 			compilations.forEach { compilation ->
 				compilation.kotlinOptions {
 					jvmTarget = jdkVersion.kotlinJvmTargetValue
-					useIR = !targetConfiguration.noIR
+					useOldBackend = targetConfiguration.noIR
 				}
 			}
 

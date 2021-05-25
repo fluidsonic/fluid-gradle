@@ -8,12 +8,12 @@ version = "1.1.22"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.4.31"
+	kotlin("jvm") version "1.5.10"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
 	id("com.github.ben-manes.versions") version "0.38.0"
-	id("com.gradle.plugin-publish") version "0.13.0"
+	id("com.gradle.plugin-publish") version "0.14.0"
 }
 
 dependencies {
@@ -49,12 +49,6 @@ pluginBundle {
 
 kotlin {
 	explicitApi()
-
-	target {
-		compilations.all {
-			kotlinOptions.useIR = true
-		}
-	}
 }
 
 java {
@@ -82,14 +76,14 @@ tasks {
 		sourceCompatibility = "1.8"
 		targetCompatibility = "1.8"
 
-		kotlinOptions.apiVersion = "1.4"
+		kotlinOptions.apiVersion = "1.5"
 		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.languageVersion = "1.4"
+		kotlinOptions.languageVersion = "1.5"
 	}
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "6.8.3"
+		gradleVersion = "7.0.2"
 	}
 }
 
