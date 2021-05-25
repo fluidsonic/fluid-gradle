@@ -603,30 +603,28 @@ internal class LibraryModuleConfigurator(
 					}
 			}
 
-			publications {
-				filterIsInstance<MavenPublication>().forEach { publication ->
-					publication.pom {
-						name.set(libraryConfiguration.fullName)
-						description.set(project.description)
+			publications.withType<MavenPublication> {
+				pom {
+					name.set(libraryConfiguration.fullName)
+					description.set(project.description)
+					url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}")
+					developers {
+						developer {
+							id.set("fluidsonic")
+							name.set("Marc Knaup")
+							email.set("marc@knaup.io")
+						}
+					}
+					licenses {
+						license {
+							name.set("Apache License 2.0")
+							url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}/blob/master/LICENSE")
+						}
+					}
+					scm {
+						connection.set("scm:git:https://github.com/fluidsonic/${libraryConfiguration.fullName}.git")
+						developerConnection.set("scm:git:git@github.com:fluidsonic/${libraryConfiguration.fullName}.git")
 						url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}")
-						developers {
-							developer {
-								id.set("fluidsonic")
-								name.set("Marc Knaup")
-								email.set("marc@knaup.io")
-							}
-						}
-						licenses {
-							license {
-								name.set("Apache License 2.0")
-								url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}/blob/master/LICENSE")
-							}
-						}
-						scm {
-							connection.set("scm:git:https://github.com/fluidsonic/${libraryConfiguration.fullName}.git")
-							developerConnection.set("scm:git:git@github.com:fluidsonic/${libraryConfiguration.fullName}.git")
-							url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}")
-						}
 					}
 				}
 			}

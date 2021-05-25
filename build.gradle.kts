@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.1.22"
+version = "1.1.23"
 
 plugins {
 	`java-gradle-plugin`
@@ -128,8 +128,8 @@ if (ossrhUsername != null && ossrhPassword != null) {
 				artifact(sourcesJar)
 			}
 
-			filterIsInstance<MavenPublication>().forEach { publication ->
-				publication.pom {
+			withType<MavenPublication> {
+				pom {
 					name.set(project.name)
 					description.set(project.description)
 					url.set("https://github.com/fluidsonic/${project.name}")
@@ -154,6 +154,10 @@ if (ossrhUsername != null && ossrhPassword != null) {
 				}
 			}
 		}
+	}
+
+	signing {
+		sign(publishing.publications)
 	}
 }
 
