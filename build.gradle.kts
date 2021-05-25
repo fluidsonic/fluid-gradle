@@ -56,10 +56,6 @@ java {
 	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-kotlinDslPluginOptions {
-	experimentalWarning.set(false)
-}
-
 repositories {
 	mavenCentral()
 	gradlePluginPortal()
@@ -97,12 +93,9 @@ dependencyUpdates {
 }
 
 
-val bintrayUser = findProperty("bintrayUser") as String?
-val bintrayKey = findProperty("bintrayApiKey") as String?
-if (bintrayUser != null && bintrayKey != null) {
-	// https://github.com/gradle/gradle/issues/11412#issuecomment-555413327
-	System.setProperty("org.gradle.internal.publish.checksums.insecure", "true")
-
+val ossrhUsername: String? = System.getenv("OSSRH_USERNAME")
+val ossrhPassword: String? = System.getenv("OSSRH_PASSWORD")
+if (ossrhUsername != null && ossrhPassword != null) {
 	val javadocJar by tasks.creating(Jar::class) {
 		archiveClassifier.set("javadoc")
 		from(tasks["javadoc"])
@@ -121,10 +114,10 @@ if (bintrayUser != null && bintrayKey != null) {
 	publishing {
 		repositories {
 			maven {
-				setUrl("https://api.bintray.com/maven/fluidsonic/kotlin/gradle/;publish=1;override=1")
+				setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
 				credentials {
-					username = bintrayUser
-					password = bintrayKey
+					username = ossrhUsername
+					password = ossrhPassword
 				}
 			}
 		}
@@ -139,7 +132,6 @@ if (bintrayUser != null && bintrayKey != null) {
 				publication.pom {
 					name.set(project.name)
 					description.set(project.description)
-					packaging = "jar"
 					url.set("https://github.com/fluidsonic/${project.name}")
 					developers {
 						developer {
