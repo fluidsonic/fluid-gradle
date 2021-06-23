@@ -12,15 +12,15 @@ plugins {
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.38.0"
-	id("com.gradle.plugin-publish") version "0.14.0"
+	id("com.github.ben-manes.versions") version "0.39.0"
+	id("com.gradle.plugin-publish") version "0.15.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.38.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.39.0")
 }
 
 gradlePlugin {
@@ -79,7 +79,7 @@ tasks {
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "7.0.2"
+		gradleVersion = "7.1"
 	}
 }
 
