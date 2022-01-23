@@ -13,13 +13,14 @@ import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.*
 import org.jetbrains.kotlin.gradle.testing.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
 internal class LibraryModuleConfigurator(
 	configuration: LibraryModuleConfiguration,
-	private val project: Project
+	private val project: Project,
 ) {
 
 	private val libraryConfiguration = project.fluidLibrary.configuration
@@ -41,7 +42,7 @@ internal class LibraryModuleConfigurator(
 					languageSettings.apply {
 						languageVersion = configuration.language.version ?: LibraryModuleConfiguration.Language.default.version
 
-						configuration.language.experimentalApisToUse.forEach { useExperimentalAnnotation(it) }
+						configuration.language.experimentalApisToUse.forEach { optIn(it) }
 						configuration.language.languageFeaturesToEnable.forEach { enableLanguageFeature(it) }
 						configuration.language.customConfigurations.forEach { it() }
 					}
@@ -94,12 +95,16 @@ internal class LibraryModuleConfigurator(
 			?.takeIf {
 				!it.noIosArm32 ||
 					!it.noIosArm64 ||
+					!it.noIosSimulatorArm64 ||
 					!it.noIosX64 ||
+					!it.noMacosArm64 ||
 					!it.noMacosX64 ||
 					!it.noTvosArm64 ||
+					!it.noTvosSimulatorArm64 ||
 					!it.noTvosX64 ||
 					!it.noWatchosArm32 ||
 					!it.noWatchosArm64 ||
+					!it.noWatchosSimulatorArm64 ||
 					!it.noWatchosX64 ||
 					!it.noWatchosX86
 			}
@@ -115,9 +120,19 @@ internal class LibraryModuleConfigurator(
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-arm64")
 			}
 
+		if (!targetConfiguration.noIosSimulatorArm64)
+			iosSimulatorArm64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-simulator-arm64")
+			}
+
 		if (!targetConfiguration.noIosX64)
 			iosX64 {
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-x64")
+			}
+
+		if (!targetConfiguration.noMacosArm64)
+			macosArm64 {
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-macos-arm64")
 			}
 
 		if (!targetConfiguration.noMacosX64)
@@ -128,6 +143,11 @@ internal class LibraryModuleConfigurator(
 		if (!targetConfiguration.noTvosArm64)
 			tvosArm64 {
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-tvos-arm64")
+			}
+
+		if (!targetConfiguration.noTvosSimulatorArm64)
+			tvosSimulatorArm64() {
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-tvos-simulator-arm64")
 			}
 
 		if (!targetConfiguration.noTvosX64)
@@ -143,6 +163,11 @@ internal class LibraryModuleConfigurator(
 		if (!targetConfiguration.noWatchosArm64)
 			watchosArm64 {
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-arm64")
+			}
+
+		if (!targetConfiguration.noWatchosSimulatorArm64)
+			watchosSimulatorArm64() {
+				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-simulator-arm64")
 			}
 
 		if (!targetConfiguration.noWatchosX64)
@@ -171,7 +196,11 @@ internal class LibraryModuleConfigurator(
 				configureSourceSetBasics(pathSuffix = "-darwin", dependencies = targetConfiguration.testDependencies)
 			}
 
-			if (!targetConfiguration.noIosArm32 || !targetConfiguration.noIosArm64 || !targetConfiguration.noIosX64) {
+			if (!targetConfiguration.noIosArm32 ||
+				!targetConfiguration.noIosArm64 ||
+				!targetConfiguration.noIosSimulatorArm64 ||
+				!targetConfiguration.noIosX64
+			) {
 				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
 				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
 //				val iosMain by creating {
@@ -212,6 +241,16 @@ internal class LibraryModuleConfigurator(
 					}
 				}
 
+				if (!targetConfiguration.noIosSimulatorArm64) {
+					getByName("iosSimulatorArm64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("iosSimulatorArm64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
 				if (!targetConfiguration.noIosX64) {
 					getByName("iosX64Main") {
 						dependsOn(darwinMain)
@@ -220,6 +259,16 @@ internal class LibraryModuleConfigurator(
 					getByName("iosX64Test") {
 						dependsOn(darwinTest)
 					}
+				}
+			}
+
+			if (!targetConfiguration.noMacosArm64) {
+				getByName("macosArm64Main") {
+					dependsOn(darwinMain)
+				}
+
+				getByName("macosArm64Test") {
+					dependsOn(darwinTest)
 				}
 			}
 
@@ -233,7 +282,7 @@ internal class LibraryModuleConfigurator(
 				}
 			}
 
-			if (!targetConfiguration.noTvosArm64 || !targetConfiguration.noTvosX64) {
+			if (!targetConfiguration.noTvosArm64 || !targetConfiguration.noTvosSimulatorArm64 || !targetConfiguration.noTvosX64) {
 				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
 				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
 //				val tvosMain by creating {
@@ -264,6 +313,16 @@ internal class LibraryModuleConfigurator(
 					}
 				}
 
+				if (!targetConfiguration.noTvosSimulatorArm64) {
+					getByName("tvosSimulatorArm64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("tvosSimulatorArm64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
 				if (!targetConfiguration.noTvosX64) {
 					getByName("tvosX64Main") {
 						dependsOn(darwinMain)
@@ -278,6 +337,7 @@ internal class LibraryModuleConfigurator(
 			if (
 				!targetConfiguration.noWatchosArm32
 				|| !targetConfiguration.noWatchosArm64
+				|| !targetConfiguration.noWatchosSimulatorArm64
 				|| !targetConfiguration.noWatchosX64
 				|| !targetConfiguration.noWatchosX86
 			) {
@@ -317,6 +377,16 @@ internal class LibraryModuleConfigurator(
 					}
 
 					getByName("watchosArm64Test") {
+						dependsOn(darwinTest)
+					}
+				}
+
+				if (!targetConfiguration.noWatchosSimulatorArm64) {
+					getByName("watchosSimulatorArm64Main") {
+						dependsOn(darwinMain)
+					}
+
+					getByName("watchosSimulatorArm64Test") {
 						dependsOn(darwinTest)
 					}
 				}
@@ -392,7 +462,7 @@ internal class LibraryModuleConfigurator(
 		jdkVersion: JdkVersion,
 		targetConfiguration: LibraryModuleConfiguration.Target.Jvm,
 		targetName: String,
-		pathSuffix: String
+		pathSuffix: String,
 	) {
 		require(jdkVersion >= JdkVersion.v8)
 
@@ -480,7 +550,7 @@ internal class LibraryModuleConfigurator(
 
 	private fun KotlinNativeTarget.configureTarget(
 		targetConfiguration: LibraryModuleConfiguration.Target.Darwin,
-		pathSuffix: String
+		pathSuffix: String,
 	) {
 		configureTargetBasics(targetConfiguration)
 
@@ -526,7 +596,7 @@ internal class LibraryModuleConfigurator(
 
 	private fun KotlinTarget.configureTargetBasics(targetConfiguration: LibraryModuleConfiguration.Target) {
 		if (targetConfiguration.enforcesSameVersionForAllKotlinDependencies) {
-			val kotlinVersion = project.getKotlinPluginVersion()!!
+			val kotlinVersion = project.getKotlinPluginVersion()
 
 			compilations.all {
 				kotlinOptions.freeCompilerArgs += "-Xinline-classes"
@@ -554,9 +624,7 @@ internal class LibraryModuleConfigurator(
 
 		repositories {
 			mavenCentral()
-			bintray("fluidsonic/kotlin")
-			bintray("kotlin/kotlin-eap")
-			bintray("kotlin/kotlinx")
+			maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers/")
 		}
 
 		kotlin {
@@ -567,6 +635,11 @@ internal class LibraryModuleConfigurator(
 			configureDarwinTargets()
 			configureJsTargets()
 			configureJvmTargets()
+		}
+
+		// https://youtrack.jetbrains.com/issue/KT-49109
+		plugins.withType<NodeJsRootPlugin> {
+			the<NodeJsRootExtension>().nodeVersion = "16.13.2"
 		}
 	}
 

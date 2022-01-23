@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.*
 
 internal class LibraryConfigurator(
 	private val configuration: LibraryConfiguration,
-	private val project: Project
+	private val project: Project,
 ) {
 
 	fun configure() = project.run {
@@ -20,9 +20,7 @@ internal class LibraryConfigurator(
 
 		repositories {
 			mavenCentral()
-			bintray("fluidsonic/kotlin")
-			bintray("kotlin/kotlin-eap")
-			bintray("kotlin/kotlinx")
+			maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers/")
 		}
 
 		wrapper {

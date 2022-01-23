@@ -371,12 +371,16 @@ internal class LibraryModuleConfigurationBuilder(
 
 			private var noIosArm32 = false
 			private var noIosArm64 = false
+			private var noIosSimulatorArm64 = false
 			private var noIosX64 = false
+			private var noMacosArm64 = false
 			private var noMacosX64 = false
 			private var noTvosArm64 = false
+			private var noTvosSimulatorArm64 = false
 			private var noTvosX64 = false
 			private var noWatchosArm32 = false
 			private var noWatchosArm64 = false
+			private var noWatchosSimulatorArm64 = false
 			private var noWatchosX64 = false
 			private var noWatchosX86 = false
 
@@ -387,13 +391,17 @@ internal class LibraryModuleConfigurationBuilder(
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				noIosArm32 = noIosArm32,
 				noIosArm64 = noIosArm64,
+				noIosSimulatorArm64 = noIosSimulatorArm64,
 				noIosX64 = noIosX64,
+				noMacosArm64 = noMacosArm64,
 				noMacosX64 = noMacosX64,
 				testDependencies = testDependencies,
 				noTvosArm64 = noTvosArm64,
+				noTvosSimulatorArm64 = noTvosSimulatorArm64,
 				noTvosX64 = noTvosX64,
 				noWatchosArm32 = noWatchosArm32,
 				noWatchosArm64 = noWatchosArm64,
+				noWatchosSimulatorArm64 = noWatchosSimulatorArm64,
 				noWatchosX64 = noWatchosX64,
 				noWatchosX86 = noWatchosX86
 			)
@@ -409,8 +417,18 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
+			override fun withoutIosSimulatorArm64() {
+				noIosSimulatorArm64 = true
+			}
+
+
 			override fun withoutIosX64() {
 				noIosX64 = true
+			}
+
+
+			override fun withoutMacosArm64() {
+				noMacosArm64 = true
 			}
 
 
@@ -421,6 +439,11 @@ internal class LibraryModuleConfigurationBuilder(
 
 			override fun withoutTvosArm64() {
 				noTvosArm64 = true
+			}
+
+
+			override fun withoutTvosSimulatorArm64() {
+				noTvosSimulatorArm64 = true
 			}
 
 
@@ -436,6 +459,11 @@ internal class LibraryModuleConfigurationBuilder(
 
 			override fun withoutWatchosArm64() {
 				noWatchosArm64 = true
+			}
+
+
+			override fun withoutWatchosSimulatorArm64() {
+				noWatchosSimulatorArm64 = true
 			}
 
 

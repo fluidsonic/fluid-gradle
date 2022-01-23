@@ -177,13 +177,22 @@ public interface LibraryModuleDsl {
 		public fun withoutIosArm64()
 
 		@Dsl
+		public fun withoutIosSimulatorArm64()
+
+		@Dsl
 		public fun withoutIosX64()
+
+		@Dsl
+		public fun withoutMacosArm64()
 
 		@Dsl
 		public fun withoutMacosX64()
 
 		@Dsl
 		public fun withoutTvosArm64()
+
+		@Dsl
+		public fun withoutTvosSimulatorArm64()
 
 		@Dsl
 		public fun withoutTvosX64()
@@ -193,6 +202,9 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun withoutWatchosArm64()
+
+		@Dsl
+		public fun withoutWatchosSimulatorArm64()
 
 		@Dsl
 		public fun withoutWatchosX64()
@@ -240,7 +252,7 @@ public interface LibraryModuleDsl {
 @Dsl
 public fun Project.fluidLibraryModule(
 	description: String,
-	configure: LibraryModuleDsl.() -> Unit
+	configure: LibraryModuleDsl.() -> Unit,
 ) {
 	LibraryModuleConfigurator(
 		configuration = LibraryModuleConfigurationBuilder(description = description).apply(configure).build(),
