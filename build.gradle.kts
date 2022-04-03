@@ -21,6 +21,7 @@ dependencies {
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.41.0")
+	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.6.10")
 }
 
 gradlePlugin {

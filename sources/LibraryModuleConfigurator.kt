@@ -9,6 +9,7 @@ import org.gradle.api.tasks.testing.logging.*
 import org.gradle.jvm.tasks.*
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.*
+import org.jetbrains.dokka.gradle.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
@@ -615,6 +616,7 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configureBasics() {
+		apply<DokkaPlugin>()
 		apply<KotlinMultiplatformPluginWrapper>()
 		apply<SerializationGradleSubplugin>()
 
@@ -707,19 +709,16 @@ internal class LibraryModuleConfigurator(
 			sign(publishing.publications)
 		}
 
-		val emptyJar by tasks.creating(Jar::class) {
-			// If you don't set this then the main JAR of the `kotlinMultiplatform` publication will be replaced by this empty JAR. WTF?
-			archiveAppendix.set("empty")
-		}
+		if (configuration.targets.jvm != null) {
+			val javadocJar by tasks.registering(Jar::class) {
+				from(tasks.named("dokkaHtml")) // https://github.com/Kotlin/dokka/issues/1753
+				archiveClassifier.set("javadoc")
+			}
 
-		afterEvaluate {
 			publishing.publications
 				.filterIsInstance<MavenPublication>()
-				.filter { it.name != "kotlinMultiplatform" }
-				.forEach { publication ->
-					if (publication.artifacts.none { it.classifier == "javadoc" })
-						publication.artifact(emptyJar) { classifier = "javadoc" }
-				}
+				.single { it.name == "jvm" }
+				.artifact(javadocJar)
 		}
 	}
 }
