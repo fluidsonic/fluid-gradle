@@ -8,19 +8,19 @@ version = "1.1.25"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.6.10"
+	kotlin("jvm") version "1.6.20"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.41.0"
-	id("com.gradle.plugin-publish") version "0.20.0"
+	id("com.github.ben-manes.versions") version "0.42.0"
+	id("com.gradle.plugin-publish") version "0.21.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.41.0")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.42.0")
 	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.6.10")
 }
 
@@ -50,11 +50,24 @@ pluginBundle {
 
 kotlin {
 	explicitApi()
+
+	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
+	target.compilations.all {
+		languageSettings.apply {
+			apiVersion = "1.6"
+			languageVersion = "1.6"
+		}
+		kotlinOptions {
+			apiVersion = "1.6"
+			jvmTarget = "17"
+			languageVersion = "1.6"
+		}
+	}
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -69,18 +82,21 @@ sourceSets {
 }
 
 tasks {
+	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
 	withType<KotlinCompile> {
-		sourceCompatibility = "1.8"
-		targetCompatibility = "1.8"
+		sourceCompatibility = "17"
+		targetCompatibility = "17"
 
-		kotlinOptions.apiVersion = "1.6"
-		kotlinOptions.jvmTarget = "1.8"
-		kotlinOptions.languageVersion = "1.6"
+		kotlinOptions {
+			apiVersion = "1.6"
+			jvmTarget = "17"
+			languageVersion = "1.6"
+		}
 	}
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "7.3.3"
+		gradleVersion = "7.4.2"
 	}
 }
 

@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.*
 import org.jetbrains.kotlin.gradle.testing.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
@@ -147,7 +146,7 @@ internal class LibraryModuleConfigurator(
 			}
 
 		if (!targetConfiguration.noTvosSimulatorArm64)
-			tvosSimulatorArm64() {
+			tvosSimulatorArm64 {
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-tvos-simulator-arm64")
 			}
 
@@ -167,7 +166,7 @@ internal class LibraryModuleConfigurator(
 			}
 
 		if (!targetConfiguration.noWatchosSimulatorArm64)
-			watchosSimulatorArm64() {
+			watchosSimulatorArm64 {
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-simulator-arm64")
 			}
 
@@ -637,11 +636,6 @@ internal class LibraryModuleConfigurator(
 			configureDarwinTargets()
 			configureJsTargets()
 			configureJvmTargets()
-		}
-
-		// https://youtrack.jetbrains.com/issue/KT-49109
-		plugins.withType<NodeJsRootPlugin> {
-			the<NodeJsRootExtension>().nodeVersion = "16.13.2"
 		}
 	}
 
