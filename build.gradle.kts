@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.1.26"
+version = "1.2.0"
 
 plugins {
 	`java-gradle-plugin`
@@ -100,21 +100,6 @@ dependencyUpdates {
 val ossrhUsername: String? = System.getenv("OSSRH_USERNAME")
 val ossrhPassword: String? = System.getenv("OSSRH_PASSWORD")
 if (ossrhUsername != null && ossrhPassword != null) {
-	val javadocJar by tasks.creating(Jar::class) {
-		archiveClassifier.set("javadoc")
-		from(tasks["javadoc"])
-	}
-
-	val sourcesJar by tasks.creating(Jar::class) {
-		archiveClassifier.set("sources")
-		from(sourceSets["main"].allSource)
-	}
-
-	artifacts {
-		archives(javadocJar)
-		archives(sourcesJar)
-	}
-
 	publishing {
 		repositories {
 			maven {
@@ -127,11 +112,6 @@ if (ossrhUsername != null && ossrhPassword != null) {
 		}
 
 		publications {
-			create<MavenPublication>("pluginMaven") {
-				artifact(javadocJar)
-				artifact(sourcesJar)
-			}
-
 			withType<MavenPublication> {
 				pom {
 					name.set(project.name)
