@@ -8,12 +8,12 @@ version = "1.1.26"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.6.20"
+	kotlin("jvm") version "1.7.10"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
 	id("com.github.ben-manes.versions") version "0.42.0"
-	id("com.gradle.plugin-publish") version "0.21.0"
+	id("com.gradle.plugin-publish") version "1.0.0"
 }
 
 dependencies {
@@ -21,7 +21,7 @@ dependencies {
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.42.0")
-	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.6.10")
+	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.7.10")
 }
 
 gradlePlugin {
@@ -40,12 +40,6 @@ pluginBundle {
 	vcsUrl = "https://github.com/fluidsonic/fluid-gradle.git"
 	description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 	tags = listOf("fluid-libraries")
-
-	plugins {
-		named("io.fluidsonic.gradle") {
-			displayName = "fluidsonic library gradle configurator"
-		}
-	}
 }
 
 kotlin {
@@ -53,14 +47,10 @@ kotlin {
 
 	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
 	target.compilations.all {
-		languageSettings.apply {
-			apiVersion = "1.6"
-			languageVersion = "1.6"
-		}
 		kotlinOptions {
 			apiVersion = "1.6"
 			jvmTarget = "17"
-			languageVersion = "1.6"
+			languageVersion = "1.7"
 		}
 	}
 }
@@ -84,19 +74,16 @@ sourceSets {
 tasks {
 	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
 	withType<KotlinCompile> {
-		sourceCompatibility = "17"
-		targetCompatibility = "17"
-
 		kotlinOptions {
-			apiVersion = "1.6"
+			apiVersion = "1.7"
 			jvmTarget = "17"
-			languageVersion = "1.6"
+			languageVersion = "1.7"
 		}
 	}
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "7.4.2"
+		gradleVersion = "7.5.1"
 	}
 }
 
