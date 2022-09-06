@@ -15,9 +15,6 @@ internal class LibraryConfigurator(
 	fun configure() = project.run {
 		apply<VersionsPlugin>()
 
-		extensions.extraProperties.set("kotlin.mpp.enableGranularSourceSetsMetadata", "true")
-		extensions.extraProperties.set("kotlin.native.enableDependencyPropagation", "false")
-
 		repositories {
 			mavenCentral()
 			maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers/")
