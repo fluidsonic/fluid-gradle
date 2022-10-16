@@ -8,7 +8,7 @@ version = "1.2.1"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.7.10"
+	kotlin("jvm") version "1.7.20"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
@@ -21,7 +21,7 @@ dependencies {
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.42.0")
-	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.7.10")
+	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
 }
 
 gradlePlugin {
