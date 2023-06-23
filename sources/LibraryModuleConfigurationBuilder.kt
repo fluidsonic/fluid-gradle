@@ -133,7 +133,7 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class CommonBuilder : TargetBuilder<DependenciesDsl, KotlinOnlyTarget<AbstractKotlinCompilation<*>>>(), CommonTargetDsl {
+		class CommonBuilder : TargetBuilder<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<*>>>(), CommonTargetDsl {
 
 			fun build() = LibraryModuleConfiguration.Target.Common(
 				customConfigurations = customConfigurations.toList(),
@@ -343,7 +343,6 @@ internal class LibraryModuleConfigurationBuilder(
 		class JvmBuilder : TargetBuilder<JvmDependenciesDsl, KotlinJvmTarget>(), JvmTargetDsl {
 
 			private var includesJava = false
-			private var noIR = false
 
 
 			fun build() = LibraryModuleConfiguration.Target.Jvm(
@@ -351,14 +350,8 @@ internal class LibraryModuleConfigurationBuilder(
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 				includesJava = includesJava,
-				noIR = noIR,
 				testDependencies = testDependencies
 			)
-
-
-			override fun noIR() {
-				noIR = true
-			}
 
 
 			override fun withJava() {

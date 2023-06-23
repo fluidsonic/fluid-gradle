@@ -478,7 +478,6 @@ internal class LibraryModuleConfigurator(
 			compilations.forEach { compilation ->
 				compilation.kotlinOptions {
 					jvmTarget = jdkVersion.kotlinJvmTargetValue
-					useOldBackend = targetConfiguration.noIR
 				}
 			}
 
@@ -581,6 +580,7 @@ internal class LibraryModuleConfigurator(
 				kotlin.setSrcDirs(listOf("tests$pathSuffix"))
 				resources.setSrcDirs(listOf("test-resources$pathSuffix"))
 			}
+
 			else -> {
 				kotlin.setSrcDirs(listOf("sources$pathSuffix"))
 				resources.setSrcDirs(listOf("resources$pathSuffix"))

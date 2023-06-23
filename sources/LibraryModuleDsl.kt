@@ -1,6 +1,5 @@
 package io.fluidsonic.gradle
 
-import java.io.*
 import org.gradle.api.*
 import org.gradle.api.artifacts.*
 import org.jetbrains.kotlin.gradle.dsl.*
@@ -8,6 +7,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.jvm.*
+import java.io.*
 
 
 @Dsl
@@ -27,7 +27,7 @@ public interface LibraryModuleDsl {
 
 
 	@Dsl
-	public interface CommonTargetDsl : TargetDsl<DependenciesDsl, KotlinOnlyTarget<AbstractKotlinCompilation<*>>>
+	public interface CommonTargetDsl : TargetDsl<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<*>>>
 
 
 	@Dsl
@@ -92,22 +92,22 @@ public interface LibraryModuleDsl {
 		public fun devNpm(directory: File): Any
 
 		@Dsl
-		public fun npm(name: String, version: String, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+		public fun npm(name: String, version: String, generateExternals: Boolean = false): Any
 
 		@Dsl
-		public fun npm(name: String, directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+		public fun npm(name: String, directory: File, generateExternals: Boolean = false): Any
 
 		@Dsl
-		public fun npm(directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+		public fun npm(directory: File, generateExternals: Boolean = false): Any
 
 		@Dsl
-		public fun optionalNpm(name: String, version: String, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+		public fun optionalNpm(name: String, version: String, generateExternals: Boolean = false): Any
 
 		@Dsl
-		public fun optionalNpm(name: String, directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+		public fun optionalNpm(name: String, directory: File, generateExternals: Boolean = false): Any
 
 		@Dsl
-		public fun optionalNpm(directory: File, generateExternals: Boolean = DEFAULT_GENERATE_EXTERNALS): Any
+		public fun optionalNpm(directory: File, generateExternals: Boolean = false): Any
 
 		@Dsl
 		public fun peerNpm(name: String, version: String): Any
@@ -138,9 +138,6 @@ public interface LibraryModuleDsl {
 
 	@Dsl
 	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget> {
-
-		@Dsl
-		public fun noIR()
 
 		@Dsl
 		public fun withJava()

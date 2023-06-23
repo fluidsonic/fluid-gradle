@@ -96,7 +96,7 @@ internal class LibraryModuleConfiguration(
 	) {
 
 		class Common(
-			val customConfigurations: List<KotlinOnlyTarget<AbstractKotlinCompilation<*>>.() -> Unit>,
+			val customConfigurations: List<KotlinOnlyTarget<KotlinMetadataCompilation<*>>.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
@@ -199,7 +199,6 @@ internal class LibraryModuleConfiguration(
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
 			val includesJava: Boolean,
-			val noIR: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
 		) : Target(
 			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
@@ -210,7 +209,6 @@ internal class LibraryModuleConfiguration(
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
 				includesJava = includesJava || other.includesJava,
-				noIR = noIR || other.noIR,
 				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}

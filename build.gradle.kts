@@ -8,56 +8,51 @@ version = "1.2.2"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.7.20"
+	kotlin("jvm") version "1.8.22"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.42.0"
-	id("com.gradle.plugin-publish") version "1.0.0"
+	id("com.github.ben-manes.versions") version "0.47.0"
+	id("com.gradle.plugin-publish") version "1.2.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.42.0")
-	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.47.0")
+	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.8.20")
 }
 
 gradlePlugin {
 	plugins {
 		register("io.fluidsonic.gradle") {
-			displayName = "fluidsonic library gradle configurator"
 			description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
+			displayName = "fluidsonic library gradle configurator"
 			id = "io.fluidsonic.gradle"
 			implementationClass = "io.fluidsonic.gradle.LibraryPlugin"
+			tags.set(listOf("fluid-libraries"))
+			vcsUrl.set("https://github.com/fluidsonic/fluid-gradle.git")
+			website.set("https://github.com/fluidsonic/fluid-gradle")
 		}
 	}
-}
-
-pluginBundle {
-	website = "https://github.com/fluidsonic/fluid-gradle"
-	vcsUrl = "https://github.com/fluidsonic/fluid-gradle.git"
-	description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
-	tags = listOf("fluid-libraries")
 }
 
 kotlin {
 	explicitApi()
 
-	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
 	target.compilations.all {
 		kotlinOptions {
-			apiVersion = "1.6"
-			jvmTarget = "8"
-			languageVersion = "1.7"
+			apiVersion = "1.8"
+			jvmTarget = "17"
+			languageVersion = "1.8"
 		}
 	}
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -75,21 +70,20 @@ tasks {
 	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
 	withType<KotlinCompile> {
 		kotlinOptions {
-			apiVersion = "1.7"
-			jvmTarget = "8"
-			languageVersion = "1.7"
+			apiVersion = "1.8"
+			jvmTarget = "17"
+			languageVersion = "1.8"
 		}
 	}
 
 	withType<Wrapper> {
 		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "7.5.1"
+		gradleVersion = "8.1.1"
 	}
 }
 
 dependencyUpdates {
 	gradleReleaseChannel = "current"
-	outputFormatter = null
 
 	rejectVersionIf {
 		isUnstableVersion(candidate.version) && !isUnstableVersion(currentVersion)
