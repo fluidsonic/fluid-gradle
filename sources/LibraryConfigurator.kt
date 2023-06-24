@@ -27,7 +27,6 @@ internal class LibraryConfigurator(
 
 		dependencyUpdates {
 			gradleReleaseChannel = GradleReleaseChannel.CURRENT.id
-			outputFormatter = null
 
 			if (!configuration.dependencyUpdatesIncludeUnstableVersions)
 				rejectVersionIf {
