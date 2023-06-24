@@ -599,8 +599,6 @@ internal class LibraryModuleConfigurator(
 			val kotlinVersion = project.getKotlinPluginVersion()
 
 			compilations.all {
-				kotlinOptions.freeCompilerArgs += "-Xinline-classes"
-
 				project.configurations.getByName(compileDependencyConfigurationName) {
 					resolutionStrategy.eachDependency {
 						if (requested.group == "org.jetbrains.kotlin") {
@@ -615,7 +613,9 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configureBasics() {
-		apply<DokkaPlugin>()
+		if (!configuration.noDokka)
+			apply<DokkaPlugin>()
+
 		apply<KotlinMultiplatformPluginWrapper>()
 		apply<SerializationGradleSubplugin>()
 
@@ -626,6 +626,7 @@ internal class LibraryModuleConfigurator(
 		repositories {
 			mavenCentral()
 			maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers/")
+			maven("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven/")
 		}
 
 		kotlin {
@@ -705,7 +706,9 @@ internal class LibraryModuleConfigurator(
 
 		if (configuration.targets.jvm != null) {
 			val javadocJar by tasks.registering(Jar::class) {
-				from(tasks.named("dokkaHtml")) // https://github.com/Kotlin/dokka/issues/1753
+				if (!configuration.noDokka)
+					from(tasks.named("dokkaHtml")) // https://github.com/Kotlin/dokka/issues/1753
+
 				archiveClassifier.set("javadoc")
 			}
 

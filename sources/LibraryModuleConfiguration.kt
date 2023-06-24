@@ -13,6 +13,7 @@ internal class LibraryModuleConfiguration(
 	val description: String?,
 	val isPublishingEnabled: Boolean,
 	val language: Language,
+	val noDokka: Boolean,
 	val targets: Targets,
 ) {
 
@@ -24,6 +25,7 @@ internal class LibraryModuleConfiguration(
 		description = other.description ?: description,
 		language = language.mergeWith(other.language),
 		isPublishingEnabled = isPublishingEnabled && other.isPublishingEnabled,
+		noDokka = noDokka || other.noDokka,
 		targets = targets.mergeWith(other.targets, addAutomatically = addTargetsAutomatically)
 	)
 
@@ -35,6 +37,7 @@ internal class LibraryModuleConfiguration(
 			description = null,
 			language = Language.default,
 			isPublishingEnabled = true,
+			noDokka = false,
 			targets = Targets.default
 		)
 	}

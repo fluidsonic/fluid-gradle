@@ -20,6 +20,9 @@ public interface LibraryModuleDsl {
 	public fun language(configure: LanguageDsl.() -> Unit)
 
 	@Dsl
+	public fun noDokka()
+
+	@Dsl
 	public fun targets(configure: TargetsDsl.() -> Unit)
 
 	@Dsl
