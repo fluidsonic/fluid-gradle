@@ -1,23 +1,28 @@
 package io.fluidsonic.gradle
 
+import org.jetbrains.kotlin.gradle.dsl.*
+
 
 internal enum class JdkVersion(
 	val code: Int,
-	val kotlinJvmTargetValue: String
+	val kotlinJvmTargetValue: JvmTarget
 ) {
 
-	v6(code = 6, kotlinJvmTargetValue = "1.6"),
-	v7(code = 7, kotlinJvmTargetValue = "1.6"),
-	v8(code = 8, kotlinJvmTargetValue = "1.8"),
-	v9(code = 9, kotlinJvmTargetValue = "9"),
-	v10(code = 10, kotlinJvmTargetValue = "10"),
-	v11(code = 11, kotlinJvmTargetValue = "11"),
-	v12(code = 12, kotlinJvmTargetValue = "12"),
-	v13(code = 13, kotlinJvmTargetValue = "13"),
-	v14(code = 14, kotlinJvmTargetValue = "14"),
-	v15(code = 15, kotlinJvmTargetValue = "15"),
-	v16(code = 16, kotlinJvmTargetValue = "16"),
-	v17(code = 17, kotlinJvmTargetValue = "17");
+	v8(code = 8, kotlinJvmTargetValue = JvmTarget.JVM_1_8),
+	v9(code = 9, kotlinJvmTargetValue = JvmTarget.JVM_9),
+	v10(code = 10, kotlinJvmTargetValue = JvmTarget.JVM_10),
+	v11(code = 11, kotlinJvmTargetValue = JvmTarget.JVM_11),
+	v12(code = 12, kotlinJvmTargetValue = JvmTarget.JVM_12),
+	v13(code = 13, kotlinJvmTargetValue = JvmTarget.JVM_13),
+	v14(code = 14, kotlinJvmTargetValue = JvmTarget.JVM_14),
+	v15(code = 15, kotlinJvmTargetValue = JvmTarget.JVM_15),
+	v16(code = 16, kotlinJvmTargetValue = JvmTarget.JVM_16),
+	v17(code = 17, kotlinJvmTargetValue = JvmTarget.JVM_17),
+	v18(code = 18, kotlinJvmTargetValue = JvmTarget.JVM_18),
+	v19(code = 19, kotlinJvmTargetValue = JvmTarget.JVM_19),
+	v20(code = 20, kotlinJvmTargetValue = JvmTarget.JVM_20),
+	v21(code = 21, kotlinJvmTargetValue = JvmTarget.JVM_21),
+	v22(code = 22, kotlinJvmTargetValue = JvmTarget.JVM_22);
 
 
 	override fun toString() =

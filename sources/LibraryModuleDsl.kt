@@ -30,7 +30,7 @@ public interface LibraryModuleDsl {
 
 
 	@Dsl
-	public interface CommonTargetDsl : TargetDsl<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<*>>>
+	public interface CommonTargetDsl : TargetDsl<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<Any>>>
 
 
 	@Dsl
@@ -171,9 +171,6 @@ public interface LibraryModuleDsl {
 	public interface DarwinTargetDsl : TargetDsl<DependenciesDsl, KotlinNativeTarget> {
 
 		@Dsl
-		public fun withoutIosArm32()
-
-		@Dsl
 		public fun withoutIosArm64()
 
 		@Dsl
@@ -208,9 +205,6 @@ public interface LibraryModuleDsl {
 
 		@Dsl
 		public fun withoutWatchosX64()
-
-		@Dsl
-		public fun withoutWatchosX86()
 	}
 
 

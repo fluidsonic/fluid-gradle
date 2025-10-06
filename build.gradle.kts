@@ -1,27 +1,26 @@
 import com.github.benmanes.gradle.versions.updates.*
-import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.tasks.*
+import org.jetbrains.kotlin.gradle.dsl.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "1.3.2"
+version = "2.0.0"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "1.8.22"
+	kotlin("jvm") version "2.2.20"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.47.0"
-	id("com.gradle.plugin-publish") version "1.2.0"
+	id("com.github.ben-manes.versions") version "0.53.0"
+	id("com.gradle.plugin-publish") version "2.0.0"
 }
 
 dependencies {
 	implementation(platform(kotlin("bom")))
 	implementation(kotlin("gradle-plugin"))
 	implementation(kotlin("serialization"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.47.0")
-	implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.8.20")
+	implementation("com.github.ben-manes:gradle-versions-plugin:0.53.0")
+	implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
 }
 
 gradlePlugin {
@@ -39,20 +38,12 @@ gradlePlugin {
 }
 
 kotlin {
-	explicitApi()
-
-	target.compilations.all {
-		kotlinOptions {
-			apiVersion = "1.8"
-			jvmTarget = "17"
-			languageVersion = "1.8"
-		}
+	compilerOptions {
+		apiVersion.set(KotlinVersion.KOTLIN_2_2)
+		languageVersion.set(KotlinVersion.KOTLIN_2_2)
 	}
-}
-
-java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	explicitApi()
+	jvmToolchain(21)
 }
 
 repositories {
@@ -66,20 +57,9 @@ sourceSets {
 	}
 }
 
-tasks {
-	// https://kotlinlang.slack.com/archives/C19FD9681/p1649021339757969
-	withType<KotlinCompile> {
-		kotlinOptions {
-			apiVersion = "1.8"
-			jvmTarget = "17"
-			languageVersion = "1.8"
-		}
-	}
-
-	withType<Wrapper> {
-		distributionType = Wrapper.DistributionType.ALL
-		gradleVersion = "8.1.1"
-	}
+tasks.withType<Wrapper> {
+	distributionType = Wrapper.DistributionType.ALL
+	gradleVersion = "9.1.0"
 }
 
 dependencyUpdates {
@@ -138,10 +118,6 @@ if (ossrhUsername != null && ossrhPassword != null) {
 		sign(publishing.publications)
 	}
 }
-
-
-val SourceSet.kotlin
-	get() = withConvention(KotlinSourceSet::class) { kotlin }
 
 
 fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =

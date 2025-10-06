@@ -93,8 +93,7 @@ internal class LibraryModuleConfigurator(
 	private fun KotlinMultiplatformExtension.configureDarwinTargets() {
 		val targetConfiguration = configuration.targets.darwin
 			?.takeIf {
-				!it.noIosArm32 ||
-					!it.noIosArm64 ||
+				!it.noIosArm64 ||
 					!it.noIosSimulatorArm64 ||
 					!it.noIosX64 ||
 					!it.noMacosArm64 ||
@@ -105,15 +104,9 @@ internal class LibraryModuleConfigurator(
 					!it.noWatchosArm32 ||
 					!it.noWatchosArm64 ||
 					!it.noWatchosSimulatorArm64 ||
-					!it.noWatchosX64 ||
-					!it.noWatchosX86
+					!it.noWatchosX64
 			}
 			?: return
-
-		if (!targetConfiguration.noIosArm32)
-			iosArm32 {
-				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-ios-arm32")
-			}
 
 		if (!targetConfiguration.noIosArm64)
 			iosArm64 {
@@ -175,11 +168,6 @@ internal class LibraryModuleConfigurator(
 				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-x64")
 			}
 
-		if (!targetConfiguration.noWatchosX86)
-			watchosX86 {
-				configureTarget(targetConfiguration = targetConfiguration, pathSuffix = "-watchos-x86")
-			}
-
 		sourceSets {
 			val commonMain by getting
 			val commonTest by getting
@@ -196,8 +184,7 @@ internal class LibraryModuleConfigurator(
 				configureSourceSetBasics(pathSuffix = "-darwin", dependencies = targetConfiguration.testDependencies)
 			}
 
-			if (!targetConfiguration.noIosArm32 ||
-				!targetConfiguration.noIosArm64 ||
+			if (!targetConfiguration.noIosArm64 ||
 				!targetConfiguration.noIosSimulatorArm64 ||
 				!targetConfiguration.noIosX64
 			) {
@@ -220,16 +207,6 @@ internal class LibraryModuleConfigurator(
 //
 //					configureSourceSet()
 //				}
-
-				if (!targetConfiguration.noIosArm32) {
-					getByName("iosArm32Main") {
-						dependsOn(darwinMain)
-					}
-
-					getByName("iosArm32Test") {
-						dependsOn(darwinTest)
-					}
-				}
 
 				if (!targetConfiguration.noIosArm64) {
 					getByName("iosArm64Main") {
@@ -339,7 +316,6 @@ internal class LibraryModuleConfigurator(
 				|| !targetConfiguration.noWatchosArm64
 				|| !targetConfiguration.noWatchosSimulatorArm64
 				|| !targetConfiguration.noWatchosX64
-				|| !targetConfiguration.noWatchosX86
 			) {
 				// TODO Enable once Commonizer is no longer limited to one level in the hierarchy.
 				//      https://github.com/JetBrains/kotlin/blob/1.4-M2/native/commonizer/README.md
@@ -397,16 +373,6 @@ internal class LibraryModuleConfigurator(
 					}
 
 					getByName("watchosX64Test") {
-						dependsOn(darwinTest)
-					}
-				}
-
-				if (!targetConfiguration.noWatchosX86) {
-					getByName("watchosX86Main") {
-						dependsOn(darwinMain)
-					}
-
-					getByName("watchosX86Test") {
 						dependsOn(darwinTest)
 					}
 				}
@@ -476,8 +442,10 @@ internal class LibraryModuleConfigurator(
 			configureTargetBasics(targetConfiguration)
 
 			compilations.forEach { compilation ->
-				compilation.kotlinOptions {
-					jvmTarget = jdkVersion.kotlinJvmTargetValue
+				compilation.compileTaskProvider.configure {
+					compilerOptions {
+						jvmTarget.set(jdkVersion.kotlinJvmTargetValue)
+					}
 				}
 			}
 
@@ -496,8 +464,10 @@ internal class LibraryModuleConfigurator(
 					attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, jdkVersion.code)
 				}
 
-				kotlinOptions {
-					jvmTarget = jdkVersion.kotlinJvmTargetValue
+				compileTaskProvider.configure {
+					compilerOptions {
+						jvmTarget.set(jdkVersion.kotlinJvmTargetValue)
+					}
 				}
 
 				defaultSourceSet {
@@ -613,6 +583,9 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configureBasics() {
+		// TODO We should migrate to new default hierarchy (or get rid of MPP).
+		extra.set("kotlin.mpp.applyDefaultHierarchyTemplate", "false")
+
 		if (!configuration.noDokka)
 			apply<DokkaPlugin>()
 

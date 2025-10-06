@@ -99,7 +99,7 @@ internal class LibraryModuleConfiguration(
 	) {
 
 		class Common(
-			val customConfigurations: List<KotlinOnlyTarget<KotlinMetadataCompilation<*>>.() -> Unit>,
+			val customConfigurations: List<KotlinOnlyTarget<KotlinMetadataCompilation<Any>>.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
@@ -131,7 +131,6 @@ internal class LibraryModuleConfiguration(
 			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
-			val noIosArm32: Boolean,
 			val noIosArm64: Boolean,
 			val noIosSimulatorArm64: Boolean,
 			val noIosX64: Boolean,
@@ -143,7 +142,6 @@ internal class LibraryModuleConfiguration(
 			val noWatchosArm32: Boolean,
 			val noWatchosArm64: Boolean,
 			val noWatchosSimulatorArm64: Boolean,
-			val noWatchosX86: Boolean,
 			val noWatchosX64: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
 		) : Target(
@@ -154,7 +152,6 @@ internal class LibraryModuleConfiguration(
 				customConfigurations = customConfigurations + other.customConfigurations,
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
-				noIosArm32 = noIosArm32 || other.noIosArm32,
 				noIosArm64 = noIosArm64 || other.noIosArm64,
 				noIosSimulatorArm64 = noIosSimulatorArm64 || other.noIosSimulatorArm64,
 				noIosX64 = noIosX64 || other.noIosX64,
@@ -167,7 +164,6 @@ internal class LibraryModuleConfiguration(
 				noWatchosArm64 = noWatchosArm64 || other.noWatchosArm64,
 				noWatchosSimulatorArm64 = noWatchosSimulatorArm64 || other.noWatchosSimulatorArm64,
 				noWatchosX64 = noWatchosX64 || other.noWatchosX64,
-				noWatchosX86 = noWatchosX86 || other.noWatchosX86,
 				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}

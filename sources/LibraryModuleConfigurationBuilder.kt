@@ -140,7 +140,7 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class CommonBuilder : TargetBuilder<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<*>>>(), CommonTargetDsl {
+		class CommonBuilder : TargetBuilder<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<Any>>>(), CommonTargetDsl {
 
 			fun build() = LibraryModuleConfiguration.Target.Common(
 				customConfigurations = customConfigurations.toList(),
@@ -369,7 +369,6 @@ internal class LibraryModuleConfigurationBuilder(
 
 		class DarwinBuilder : TargetBuilder<DependenciesDsl, KotlinNativeTarget>(), DarwinTargetDsl {
 
-			private var noIosArm32 = false
 			private var noIosArm64 = false
 			private var noIosSimulatorArm64 = false
 			private var noIosX64 = false
@@ -382,14 +381,12 @@ internal class LibraryModuleConfigurationBuilder(
 			private var noWatchosArm64 = false
 			private var noWatchosSimulatorArm64 = false
 			private var noWatchosX64 = false
-			private var noWatchosX86 = false
 
 
 			fun build() = LibraryModuleConfiguration.Target.Darwin(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
-				noIosArm32 = noIosArm32,
 				noIosArm64 = noIosArm64,
 				noIosSimulatorArm64 = noIosSimulatorArm64,
 				noIosX64 = noIosX64,
@@ -403,13 +400,7 @@ internal class LibraryModuleConfigurationBuilder(
 				noWatchosArm64 = noWatchosArm64,
 				noWatchosSimulatorArm64 = noWatchosSimulatorArm64,
 				noWatchosX64 = noWatchosX64,
-				noWatchosX86 = noWatchosX86
 			)
-
-
-			override fun withoutIosArm32() {
-				noIosArm32 = true
-			}
 
 
 			override fun withoutIosArm64() {
@@ -469,11 +460,6 @@ internal class LibraryModuleConfigurationBuilder(
 
 			override fun withoutWatchosX64() {
 				noWatchosX64 = true
-			}
-
-
-			override fun withoutWatchosX86() {
-				noWatchosX86 = true
 			}
 		}
 	}
