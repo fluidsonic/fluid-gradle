@@ -16,9 +16,9 @@ plugins {
 }
 
 dependencies {
-	implementation(platform(kotlin("bom")))
-	implementation(kotlin("gradle-plugin"))
-	implementation(kotlin("serialization"))
+	implementation(platform(kotlin("bom", "2.2.20")))
+	implementation(kotlin("gradle-plugin", "2.2.20"))
+	implementation(kotlin("serialization", "2.2.20"))
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.53.0")
 	implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
 }
