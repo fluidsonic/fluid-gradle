@@ -140,11 +140,7 @@ public interface LibraryModuleDsl {
 
 
 	@Dsl
-	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget> {
-
-		@Dsl
-		public fun withJava()
-	}
+	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget>
 
 
 	@Dsl

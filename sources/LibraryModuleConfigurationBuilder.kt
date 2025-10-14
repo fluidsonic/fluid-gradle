@@ -349,21 +349,12 @@ internal class LibraryModuleConfigurationBuilder(
 
 		class JvmBuilder : TargetBuilder<JvmDependenciesDsl, KotlinJvmTarget>(), JvmTargetDsl {
 
-			private var includesJava = false
-
-
 			fun build() = LibraryModuleConfiguration.Target.Jvm(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
-				includesJava = includesJava,
 				testDependencies = testDependencies
 			)
-
-
-			override fun withJava() {
-				includesJava = true
-			}
 		}
 
 

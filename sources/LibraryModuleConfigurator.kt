@@ -432,13 +432,7 @@ internal class LibraryModuleConfigurator(
 	) {
 		require(jdkVersion >= JdkVersion.v8)
 
-		if (targetConfiguration.dependencies.kaptConfigurations.isNotEmpty() && !targetConfiguration.includesJava)
-			error("withJava() must be used in target '$targetName' when using kapt() dependencies.")
-
 		jvm(targetName) {
-			if (targetConfiguration.includesJava)
-				withJava()
-
 			configureTargetBasics(targetConfiguration)
 
 			compilations.forEach { compilation ->
@@ -615,37 +609,10 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configurePublishing() {
-		val githubActor: String? = System.getenv("GITHUB_ACTOR")
-		val githubToken: String? = System.getenv("GITHUB_TOKEN")
-		val ossrhUsername: String? = System.getenv("OSSRH_USERNAME")
-		val ossrhPassword: String? = System.getenv("OSSRH_PASSWORD")
-
 		apply<MavenPublishPlugin>()
 		apply<SigningPlugin>()
 
 		publishing {
-			repositories {
-				if (ossrhUsername != null && ossrhPassword != null)
-					maven {
-						name = "OSSRH"
-						setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-						credentials {
-							username = ossrhUsername
-							password = ossrhPassword
-						}
-					}
-
-				if (githubActor != null && githubToken != null)
-					maven {
-						name = "GitHubPackages"
-						setUrl("https://maven.pkg.github.com/fluidsonic/${libraryConfiguration.fullName}")
-						credentials {
-							username = githubActor
-							password = githubToken
-						}
-					}
-			}
-
 			publications.withType<MavenPublication> {
 				pom {
 					name.set(libraryConfiguration.fullName)

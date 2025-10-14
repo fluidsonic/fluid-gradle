@@ -197,7 +197,6 @@ internal class LibraryModuleConfiguration(
 			val customConfigurations: List<KotlinJvmTarget.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
-			val includesJava: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
 		) : Target(
 			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
@@ -207,7 +206,6 @@ internal class LibraryModuleConfiguration(
 				customConfigurations = customConfigurations + other.customConfigurations,
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
-				includesJava = includesJava || other.includesJava,
 				testDependencies = testDependencies.mergeWith(other.testDependencies)
 			)
 		}

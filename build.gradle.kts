@@ -9,10 +9,10 @@ plugins {
 	`java-gradle-plugin`
 	kotlin("jvm") version "2.2.20"
 	`kotlin-dsl`
-	`maven-publish`
 	signing
 	id("com.github.ben-manes.versions") version "0.53.0"
 	id("com.gradle.plugin-publish") version "2.0.0"
+	id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 dependencies {
@@ -20,6 +20,7 @@ dependencies {
 	implementation(kotlin("gradle-plugin", "2.2.20"))
 	implementation(kotlin("serialization", "2.2.20"))
 	implementation("com.github.ben-manes:gradle-versions-plugin:0.53.0")
+	implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
 	implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
 }
 
@@ -71,45 +72,45 @@ dependencyUpdates {
 }
 
 
-val ossrhUsername: String? = System.getenv("OSSRH_USERNAME")
-val ossrhPassword: String? = System.getenv("OSSRH_PASSWORD")
-if (ossrhUsername != null && ossrhPassword != null) {
-	publishing {
+val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
+val sonatypePassword: String? = System.getenv("SONATYPE_PASSWORD")
+if (sonatypeUsername != null && sonatypePassword != null) {
+	nexusPublishing {
+		packageGroup = "io.fluidsonic"
+
 		repositories {
-			maven {
-				setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-				credentials {
-					username = ossrhUsername
-					password = ossrhPassword
-				}
+			sonatype {
+				username = sonatypeUsername
+				password = sonatypePassword
+
+				nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+				snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
 			}
 		}
+	}
 
-		publications {
-			withType<MavenPublication> {
-				pom {
-					name.set(project.name)
-					description.set(project.description)
-					url.set("https://github.com/fluidsonic/${project.name}")
-					developers {
-						developer {
-							id.set("fluidsonic")
-							name.set("Marc Knaup")
-							email.set("marc@knaup.io")
-						}
-					}
-					licenses {
-						license {
-							name.set("Apache License 2.0")
-							url.set("https://github.com/fluidsonic/${project.name}/blob/master/LICENSE")
-						}
-					}
-					scm {
-						connection.set("scm:git:https://github.com/fluidsonic/${project.name}.git")
-						developerConnection.set("scm:git:git@github.com:fluidsonic/${project.name}.git")
-						url.set("https://github.com/fluidsonic/${project.name}")
-					}
+	publishing.publications.withType<MavenPublication> {
+		pom {
+			name.set(project.name)
+			description.set(project.description)
+			url.set("https://github.com/fluidsonic/${project.name}")
+			developers {
+				developer {
+					id.set("fluidsonic")
+					name.set("Marc Knaup")
+					email.set("marc@knaup.io")
 				}
+			}
+			licenses {
+				license {
+					name.set("Apache License 2.0")
+					url.set("https://github.com/fluidsonic/${project.name}/blob/master/LICENSE")
+				}
+			}
+			scm {
+				connection.set("scm:git:https://github.com/fluidsonic/${project.name}.git")
+				developerConnection.set("scm:git:git@github.com:fluidsonic/${project.name}.git")
+				url.set("https://github.com/fluidsonic/${project.name}")
 			}
 		}
 	}
