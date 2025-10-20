@@ -609,10 +609,24 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configurePublishing() {
+		val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN") ?: findProperty("GITHUB_PACKAGES_AUTH_TOKEN") as String?
+
 		apply<MavenPublishPlugin>()
 		apply<SigningPlugin>()
 
 		publishing {
+			if (githubToken != null)
+				repositories {
+					maven {
+						name = "github"
+						setUrl("https://maven.pkg.github.com/fluidsonic/${libraryConfiguration.fullName}")
+						credentials {
+							username = "unused"
+							password = githubToken
+						}
+					}
+				}
+
 			publications.withType<MavenPublication> {
 				pom {
 					name.set(libraryConfiguration.fullName)

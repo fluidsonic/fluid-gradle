@@ -43,7 +43,6 @@ internal class LibraryConfigurator(
 
 
 	private fun Project.configurePublishing() {
-		val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN")
 		val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
 		val sonatypePassword: String? = System.getenv("SONATYPE_PASSWORD")
 
@@ -61,20 +60,6 @@ internal class LibraryConfigurator(
 
 						nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
 						snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
-					}
-				}
-			}
-
-		if (githubToken != null)
-			publishing {
-				repositories {
-					maven {
-						name = "github"
-						setUrl("https://maven.pkg.github.com/fluidsonic/${configuration.fullName}")
-						credentials {
-							username = "unused"
-							password = githubToken
-						}
 					}
 				}
 			}

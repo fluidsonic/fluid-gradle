@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "2.0.1"
+version = "2.0.2"
 
 plugins {
 	`java-gradle-plugin`
@@ -90,7 +90,7 @@ if (sonatypeUsername != null && sonatypePassword != null) {
 	}
 }
 
-val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN")
+val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN") ?: findProperty("GITHUB_PACKAGES_AUTH_TOKEN") as String?
 if (githubToken != null) {
 	publishing {
 		repositories {
