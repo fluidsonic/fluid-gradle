@@ -4,6 +4,7 @@ import com.github.benmanes.gradle.versions.*
 import com.github.benmanes.gradle.versions.updates.gradle.*
 import io.github.gradlenexus.publishplugin.*
 import org.gradle.api.*
+import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.wrapper.*
 import org.gradle.kotlin.dsl.*
 
@@ -42,11 +43,11 @@ internal class LibraryConfigurator(
 
 
 	private fun Project.configurePublishing() {
-		val githubActor: String? = System.getenv("GITHUB_ACTOR")
-		val githubToken: String? = System.getenv("GITHUB_TOKEN")
+		val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN")
 		val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
 		val sonatypePassword: String? = System.getenv("SONATYPE_PASSWORD")
 
+		apply<MavenPublishPlugin>()
 		apply<NexusPublishPlugin>()
 
 		if (sonatypeUsername != null && sonatypePassword != null)
@@ -64,14 +65,14 @@ internal class LibraryConfigurator(
 				}
 			}
 
-		if (githubActor != null && githubToken != null)
+		if (githubToken != null)
 			publishing {
 				repositories {
 					maven {
-						name = "GitHubPackages"
+						name = "github"
 						setUrl("https://maven.pkg.github.com/fluidsonic/${configuration.fullName}")
 						credentials {
-							username = githubActor
+							username = "unused"
 							password = githubToken
 						}
 					}

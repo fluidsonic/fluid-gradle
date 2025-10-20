@@ -3,12 +3,13 @@ import org.jetbrains.kotlin.gradle.dsl.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "2.0.0"
+version = "2.0.1"
 
 plugins {
 	`java-gradle-plugin`
 	kotlin("jvm") version "2.2.20"
 	`kotlin-dsl`
+	`maven-publish`
 	signing
 	id("com.github.ben-manes.versions") version "0.53.0"
 	id("com.gradle.plugin-publish") version "2.0.0"
@@ -71,7 +72,6 @@ dependencyUpdates {
 	}
 }
 
-
 val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
 val sonatypePassword: String? = System.getenv("SONATYPE_PASSWORD")
 if (sonatypeUsername != null && sonatypePassword != null) {
@@ -88,7 +88,26 @@ if (sonatypeUsername != null && sonatypePassword != null) {
 			}
 		}
 	}
+}
 
+val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN")
+if (githubToken != null) {
+	publishing {
+		repositories {
+			maven {
+				name = "github"
+				url = uri("https://maven.pkg.github.com/fluidsonic/fluid-gradle")
+
+				credentials {
+					username = "unused"
+					password = githubToken
+				}
+			}
+		}
+	}
+}
+
+if ((sonatypeUsername != null && sonatypePassword != null) || githubToken != null) {
 	publishing.publications.withType<MavenPublication> {
 		pom {
 			name.set(project.name)
