@@ -4,21 +4,22 @@ import org.gradle.api.*
 import org.gradle.kotlin.dsl.*
 
 
+/** DSL for configuring root-level library settings. */
 @Dsl
 public interface LibraryDsl {
 
-	@Dsl
+	/** Applies [configure] to every library module. */
 	public fun allModules(configure: LibraryModuleDsl.() -> Unit)
 
-	@Dsl
+	/** Includes unstable versions when checking for dependency updates. */
 	public fun dependencyUpdatesIncludeUnstableVersions()
 
-	@Dsl
+	/** Sets the Gradle wrapper version for this project. */
 	public fun gradleVersion(version: String)
 }
 
 
-@Dsl
+/** Entry point for configuring a fluidsonic library project. Must be called in the root project's `build.gradle.kts`. */
 public fun Project.fluidLibrary(
 	name: String,
 	version: String,
@@ -43,8 +44,6 @@ public fun Project.fluidLibrary(
 			.apply {
 				allModules {
 					language {
-						withExperimentalApi("kotlin.ExperimentalUnsignedTypes")
-						withExperimentalApi("kotlin.RequiresOptIn")
 						withExperimentalApi("kotlin.contracts.ExperimentalContracts")
 						withExperimentalApi("kotlin.experimental.ExperimentalTypeInference")
 					}

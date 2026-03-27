@@ -151,15 +151,18 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
+		@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
 		class DependenciesBuilder : JsDependenciesDsl, JvmDependenciesDsl {
 
 			private val configurations: MutableList<KotlinDependencyHandler.() -> Unit> = mutableListOf()
 			private val kaptConfigurations: MutableList<DependencyHandler.() -> Unit> = mutableListOf()
+			private val kspConfigurations: MutableList<DependencyHandler.() -> Unit> = mutableListOf()
 
 
 			fun build() = LibraryModuleConfiguration.Dependencies(
 				configurations = configurations.toList(),
-				kaptConfigurations = kaptConfigurations.toList()
+				kaptConfigurations = kaptConfigurations.toList(),
+				kspConfigurations = kspConfigurations.toList(),
 			)
 
 			override fun devNpm(name: String, version: String): Any =
@@ -246,6 +249,16 @@ internal class LibraryModuleConfigurationBuilder(
 			}
 
 
+			override fun ksp(notation: Any) {
+				kspConfigurations += { add("kspJvm", resolve(notation)) }
+			}
+
+
+			override fun ksp(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit) {
+				kspConfigurations += { add("kspJvm", dependencyNotation, configure) }
+			}
+
+
 			override fun runtimeOnly(notation: Any) {
 				configurations += { runtimeOnly(resolve(notation)) }
 			}
@@ -317,16 +330,14 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		class JsBuilder(
-			private val compiler: KotlinJsCompilerType?
-		) : TargetBuilder<JsDependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
+		@Suppress("DEPRECATION")
+		class JsBuilder : TargetBuilder<JsDependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
 
 			private var noBrowser = false
 			private var noNodeJs = false
 
 
 			fun build() = LibraryModuleConfiguration.Target.Js(
-				compiler = compiler,
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
@@ -356,117 +367,18 @@ internal class LibraryModuleConfigurationBuilder(
 				testDependencies = testDependencies
 			)
 		}
-
-
-		class DarwinBuilder : TargetBuilder<DependenciesDsl, KotlinNativeTarget>(), DarwinTargetDsl {
-
-			private var noIosArm64 = false
-			private var noIosSimulatorArm64 = false
-			private var noIosX64 = false
-			private var noMacosArm64 = false
-			private var noMacosX64 = false
-			private var noTvosArm64 = false
-			private var noTvosSimulatorArm64 = false
-			private var noTvosX64 = false
-			private var noWatchosArm32 = false
-			private var noWatchosArm64 = false
-			private var noWatchosSimulatorArm64 = false
-			private var noWatchosX64 = false
-
-
-			fun build() = LibraryModuleConfiguration.Target.Darwin(
-				customConfigurations = customConfigurations.toList(),
-				dependencies = dependencies,
-				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
-				noIosArm64 = noIosArm64,
-				noIosSimulatorArm64 = noIosSimulatorArm64,
-				noIosX64 = noIosX64,
-				noMacosArm64 = noMacosArm64,
-				noMacosX64 = noMacosX64,
-				testDependencies = testDependencies,
-				noTvosArm64 = noTvosArm64,
-				noTvosSimulatorArm64 = noTvosSimulatorArm64,
-				noTvosX64 = noTvosX64,
-				noWatchosArm32 = noWatchosArm32,
-				noWatchosArm64 = noWatchosArm64,
-				noWatchosSimulatorArm64 = noWatchosSimulatorArm64,
-				noWatchosX64 = noWatchosX64,
-			)
-
-
-			override fun withoutIosArm64() {
-				noIosArm64 = true
-			}
-
-
-			override fun withoutIosSimulatorArm64() {
-				noIosSimulatorArm64 = true
-			}
-
-
-			override fun withoutIosX64() {
-				noIosX64 = true
-			}
-
-
-			override fun withoutMacosArm64() {
-				noMacosArm64 = true
-			}
-
-
-			override fun withoutMacosX64() {
-				noMacosX64 = true
-			}
-
-
-			override fun withoutTvosArm64() {
-				noTvosArm64 = true
-			}
-
-
-			override fun withoutTvosSimulatorArm64() {
-				noTvosSimulatorArm64 = true
-			}
-
-
-			override fun withoutTvosX64() {
-				noTvosX64 = true
-			}
-
-
-			override fun withoutWatchosArm32() {
-				noWatchosArm32 = true
-			}
-
-
-			override fun withoutWatchosArm64() {
-				noWatchosArm64 = true
-			}
-
-
-			override fun withoutWatchosSimulatorArm64() {
-				noWatchosSimulatorArm64 = true
-			}
-
-
-			override fun withoutWatchosX64() {
-				noWatchosX64 = true
-			}
-		}
 	}
 
 
 	class TargetsBuilder : TargetsDsl {
 
 		private var commonConfiguration: LibraryModuleConfiguration.Target.Common? = null
-		private var darwinConfiguration: LibraryModuleConfiguration.Target.Darwin? = null
 		private var jsConfiguration: LibraryModuleConfiguration.Target.Js? = null
 		private var jvmConfiguration: LibraryModuleConfiguration.Target.Jvm? = null
 
 
 		fun build() = LibraryModuleConfiguration.Targets(
 			common = commonConfiguration ?: LibraryModuleConfiguration.Target.Common.default,
-			darwin = darwinConfiguration,
 			js = jsConfiguration,
 			jvm = jvmConfiguration
 		)
@@ -479,15 +391,9 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		override fun darwin(configure: DarwinTargetDsl.() -> Unit) {
-			TargetBuilder.DarwinBuilder().apply(configure).build().also { configuration ->
-				darwinConfiguration = darwinConfiguration?.mergeWith(configuration) ?: configuration
-			}
-		}
-
-
-		override fun js(compiler: KotlinJsCompilerType?, configure: JsTargetDsl.() -> Unit) {
-			TargetBuilder.JsBuilder(compiler = compiler).apply(configure).build().also { configuration ->
+		@Suppress("DEPRECATION")
+		override fun js(configure: JsTargetDsl.() -> Unit) {
+			TargetBuilder.JsBuilder().apply(configure).build().also { configuration ->
 				jsConfiguration = jsConfiguration?.mergeWith(configuration) ?: configuration
 			}
 		}

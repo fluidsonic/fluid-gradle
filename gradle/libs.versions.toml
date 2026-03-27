@@ -1,0 +1,23 @@
+[versions]
+dokka = "2.1.0"
+gradle-nexus-publish = "2.0.0"
+gradle-plugin-publish = "2.1.0"
+gradle-versions = "0.53.0"
+junit = "6.0.3"
+kotlin = "2.3.20"
+ksp = "2.3.6"
+
+[libraries]
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+gradle-nexus-publish-plugin = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "gradle-nexus-publish" }
+gradle-versions-plugin = { module = "com.github.ben-manes:gradle-versions-plugin", version.ref = "gradle-versions" }
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+
+[plugins]
+gradle-nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradle-nexus-publish" }
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
+gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

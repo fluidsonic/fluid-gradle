@@ -46,11 +46,13 @@ internal class LibraryModuleConfiguration(
 	class Dependencies(
 		val configurations: List<KotlinDependencyHandler.() -> Unit>,
 		val kaptConfigurations: List<DependencyHandler.() -> Unit>,
+		val kspConfigurations: List<DependencyHandler.() -> Unit>,
 	) {
 
 		fun mergeWith(other: Dependencies) = Dependencies(
 			configurations = configurations + other.configurations,
-			kaptConfigurations = kaptConfigurations + other.kaptConfigurations
+			kaptConfigurations = kaptConfigurations + other.kaptConfigurations,
+			kspConfigurations = kspConfigurations + other.kspConfigurations,
 		)
 
 
@@ -58,7 +60,8 @@ internal class LibraryModuleConfiguration(
 
 			val default = Dependencies(
 				configurations = emptyList(),
-				kaptConfigurations = emptyList()
+				kaptConfigurations = emptyList(),
+				kspConfigurations = emptyList(),
 			)
 		}
 	}
@@ -127,50 +130,7 @@ internal class LibraryModuleConfiguration(
 		}
 
 
-		class Darwin(
-			val customConfigurations: List<KotlinNativeTarget.() -> Unit>,
-			val dependencies: Dependencies = Dependencies.default,
-			enforcesSameVersionForAllKotlinDependencies: Boolean,
-			val noIosArm64: Boolean,
-			val noIosSimulatorArm64: Boolean,
-			val noIosX64: Boolean,
-			val noMacosArm64: Boolean,
-			val noMacosX64: Boolean,
-			val noTvosArm64: Boolean,
-			val noTvosSimulatorArm64: Boolean,
-			val noTvosX64: Boolean,
-			val noWatchosArm32: Boolean,
-			val noWatchosArm64: Boolean,
-			val noWatchosSimulatorArm64: Boolean,
-			val noWatchosX64: Boolean,
-			val testDependencies: Dependencies = Dependencies.default,
-		) : Target(
-			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
-		) {
-
-			fun mergeWith(other: Darwin) = Darwin(
-				customConfigurations = customConfigurations + other.customConfigurations,
-				dependencies = dependencies.mergeWith(other.dependencies),
-				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
-				noIosArm64 = noIosArm64 || other.noIosArm64,
-				noIosSimulatorArm64 = noIosSimulatorArm64 || other.noIosSimulatorArm64,
-				noIosX64 = noIosX64 || other.noIosX64,
-				noMacosArm64 = noMacosArm64 || other.noMacosArm64,
-				noMacosX64 = noMacosX64 || other.noMacosX64,
-				noTvosArm64 = noTvosArm64 || other.noTvosArm64,
-				noTvosSimulatorArm64 = noTvosSimulatorArm64 || other.noTvosSimulatorArm64,
-				noTvosX64 = noTvosX64 || other.noTvosX64,
-				noWatchosArm32 = noWatchosArm32 || other.noWatchosArm32,
-				noWatchosArm64 = noWatchosArm64 || other.noWatchosArm64,
-				noWatchosSimulatorArm64 = noWatchosSimulatorArm64 || other.noWatchosSimulatorArm64,
-				noWatchosX64 = noWatchosX64 || other.noWatchosX64,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
-			)
-		}
-
-
 		class Js(
-			val compiler: KotlinJsCompilerType?,
 			val customConfigurations: List<KotlinJsTargetDsl.() -> Unit>,
 			val dependencies: Dependencies = Dependencies.default,
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
@@ -182,7 +142,6 @@ internal class LibraryModuleConfiguration(
 		) {
 
 			fun mergeWith(other: Js) = Js(
-				compiler = compiler ?: other.compiler,
 				customConfigurations = customConfigurations + other.customConfigurations,
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
@@ -214,14 +173,12 @@ internal class LibraryModuleConfiguration(
 
 	class Targets(
 		val common: Target.Common,
-		val darwin: Target.Darwin?,
 		val js: Target.Js?,
 		val jvm: Target.Jvm?,
 	) {
 
 		fun mergeWith(other: Targets, addAutomatically: Boolean) = Targets(
 			common = common.mergeWith(other.common),
-			darwin = other.darwin?.let { darwin?.mergeWith(it) } ?: other.darwin ?: darwin.takeIf { addAutomatically },
 			js = other.js?.let { js?.mergeWith(it) } ?: other.js ?: js.takeIf { addAutomatically },
 			jvm = other.jvm?.let { jvm?.mergeWith(it) } ?: other.jvm ?: jvm.takeIf { addAutomatically }
 		)
@@ -231,7 +188,6 @@ internal class LibraryModuleConfiguration(
 
 			val default = Targets(
 				common = Target.Common.default,
-				darwin = null,
 				js = null,
 				jvm = null
 			)

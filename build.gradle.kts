@@ -3,26 +3,33 @@ import org.jetbrains.kotlin.gradle.dsl.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "2.0.2"
+version = "3.0.0"
 
 plugins {
 	`java-gradle-plugin`
-	kotlin("jvm") version "2.2.20"
 	`kotlin-dsl`
 	`maven-publish`
 	signing
-	id("com.github.ben-manes.versions") version "0.53.0"
-	id("com.gradle.plugin-publish") version "2.0.0"
-	id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+	alias(libs.plugins.gradle.nexus.publish)
+	alias(libs.plugins.gradle.plugin.publish)
+	alias(libs.plugins.gradle.versions)
+	alias(libs.plugins.kotlin.jvm)
 }
 
 dependencies {
-	implementation(platform(kotlin("bom", "2.2.20")))
-	implementation(kotlin("gradle-plugin", "2.2.20"))
-	implementation(kotlin("serialization", "2.2.20"))
-	implementation("com.github.ben-manes:gradle-versions-plugin:0.53.0")
-	implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
-	implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
+	implementation(platform(libs.kotlin.bom))
+	implementation(libs.dokka.gradle.plugin)
+	implementation(libs.gradle.nexus.publish.plugin)
+	implementation(libs.gradle.versions.plugin)
+	implementation(libs.kotlin.gradle.plugin)
+	implementation(libs.kotlin.serialization.plugin)
+	implementation(libs.ksp.gradle.plugin)
+
+	testImplementation(kotlin("test"))
+	testImplementation(kotlin("test-junit5"))
+	testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.3")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.3")
+	testImplementation(gradleTestKit())
 }
 
 gradlePlugin {
@@ -41,8 +48,8 @@ gradlePlugin {
 
 kotlin {
 	compilerOptions {
-		apiVersion.set(KotlinVersion.KOTLIN_2_2)
-		languageVersion.set(KotlinVersion.KOTLIN_2_2)
+		apiVersion.set(KotlinVersion.KOTLIN_2_3)
+		languageVersion.set(KotlinVersion.KOTLIN_2_3)
 	}
 	explicitApi()
 	jvmToolchain(21)
@@ -57,11 +64,18 @@ sourceSets {
 	getByName("main") {
 		kotlin.srcDirs(listOf("sources"))
 	}
+	getByName("test") {
+		kotlin.srcDirs(listOf("tests"))
+	}
+}
+
+tasks.withType<Test> {
+	useJUnitPlatform()
 }
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "9.1.0"
+	gradleVersion = "9.4.1"
 }
 
 dependencyUpdates {

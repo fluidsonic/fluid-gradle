@@ -10,236 +10,204 @@ import org.jetbrains.kotlin.gradle.targets.jvm.*
 import java.io.*
 
 
+/** DSL for configuring a library module. */
 @Dsl
 public interface LibraryModuleDsl {
 
-	@Dsl
+	/** Provides direct access to the [KotlinMultiplatformExtension] for custom configuration. */
 	public fun custom(configure: KotlinMultiplatformExtension.() -> Unit)
 
-	@Dsl
+	/** Configures Kotlin language settings for this module. */
 	public fun language(configure: LanguageDsl.() -> Unit)
 
-	@Dsl
+	/** Disables Dokka documentation generation for this module. */
 	public fun noDokka()
 
-	@Dsl
+	/** Configures the compilation targets for this module. */
 	public fun targets(configure: TargetsDsl.() -> Unit)
 
-	@Dsl
+	/** Excludes this module from Maven publication. */
 	public fun withoutPublishing()
 
 
+	/** DSL for configuring the common (metadata) target. */
 	@Dsl
 	public interface CommonTargetDsl : TargetDsl<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<Any>>>
 
 
+	/** DSL for declaring dependencies on a source set. */
 	@Dsl
 	public interface DependenciesDsl {
 
-		@Dsl
+		/** Adds an API dependency visible to consumers. */
 		public fun api(notation: Any)
 
-		@Dsl
+		/** Adds an API dependency visible to consumers with additional [configure] block. */
 		public fun api(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 
-		@Dsl
+		/** Adds a compile-only dependency not included at runtime. */
 		public fun compileOnly(notation: Any)
 
-		@Dsl
+		/** Adds a compile-only dependency not included at runtime with additional [configure] block. */
 		public fun compileOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 
-		@Dsl
+		/** Provides direct access to the [KotlinDependencyHandler] for custom configuration. */
 		public fun custom(configure: KotlinDependencyHandler.() -> Unit)
 
-		@Dsl
+		/** Adds an implementation dependency not visible to consumers. */
 		public fun implementation(notation: Any)
 
-		@Dsl
+		/** Adds an implementation dependency not visible to consumers with additional [configure] block. */
 		public fun implementation(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 
-		@Dsl
+		/** Adds a runtime-only dependency not available at compile time. */
 		public fun runtimeOnly(notation: Any)
 
-		@Dsl
+		/** Adds a runtime-only dependency not available at compile time with additional [configure] block. */
 		public fun runtimeOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 
 
-		@Dsl
+		/** Creates a dependency notation for a `io.fluidsonic.*` module. */
 		public fun fluid(simpleModuleName: String, version: String, usePrefix: Boolean = true): Any
 
-		@Dsl
+		/** Creates a dependency notation for a `kotlin-stdlib-*` module. */
 		public fun kotlin(simpleModuleName: String, version: String? = null): Any
 
-		@Dsl
+		/** Creates a dependency notation for a `kotlinx-*` module. */
 		public fun kotlinx(simpleModuleName: String, version: String, usePrefix: Boolean = true): Any
 
-		@Dsl
+		/** Creates a dependency notation for a Gradle project by [path]. */
 		public fun project(path: String, configuration: String? = null): Any =
 			project(mapOf("configuration" to configuration, "path" to path))
 
-		@Dsl
+		/** Creates a dependency notation for a Gradle project by [notation] map. */
 		public fun project(notation: Map<String, Any?>): Any
 	}
 
 
+	/** DSL for declaring JS-specific dependencies, including npm packages. */
+	@Deprecated("JS target support will be removed in a future version.")
 	@Dsl
 	public interface JsDependenciesDsl : DependenciesDsl {
 
-		@Dsl
 		public fun devNpm(name: String, version: String): Any
 
-		@Dsl
 		public fun devNpm(name: String, directory: File): Any
 
-		@Dsl
 		public fun devNpm(directory: File): Any
 
-		@Dsl
 		public fun npm(name: String, version: String, generateExternals: Boolean = false): Any
 
-		@Dsl
 		public fun npm(name: String, directory: File, generateExternals: Boolean = false): Any
 
-		@Dsl
 		public fun npm(directory: File, generateExternals: Boolean = false): Any
 
-		@Dsl
 		public fun optionalNpm(name: String, version: String, generateExternals: Boolean = false): Any
 
-		@Dsl
 		public fun optionalNpm(name: String, directory: File, generateExternals: Boolean = false): Any
 
-		@Dsl
 		public fun optionalNpm(directory: File, generateExternals: Boolean = false): Any
 
-		@Dsl
 		public fun peerNpm(name: String, version: String): Any
 	}
 
 
+	/** DSL for configuring the Kotlin/JS target. */
+	@Deprecated("JS target support will be removed in a future version.")
+	@Suppress("DEPRECATION")
 	@Dsl
 	public interface JsTargetDsl : TargetDsl<JsDependenciesDsl, KotlinJsTargetDsl> {
 
-		@Dsl
+		/** Disables browser sub-target. */
 		public fun withoutBrowser()
 
-		@Dsl
+		/** Disables Node.js sub-target. */
 		public fun withoutNodeJs()
 	}
 
 
+	/** DSL for declaring JVM-specific dependencies, including annotation processors. */
 	@Dsl
 	public interface JvmDependenciesDsl : DependenciesDsl {
 
-		@Dsl
+		/** Adds a kapt annotation processor dependency. */
+		@Deprecated("Use ksp() instead.", ReplaceWith("ksp(notation)"))
 		public fun kapt(notation: Any)
 
-		@Dsl
+		/** Adds a kapt annotation processor dependency with additional configuration. */
+		@Deprecated("Use ksp() instead.", ReplaceWith("ksp(dependencyNotation, configure)"))
 		public fun kapt(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
+
+		/** Adds a KSP (Kotlin Symbol Processing) annotation processor dependency. */
+		public fun ksp(notation: Any)
+
+		/** Adds a KSP (Kotlin Symbol Processing) annotation processor dependency with additional configuration. */
+		public fun ksp(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 	}
 
 
+	/** DSL for configuring the Kotlin/JVM target. */
 	@Dsl
 	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget>
 
 
+	/** DSL for configuring Kotlin language settings. */
 	@Dsl
 	public interface LanguageDsl {
 
-		@Dsl
+		/** Provides direct access to [LanguageSettingsBuilder] for custom configuration. */
 		public fun custom(configure: LanguageSettingsBuilder.() -> Unit)
 
-		@Dsl
+		/** Opts in to an experimental API identified by [name]. */
 		public fun withExperimentalApi(name: String)
 
-		@Dsl
+		/** Enables a Kotlin language feature identified by [name]. */
 		public fun withLanguageFeature(name: String)
 
-		@Dsl
+		/** Sets the Kotlin language version. */
 		public fun version(version: String)
 
-		@Dsl
+		/** Disables explicit API mode for this module. */
 		public fun withoutExplicitApi()
 	}
 
 
-	@Dsl
-	public interface DarwinTargetDsl : TargetDsl<DependenciesDsl, KotlinNativeTarget> {
-
-		@Dsl
-		public fun withoutIosArm64()
-
-		@Dsl
-		public fun withoutIosSimulatorArm64()
-
-		@Dsl
-		public fun withoutIosX64()
-
-		@Dsl
-		public fun withoutMacosArm64()
-
-		@Dsl
-		public fun withoutMacosX64()
-
-		@Dsl
-		public fun withoutTvosArm64()
-
-		@Dsl
-		public fun withoutTvosSimulatorArm64()
-
-		@Dsl
-		public fun withoutTvosX64()
-
-		@Dsl
-		public fun withoutWatchosArm32()
-
-		@Dsl
-		public fun withoutWatchosArm64()
-
-		@Dsl
-		public fun withoutWatchosSimulatorArm64()
-
-		@Dsl
-		public fun withoutWatchosX64()
-	}
-
-
+	/** Base DSL for configuring a compilation target. */
 	@Dsl
 	public interface TargetDsl<out Dependencies : DependenciesDsl, out Custom> {
 
-		@Dsl
+		/** Provides direct access to the underlying Kotlin target for custom configuration. */
 		public fun custom(configure: Custom.() -> Unit)
 
-		@Dsl
+		/** Configures main source set dependencies. */
 		public fun dependencies(configure: Dependencies.() -> Unit)
 
-		@Dsl
+		/** Configures test source set dependencies. */
 		public fun testDependencies(configure: Dependencies.() -> Unit)
 
-		@Dsl
+		/** Disables the default BOM that enforces the same version for all Kotlin dependencies. */
 		public fun withoutEnforcingSameVersionForAllKotlinDependencies()
 	}
 
 
+	/** DSL for declaring which compilation targets to enable. */
 	@Dsl
 	public interface TargetsDsl {
 
-		@Dsl
+		/** Configures the common (metadata) target. */
 		public fun common(configure: CommonTargetDsl.() -> Unit = {})
 
-		@Dsl
-		public fun darwin(configure: DarwinTargetDsl.() -> Unit = {})
+		/** Enables and configures the Kotlin/JS target. */
+		@Suppress("DEPRECATION")
+		public fun js(configure: JsTargetDsl.() -> Unit = {})
 
-		@Dsl
-		public fun js(compiler: KotlinJsCompilerType? = null, configure: JsTargetDsl.() -> Unit = {})
-
-		@Dsl
+		/** Enables and configures the Kotlin/JVM target. */
 		public fun jvm(configure: JvmTargetDsl.() -> Unit = {})
 	}
 }
 
 
-@Dsl
+/** Entry point for configuring a library module. Must be called in each subproject's `build.gradle.kts`. */
 public fun Project.fluidLibraryModule(
 	description: String,
 	configure: LibraryModuleDsl.() -> Unit,

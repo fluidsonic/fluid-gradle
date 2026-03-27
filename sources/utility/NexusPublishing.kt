@@ -5,6 +5,7 @@ import org.gradle.api.*
 import org.gradle.kotlin.dsl.accessors.runtime.*
 
 
+/** The [NexusPublishExtension] registered on this project. */
 internal val Project.nexusPublishing: NexusPublishExtension
 	get() = extensionOf(this, "nexusPublishing") as NexusPublishExtension
 
