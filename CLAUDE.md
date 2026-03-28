@@ -27,3 +27,4 @@ Gradle plugin using a DSL -> Builder -> Configuration -> Configurator pattern.
 - Tab indentation (literal tab characters)
 - Explicit API mode is enabled
 - Kotlin with multiplatform support
+- Version tags have no `v` prefix (e.g. `3.0.0`, not `v3.0.0`)
