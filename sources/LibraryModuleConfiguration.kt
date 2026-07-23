@@ -91,7 +91,7 @@ internal class LibraryModuleConfiguration(
 			customConfigurations = customConfigurations + other.customConfigurations,
 			experimentalApisToUse = experimentalApisToUse + other.experimentalApisToUse,
 			isExplicitApiEnabled = isExplicitApiEnabled && other.isExplicitApiEnabled,
-			version = version ?: other.version
+			version = other.version ?: version
 		)
 
 

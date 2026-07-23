@@ -49,7 +49,7 @@ class LibraryModuleConfigurationTest {
 	}
 
 	@Test
-	fun language_mergeWith_usesReceiverVersionWhenBothSet() {
+	fun language_mergeWith_usesOtherVersionWhenBothSet() {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
@@ -61,6 +61,24 @@ class LibraryModuleConfigurationTest {
 			experimentalApisToUse = emptySet(),
 			isExplicitApiEnabled = true,
 			version = "2.0",
+		)
+		val merged = a.mergeWith(b)
+		assertEquals(actual = merged.version, expected = "2.0")
+	}
+
+	@Test
+	fun language_mergeWith_usesReceiverVersionWhenOtherIsNull() {
+		val a = LibraryModuleConfiguration.Language(
+			customConfigurations = emptyList(),
+			experimentalApisToUse = emptySet(),
+			isExplicitApiEnabled = true,
+			version = "1.9",
+		)
+		val b = LibraryModuleConfiguration.Language(
+			customConfigurations = emptyList(),
+			experimentalApisToUse = emptySet(),
+			isExplicitApiEnabled = true,
+			version = null,
 		)
 		val merged = a.mergeWith(b)
 		assertEquals(actual = merged.version, expected = "1.9")

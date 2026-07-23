@@ -4,7 +4,7 @@ The DSL -> Builder -> Configuration pipeline layers an `allModules {}` default u
 
 In `sources/LibraryModuleConfiguration.kt`:
 - `LibraryModuleConfiguration.mergeWith` resolves `description` as `other.description ?: description` — the incoming/override (per-module) wins.
-- `Language.mergeWith` resolves `version` as `version ?: other.version` — the **receiver** (the `allModules` default) wins when both are set. Opposite direction from `description`. A language `version` set in `allModules {}` therefore cannot be overridden per-module.
+- `Language.mergeWith` resolves `version` as `other.version ?: version` — the incoming/override (per-module) wins, same direction as `description`. A per-module language `version` therefore overrides the `allModules {}` default.
 - Boolean feature flags all combine with AND, so disabling in either place wins: `isPublishingEnabled`, `enforcesSameVersionForAllKotlinDependencies`, `isDokkaEnabled`, `language.isExplicitApiEnabled`, and JS `isBrowserEnabled`/`isNodeJsEnabled`. (These were phrased as `noDokka`/`noExplicitApi`/… OR-combined before the flags were renamed to positive form; behavior is unchanged.)
 - JVM `jdkVersion` merges with `maxOf` — the higher JDK wins (a comment in `Jvm.mergeWith` explains a JDK selection is a minimum, so the maximum never violates either side's minimum). See `jvm-target.md`.
 - Lists/sets (`customConfigurations`, `experimentalApisToUse`, dependency `configurations`) are always concatenated/unioned — never replaced. Every `custom {}` block accumulates.
