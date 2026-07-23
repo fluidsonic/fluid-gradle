@@ -35,6 +35,7 @@
 			"xcrun:*",
 			"./gradlew:*"
 		],
+		"failIfUnavailable": true,
 		"network": {
 			"allowLocalBinding": true
 		}
