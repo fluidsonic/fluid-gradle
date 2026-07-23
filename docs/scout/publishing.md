@@ -10,4 +10,4 @@ The plugin's own `build.gradle.kts` duplicates this exact dual-credential logic 
 
 Javadoc trap: when a JVM target exists, `configurePublishing` (module) registers a `javadocJar` sourced from the Dokka v2 task `dokkaGeneratePublicationHtml` (skipped if `noDokka`) and attaches it via `publications.filterIsInstance<MavenPublication>().single { it.name == "jvm" }`. The `.single { }` **throws** if there is not exactly one publication named `jvm`. Only the JVM publication receives a javadoc artifact.
 
-dokka version: 2.1.0 (as of 2026-07, `gradle/libs.versions.toml`).
+dokka version: 2.2.0 (as of 2026-07, `gradle/libs.versions.toml`).

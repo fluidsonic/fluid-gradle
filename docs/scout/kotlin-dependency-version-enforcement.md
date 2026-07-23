@@ -6,4 +6,4 @@ A default behavior that silently overrides any `org.jetbrains.kotlin:*` version 
 
 This is on by default for every target (the flag `enforcesSameVersionForAllKotlinDependencies` defaults to `true` in `sources/LibraryModuleConfigurationBuilder.kt`, `TargetBuilder`). The only opt-out is the easily-missed `withoutEnforcingSameVersionForAllKotlinDependencies()` in the target DSL. If a consumer's Kotlin dependency version appears "ignored", this hook is why.
 
-Kotlin version: 2.3.20 (as of 2026-07, `gradle/libs.versions.toml`).
+Kotlin version: 2.4.10 (as of 2026-07, `gradle/libs.versions.toml`).

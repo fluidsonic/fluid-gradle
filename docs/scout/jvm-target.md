@@ -10,4 +10,4 @@ By contrast the **common** test source set (`configureCommonTarget`) only gets `
 
 Both main and test JVM compilations also set the `TargetJvmVersion` attribute to `jdkVersion.code`.
 
-junit version: 6.0.3 (as of 2026-07, `sources/Versions.kt` `Versions.junit` — the constant the code actually injects).
+junit version: 6.1.2 (as of 2026-07, `sources/Versions.kt` `Versions.junit` — the constant the code actually injects).

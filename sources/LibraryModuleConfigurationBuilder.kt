@@ -66,7 +66,6 @@ internal class LibraryModuleConfigurationBuilder(
 
 		private val customConfigurations: MutableList<LanguageSettingsBuilder.() -> Unit> = mutableListOf()
 		private val experimentalApisToUse: MutableSet<String> = mutableSetOf()
-		private val languageFeaturesToEnable: MutableSet<String> = mutableSetOf()
 		private var noExplicitApi = false
 		private var version: String? = null
 
@@ -74,7 +73,6 @@ internal class LibraryModuleConfigurationBuilder(
 		fun build() = LibraryModuleConfiguration.Language(
 			customConfigurations = customConfigurations.toList(),
 			experimentalApisToUse = experimentalApisToUse.toSet(),
-			languageFeaturesToEnable = languageFeaturesToEnable.toSet(),
 			noExplicitApi = noExplicitApi,
 			version = version
 		)
@@ -92,11 +90,6 @@ internal class LibraryModuleConfigurationBuilder(
 
 		override fun withExperimentalApi(name: String) {
 			experimentalApisToUse += name
-		}
-
-
-		override fun withLanguageFeature(name: String) {
-			languageFeaturesToEnable += name
 		}
 
 

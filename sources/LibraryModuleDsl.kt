@@ -161,9 +161,6 @@ public interface LibraryModuleDsl {
 		/** Opts in to an experimental API identified by [name]. */
 		public fun withExperimentalApi(name: String)
 
-		/** Enables a Kotlin language feature identified by [name]. */
-		public fun withLanguageFeature(name: String)
-
 		/** Sets the Kotlin language version. */
 		public fun version(version: String)
 

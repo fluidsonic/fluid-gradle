@@ -70,7 +70,6 @@ internal class LibraryModuleConfiguration(
 	class Language(
 		val customConfigurations: List<LanguageSettingsBuilder.() -> Unit>,
 		val experimentalApisToUse: Set<String>,
-		val languageFeaturesToEnable: Set<String>,
 		val noExplicitApi: Boolean,
 		val version: String?,
 	) {
@@ -78,7 +77,6 @@ internal class LibraryModuleConfiguration(
 		fun mergeWith(other: Language) = Language(
 			customConfigurations = customConfigurations + other.customConfigurations,
 			experimentalApisToUse = experimentalApisToUse + other.experimentalApisToUse,
-			languageFeaturesToEnable = languageFeaturesToEnable + other.languageFeaturesToEnable,
 			noExplicitApi = noExplicitApi || other.noExplicitApi,
 			version = version ?: other.version
 		)
@@ -89,7 +87,6 @@ internal class LibraryModuleConfiguration(
 			val default = Language(
 				customConfigurations = emptyList(),
 				experimentalApisToUse = emptySet(),
-				languageFeaturesToEnable = emptySet(),
 				noExplicitApi = false,
 				version = null
 			)

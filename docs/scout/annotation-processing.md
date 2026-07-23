@@ -6,4 +6,6 @@ In `sources/LibraryModuleConfigurationBuilder.kt` (`DependenciesBuilder`), `ksp(
 
 Direction of travel: `JvmDependenciesDsl.kapt(...)` in `sources/LibraryModuleDsl.kt` is `@Deprecated` with `ReplaceWith` pointing to `ksp(...)`. Both are still wired (separate `kaptConfigurations`/`kspConfigurations` lists), but new code should use `ksp()`.
 
-ksp version: 2.3.6 (as of 2026-07, `gradle/libs.versions.toml`).
+Version-bump trap: the `ksp` version in `gradle/libs.versions.toml` is decoupled from the `kotlin` version and does not track it (KSP2 has its own release line). When bumping Kotlin, do not force KSP to the same number — move it independently to the KSP release that supports the target Kotlin (e.g. Kotlin 2.4.10 pairs with KSP 2.3.10, not 2.4.x).
+
+ksp version: 2.3.10 (as of 2026-07, `gradle/libs.versions.toml`).

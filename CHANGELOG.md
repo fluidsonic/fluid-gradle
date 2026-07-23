@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Dependabot configuration for automated dependency updates (Gradle and GitHub Actions ecosystems, weekly)
+- Scout knowledge base under `docs/scout/` documenting non-obvious, repo-specific conventions and traps
+
+### Changed
+- Kotlin updated to 2.4.10 (KSP to 2.3.10); language and API baseline raised to 2.4
+- Gradle wrapper updated to 9.6.1
+- Dokka updated to 2.2.0
+- JUnit updated to 6.1.2
+- Gradle Plugin Publish updated to 2.1.1
+- Gradle Versions plugin updated to 0.54.0
+- GitHub Actions pinned to full commit SHAs (`actions/checkout` v7.0.1, `actions/setup-java` v5.6.0)
+- JUnit test dependencies consolidated onto the Gradle version catalog
+
+### Removed
+- `withLanguageFeature(...)` from the language DSL — the underlying Kotlin compiler API was deprecated to error level and removed in Kotlin 2.4 with no replacement
+
 ## [3.0.0]
 
 ### Added

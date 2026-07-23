@@ -15,39 +15,17 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = setOf("api1"),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = setOf("api2"),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = null,
 		)
 		val merged = a.mergeWith(b)
 		assertEquals(actual = merged.experimentalApisToUse, expected = setOf("api1", "api2"))
-	}
-
-	@Test
-	fun language_mergeWith_combinesLanguageFeatures() {
-		val a = LibraryModuleConfiguration.Language(
-			customConfigurations = emptyList(),
-			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = setOf("feature1"),
-			noExplicitApi = false,
-			version = null,
-		)
-		val b = LibraryModuleConfiguration.Language(
-			customConfigurations = emptyList(),
-			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = setOf("feature2"),
-			noExplicitApi = false,
-			version = null,
-		)
-		val merged = a.mergeWith(b)
-		assertEquals(actual = merged.languageFeaturesToEnable, expected = setOf("feature1", "feature2"))
 	}
 
 	@Test
@@ -57,14 +35,12 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = listOf(config1),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = listOf(config2),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = null,
 		)
@@ -77,14 +53,12 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = "1.9",
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = "2.0",
 		)
@@ -97,14 +71,12 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = "2.0",
 		)
@@ -117,14 +89,12 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = true,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			languageFeaturesToEnable = emptySet(),
 			noExplicitApi = false,
 			version = null,
 		)

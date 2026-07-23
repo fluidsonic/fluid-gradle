@@ -40,8 +40,6 @@ internal class LibraryModuleConfigurator(
 						languageVersion = configuration.language.version ?: LibraryModuleConfiguration.Language.default.version
 
 						configuration.language.experimentalApisToUse.forEach { optIn(it) }
-						@Suppress("DEPRECATION")
-						configuration.language.languageFeaturesToEnable.forEach { enableLanguageFeature(it) }
 						configuration.language.customConfigurations.forEach { it() }
 					}
 				}
@@ -90,7 +88,7 @@ internal class LibraryModuleConfigurator(
 	private fun KotlinMultiplatformExtension.configureJsTargets() {
 		val targetConfiguration = configuration.targets.js ?: return
 
-		js(KotlinJsCompilerType.IR) {
+		js {
 			configureTargetBasics(targetConfiguration)
 
 			useCommonJs()
@@ -338,7 +336,7 @@ internal class LibraryModuleConfigurator(
 		}
 
 		if (configuration.targets.jvm != null) {
-			val javadocJar by tasks.registering(Jar::class) {
+			val javadocJar = tasks.register<Jar>("javadocJar") {
 				if (!configuration.noDokka)
 					from(tasks.named("dokkaGeneratePublicationHtml"))
 

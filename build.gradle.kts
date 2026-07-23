@@ -27,8 +27,8 @@ dependencies {
 
 	testImplementation(kotlin("test"))
 	testImplementation(kotlin("test-junit5"))
-	testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.3")
-	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.3")
+	testImplementation(libs.junit.jupiter.api)
+	testRuntimeOnly(libs.junit.jupiter.engine)
 	testImplementation(gradleTestKit())
 }
 
@@ -48,8 +48,8 @@ gradlePlugin {
 
 kotlin {
 	compilerOptions {
-		apiVersion.set(KotlinVersion.KOTLIN_2_3)
-		languageVersion.set(KotlinVersion.KOTLIN_2_3)
+		apiVersion.set(KotlinVersion.KOTLIN_2_4)
+		languageVersion.set(KotlinVersion.KOTLIN_2_4)
 	}
 	explicitApi()
 	jvmToolchain(21)
@@ -75,7 +75,7 @@ tasks.withType<Test> {
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "9.4.1"
+	gradleVersion = "9.6.1"
 }
 
 dependencyUpdates {

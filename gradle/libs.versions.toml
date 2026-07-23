@@ -1,16 +1,18 @@
 [versions]
-dokka = "2.1.0"
+dokka = "2.2.0"
 gradle-nexus-publish = "2.0.0"
-gradle-plugin-publish = "2.1.0"
-gradle-versions = "0.53.0"
-junit = "6.0.3"
-kotlin = "2.3.20"
-ksp = "2.3.6"
+gradle-plugin-publish = "2.1.1"
+gradle-versions = "0.54.0"
+junit = "6.1.2"
+kotlin = "2.4.10"
+ksp = "2.3.10"
 
 [libraries]
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 gradle-nexus-publish-plugin = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "gradle-nexus-publish" }
 gradle-versions-plugin = { module = "com.github.ben-manes:gradle-versions-plugin", version.ref = "gradle-versions" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
