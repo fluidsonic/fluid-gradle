@@ -1,0 +1,42 @@
+{
+	"$schema": "https://json.schemastore.org/claude-code-settings.json",
+	"enabledPlugins": {
+		"genki-dev@genki": true
+	},
+	"permissions": {
+		"allow": [],
+		"ask": [],
+		"defaultMode": "plan",
+		"deny": []
+	},
+	"sandbox": {
+		"allowUnsandboxedCommands": false,
+		"autoAllowBashIfSandboxed": true,
+		"enabled": true,
+		"excludedCommands": [
+			"adb:*",
+			"bq:*",
+			"coderabbit:*",
+			"corepack:*",
+			"cr:*",
+			"docker:*",
+			"emulator:*",
+			"gh:*",
+			"git:*",
+			"maestro:*",
+			"open:*",
+			"pnpm:*",
+			"pnpx:*",
+			"railway:*",
+			"turbo:*",
+			"wrangler:*",
+			"xcodebuild:*",
+			"xcodegen:*",
+			"xcrun:*",
+			"./gradlew:*"
+		],
+		"network": {
+			"allowLocalBinding": true
+		}
+	}
+}
