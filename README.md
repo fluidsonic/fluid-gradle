@@ -35,9 +35,18 @@ fluidLibrary(name = "country", version = "0.15.0") {
 ```kotlin
 fluidLibraryModule(description = "Kotlin multiplatform country library") {
     targets {
+        common {
+            dependencies {
+                api(kotlinx("serialization-core", "1.9.0"))
+            }
+        }
         jvm {
+            jdk(21)
             dependencies {
                 api(fluid("stdlib", "0.15.0"))
+            }
+            testDependencies {
+                implementation(kotlin("test"))
             }
         }
     }
@@ -46,6 +55,38 @@ fluidLibraryModule(description = "Kotlin multiplatform country library") {
     }
 }
 ```
+
+Dependency notations: `fluid(name, version)` for `io.fluidsonic.*` modules, `kotlin(name, version?)` for
+`kotlin-stdlib-*`, `kotlinx(name, version)` for `kotlinx-*`, and `project(path)` for local Gradle projects.
+Each dependency scope is available as `api`, `implementation`, `compileOnly`, and `runtimeOnly`.
+
+
+Options
+-------
+
+The plugin applies sensible defaults that can be adjusted per module or target:
+
+```kotlin
+fluidLibraryModule(description = "…") {
+    disableDokka()          // skip Dokka documentation generation
+    disablePublishing()     // exclude this module from Maven publication
+
+    targets {
+        jvm {
+            jdk(24)                                  // JDK to compile against (21–24, default 21)
+            disableKotlinDependencyVersionAlignment() // drop the BOM aligning all Kotlin dependencies
+        }
+    }
+    language {
+        disableExplicitApi() // turn off explicit API mode for this module
+    }
+}
+```
+
+Root-level options are available inside `fluidLibrary(…) { … }`:
+
+- `gradleVersion("9.6.1")` — sets the Gradle wrapper version.
+- `dependencyUpdatesIncludeUnstableVersions()` — includes pre-release versions when checking for updates.
 
 
 Requirements

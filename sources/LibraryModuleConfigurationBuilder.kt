@@ -12,23 +12,24 @@ import org.jetbrains.kotlin.gradle.targets.jvm.*
 import java.io.*
 
 
+/** Collects [LibraryModuleDsl] calls and resolves them into a [LibraryModuleConfiguration] via [build]. */
 internal class LibraryModuleConfigurationBuilder(
 	private val description: String?
 ) : LibraryModuleDsl {
 
 	private val customConfigurations: MutableList<KotlinMultiplatformExtension.() -> Unit> = mutableListOf()
+	private var isDokkaEnabled = true
 	private var isPublishingEnabled = true
 	private var languageConfiguration: LibraryModuleConfiguration.Language? = null
-	private var noDokka = false
 	private var targetsConfiguration: LibraryModuleConfiguration.Targets? = null
 
 
 	fun build() = LibraryModuleConfiguration(
 		customConfigurations = customConfigurations.toList(),
 		description = description,
+		isDokkaEnabled = isDokkaEnabled,
 		isPublishingEnabled = isPublishingEnabled,
 		language = languageConfiguration ?: LibraryModuleConfiguration.Language.default,
-		noDokka = noDokka,
 		targets = targetsConfiguration ?: LibraryModuleConfiguration.Targets.default
 	)
 
@@ -45,8 +46,8 @@ internal class LibraryModuleConfigurationBuilder(
 	}
 
 
-	override fun noDokka() {
-		noDokka = true
+	override fun disableDokka() {
+		isDokkaEnabled = false
 	}
 
 
@@ -57,23 +58,24 @@ internal class LibraryModuleConfigurationBuilder(
 	}
 
 
-	override fun withoutPublishing() {
+	override fun disablePublishing() {
 		isPublishingEnabled = false
 	}
 
 
+	/** Collects [LanguageDsl] calls into a [LibraryModuleConfiguration.Language]. */
 	class LanguageBuilder : LanguageDsl {
 
 		private val customConfigurations: MutableList<LanguageSettingsBuilder.() -> Unit> = mutableListOf()
 		private val experimentalApisToUse: MutableSet<String> = mutableSetOf()
-		private var noExplicitApi = false
+		private var isExplicitApiEnabled = true
 		private var version: String? = null
 
 
 		fun build() = LibraryModuleConfiguration.Language(
 			customConfigurations = customConfigurations.toList(),
 			experimentalApisToUse = experimentalApisToUse.toSet(),
-			noExplicitApi = noExplicitApi,
+			isExplicitApiEnabled = isExplicitApiEnabled,
 			version = version
 		)
 
@@ -93,12 +95,13 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		override fun withoutExplicitApi() {
-			noExplicitApi = true
+		override fun disableExplicitApi() {
+			isExplicitApiEnabled = false
 		}
 	}
 
 
+	/** Base builder for a single compilation target, shared by the common, JS, and JVM target builders. */
 	sealed class TargetBuilder<out Dependencies : DependenciesDsl, Custom> : TargetDsl<Dependencies, Custom> {
 
 		protected val customConfigurations: MutableList<Custom.() -> Unit> = mutableListOf()
@@ -113,6 +116,9 @@ internal class LibraryModuleConfigurationBuilder(
 
 
 		final override fun dependencies(configure: Dependencies.() -> Unit) {
+			// Safe: the single DependenciesBuilder implements every per-target dependency DSL (JsDependenciesDsl,
+			// JvmDependenciesDsl), so widening the caller's typed lambda to DependenciesDsl never reaches a missing
+			// member — the per-target members don't collide. See docs/scout/dsl-internals.md.
 			@Suppress("UNCHECKED_CAST")
 			val dependencies = DependenciesBuilder().apply(configure as DependenciesDsl.() -> Unit).build()
 
@@ -121,6 +127,9 @@ internal class LibraryModuleConfigurationBuilder(
 
 
 		final override fun testDependencies(configure: Dependencies.() -> Unit) {
+			// Safe: the single DependenciesBuilder implements every per-target dependency DSL (JsDependenciesDsl,
+			// JvmDependenciesDsl), so widening the caller's typed lambda to DependenciesDsl never reaches a missing
+			// member — the per-target members don't collide. See docs/scout/dsl-internals.md.
 			@Suppress("UNCHECKED_CAST")
 			val dependencies = DependenciesBuilder().apply(configure as DependenciesDsl.() -> Unit).build()
 
@@ -128,11 +137,12 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
-		final override fun withoutEnforcingSameVersionForAllKotlinDependencies() {
+		final override fun disableKotlinDependencyVersionAlignment() {
 			enforcesSameVersionForAllKotlinDependencies = false
 		}
 
 
+		/** Builds the common (metadata) target configuration. */
 		class CommonBuilder : TargetBuilder<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<Any>>>(), CommonTargetDsl {
 
 			fun build() = LibraryModuleConfiguration.Target.Common(
@@ -144,6 +154,12 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
+		/**
+		 * Collects dependency declarations for one source set into a [LibraryModuleConfiguration.Dependencies].
+		 *
+		 * Implements every per-target dependency DSL ([JsDependenciesDsl], [JvmDependenciesDsl]) so a single builder
+		 * serves all targets; see the `dependencies`/`testDependencies` overrides and `docs/scout/dsl-internals.md`.
+		 */
 		@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
 		class DependenciesBuilder : JsDependenciesDsl, JvmDependenciesDsl {
 
@@ -283,6 +299,7 @@ internal class LibraryModuleConfigurationBuilder(
 				is SpecialDependency.OptionalNpmNameVersion -> optionalNpm(notation.name, notation.version)
 				is SpecialDependency.PeerNpmNameVersion -> peerNpm(notation.name, notation.version)
 				is SpecialDependency.Project -> project(notation.notation)
+				is SpecialDependency -> error("Unsupported: $notation")
 				else -> notation
 			}
 
@@ -323,46 +340,59 @@ internal class LibraryModuleConfigurationBuilder(
 		}
 
 
+		/** Builds the Kotlin/JS target configuration. */
 		@Suppress("DEPRECATION")
 		class JsBuilder : TargetBuilder<JsDependenciesDsl, KotlinJsTargetDsl>(), JsTargetDsl {
 
-			private var noBrowser = false
-			private var noNodeJs = false
+			private var isBrowserEnabled = true
+			private var isNodeJsEnabled = true
 
 
 			fun build() = LibraryModuleConfiguration.Target.Js(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
-				noBrowser = noBrowser,
-				noNodeJs = noNodeJs,
+				isBrowserEnabled = isBrowserEnabled,
+				isNodeJsEnabled = isNodeJsEnabled,
 				testDependencies = testDependencies
 			)
 
 
 			override fun withoutBrowser() {
-				noBrowser = true
+				isBrowserEnabled = false
 			}
 
 
 			override fun withoutNodeJs() {
-				noNodeJs = true
+				isNodeJsEnabled = false
 			}
 		}
 
 
+		/** Builds the Kotlin/JVM target configuration. */
 		class JvmBuilder : TargetBuilder<JvmDependenciesDsl, KotlinJvmTarget>(), JvmTargetDsl {
+
+			private var jdkVersion = JdkVersion.v21
+
 
 			fun build() = LibraryModuleConfiguration.Target.Jvm(
 				customConfigurations = customConfigurations.toList(),
 				dependencies = dependencies,
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
+				jdkVersion = jdkVersion,
 				testDependencies = testDependencies
 			)
+
+
+			override fun jdk(version: Int) {
+				jdkVersion = JdkVersion.entries.firstOrNull { it.code == version }
+					?: throw IllegalArgumentException("Unsupported JDK version $version. Supported versions are 21 to 24.")
+			}
 		}
 	}
 
 
+	/** Collects [TargetsDsl] calls into a [LibraryModuleConfiguration.Targets]. */
 	class TargetsBuilder : TargetsDsl {
 
 		private var commonConfiguration: LibraryModuleConfiguration.Target.Common? = null

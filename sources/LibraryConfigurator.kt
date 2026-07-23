@@ -9,17 +9,21 @@ import org.gradle.api.tasks.wrapper.*
 import org.gradle.kotlin.dsl.*
 
 
+/**
+ * Applies a resolved [LibraryConfiguration] to the root [project]: the dependency-updates plugin, the Gradle wrapper
+ * version, Maven Central publishing to Sonatype, and the [LibraryPluginExtension] that exposes the configuration to
+ * each module.
+ */
 internal class LibraryConfigurator(
 	private val configuration: LibraryConfiguration,
 	private val project: Project,
 ) {
 
+	/** Applies the configuration to the root project. */
 	fun configure() = project.run {
 		apply<VersionsPlugin>()
 
-		repositories {
-			mavenCentral()
-		}
+		useMavenCentralRepository()
 
 		wrapper {
 			distributionType = Wrapper.DistributionType.ALL

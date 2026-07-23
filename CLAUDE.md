@@ -4,7 +4,7 @@
 
 - Build: `./gradlew build`
 - Test: `./gradlew test`
-- Dependency check: `./gradlew dependencyUpdates`
+- Dependency check: `./gradlew dependencyUpdates --no-configuration-cache --no-parallel` (the flags are required until gradle-versions 0.55.0; see `docs/scout/dependency-updates-task.md`)
 
 ## Source layout
 

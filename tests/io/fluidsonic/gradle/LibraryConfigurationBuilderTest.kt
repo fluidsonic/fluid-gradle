@@ -47,9 +47,9 @@ class LibraryConfigurationBuilderTest {
 			version = "1.0.0",
 		).apply {
 			allModules {
-				noDokka()
+				disableDokka()
 			}
 		}.build()
-		assertEquals(actual = config.defaultModuleConfiguration.noDokka, expected = true)
+		assertEquals(actual = config.defaultModuleConfiguration.isDokkaEnabled, expected = false)
 	}
 }

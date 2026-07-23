@@ -15,13 +15,13 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = setOf("api1"),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = setOf("api2"),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = null,
 		)
 		val merged = a.mergeWith(b)
@@ -35,13 +35,13 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = listOf(config1),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = listOf(config2),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = null,
 		)
 		val merged = a.mergeWith(b)
@@ -53,13 +53,13 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = "1.9",
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = "2.0",
 		)
 		val merged = a.mergeWith(b)
@@ -71,13 +71,13 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = "2.0",
 		)
 		val merged = a.mergeWith(b)
@@ -85,21 +85,21 @@ class LibraryModuleConfigurationTest {
 	}
 
 	@Test
-	fun language_mergeWith_orsNoExplicitApi() {
+	fun language_mergeWith_andsIsExplicitApiEnabled() {
 		val a = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = true,
+			isExplicitApiEnabled = false,
 			version = null,
 		)
 		val b = LibraryModuleConfiguration.Language(
 			customConfigurations = emptyList(),
 			experimentalApisToUse = emptySet(),
-			noExplicitApi = false,
+			isExplicitApiEnabled = true,
 			version = null,
 		)
 		val merged = a.mergeWith(b)
-		assertEquals(actual = merged.noExplicitApi, expected = true)
+		assertEquals(actual = merged.isExplicitApiEnabled, expected = false)
 	}
 
 
@@ -221,43 +221,59 @@ class LibraryModuleConfigurationTest {
 		assertEquals(actual = merged.enforcesSameVersionForAllKotlinDependencies, expected = false)
 	}
 
+	@Test
+	fun targetJvm_mergeWith_usesHigherJdkVersion() {
+		val a = LibraryModuleConfiguration.Target.Jvm(
+			customConfigurations = emptyList(),
+			enforcesSameVersionForAllKotlinDependencies = true,
+			jdkVersion = JdkVersion.v24,
+		)
+		val b = LibraryModuleConfiguration.Target.Jvm(
+			customConfigurations = emptyList(),
+			enforcesSameVersionForAllKotlinDependencies = true,
+			jdkVersion = JdkVersion.v21,
+		)
+		val merged = a.mergeWith(b)
+		assertEquals(actual = merged.jdkVersion, expected = JdkVersion.v24)
+	}
+
 
 	// Target.Js.mergeWith()
 
 	@Test
-	fun targetJs_mergeWith_orsNoBrowser() {
+	fun targetJs_mergeWith_andsIsBrowserEnabled() {
 		val a = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = emptyList(),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = true,
-			noNodeJs = false,
+			isBrowserEnabled = false,
+			isNodeJsEnabled = true,
 		)
 		val b = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = emptyList(),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = false,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = true,
 		)
 		val merged = a.mergeWith(b)
-		assertEquals(actual = merged.noBrowser, expected = true)
+		assertEquals(actual = merged.isBrowserEnabled, expected = false)
 	}
 
 	@Test
-	fun targetJs_mergeWith_orsNoNodeJs() {
+	fun targetJs_mergeWith_andsIsNodeJsEnabled() {
 		val a = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = emptyList(),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = false,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = true,
 		)
 		val b = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = emptyList(),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = true,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = false,
 		)
 		val merged = a.mergeWith(b)
-		assertEquals(actual = merged.noNodeJs, expected = true)
+		assertEquals(actual = merged.isNodeJsEnabled, expected = false)
 	}
 
 	@Test
@@ -265,14 +281,14 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = listOf({}),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = false,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = true,
 		)
 		val b = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = listOf({}),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = false,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = true,
 		)
 		val merged = a.mergeWith(b)
 		assertEquals(actual = merged.customConfigurations.size, expected = 2)
@@ -308,14 +324,14 @@ class LibraryModuleConfigurationTest {
 		val jsA = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = listOf({}),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = false,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = true,
 		)
 		val jsB = LibraryModuleConfiguration.Target.Js(
 			customConfigurations = listOf({}),
 			enforcesSameVersionForAllKotlinDependencies = true,
-			noBrowser = false,
-			noNodeJs = false,
+			isBrowserEnabled = true,
+			isNodeJsEnabled = true,
 		)
 		val a = LibraryModuleConfiguration.Targets(
 			common = LibraryModuleConfiguration.Target.Common.default,
@@ -365,17 +381,17 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration(
 			customConfigurations = listOf({}),
 			description = null,
+			isDokkaEnabled = true,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val b = LibraryModuleConfiguration(
 			customConfigurations = listOf({}),
 			description = null,
+			isDokkaEnabled = true,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val merged = a.mergeWith(b, addTargetsAutomatically = false)
@@ -387,17 +403,17 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration(
 			customConfigurations = emptyList(),
 			description = "original",
+			isDokkaEnabled = true,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val b = LibraryModuleConfiguration(
 			customConfigurations = emptyList(),
 			description = "override",
+			isDokkaEnabled = true,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val merged = a.mergeWith(b, addTargetsAutomatically = false)
@@ -409,17 +425,17 @@ class LibraryModuleConfigurationTest {
 		val a = LibraryModuleConfiguration(
 			customConfigurations = emptyList(),
 			description = null,
+			isDokkaEnabled = true,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val b = LibraryModuleConfiguration(
 			customConfigurations = emptyList(),
 			description = null,
+			isDokkaEnabled = true,
 			isPublishingEnabled = false,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val merged = a.mergeWith(b, addTargetsAutomatically = false)
@@ -427,24 +443,24 @@ class LibraryModuleConfigurationTest {
 	}
 
 	@Test
-	fun mergeWith_orsNoDokka() {
+	fun mergeWith_andsIsDokkaEnabled() {
 		val a = LibraryModuleConfiguration(
 			customConfigurations = emptyList(),
 			description = null,
+			isDokkaEnabled = true,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = false,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val b = LibraryModuleConfiguration(
 			customConfigurations = emptyList(),
 			description = null,
+			isDokkaEnabled = false,
 			isPublishingEnabled = true,
 			language = LibraryModuleConfiguration.Language.default,
-			noDokka = true,
 			targets = LibraryModuleConfiguration.Targets.default,
 		)
 		val merged = a.mergeWith(b, addTargetsAutomatically = false)
-		assertEquals(actual = merged.noDokka, expected = true)
+		assertEquals(actual = merged.isDokkaEnabled, expected = false)
 	}
 }

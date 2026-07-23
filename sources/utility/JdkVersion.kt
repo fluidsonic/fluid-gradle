@@ -3,6 +3,12 @@ package io.fluidsonic.gradle
 import org.jetbrains.kotlin.gradle.dsl.*
 
 
+/**
+ * A supported JVM toolchain version, ordered so that a later entry is "higher" than an earlier one.
+ *
+ * @property code The numeric JDK major version (e.g. `21`).
+ * @property kotlinJvmTargetValue The matching Kotlin compiler [JvmTarget].
+ */
 internal enum class JdkVersion(
 	val code: Int,
 	val kotlinJvmTargetValue: JvmTarget

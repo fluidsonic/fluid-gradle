@@ -19,7 +19,14 @@ public interface LibraryDsl {
 }
 
 
-/** Entry point for configuring a fluidsonic library project. Must be called in the root project's `build.gradle.kts`. */
+/**
+ * Entry point for configuring a fluidsonic library project. Must be called in the root project's `build.gradle.kts`.
+ *
+ * @param prefixName When `true` (the default) the Gradle project name is expected to be `fluid-$name`; when `false` it
+ *   must equal [name] verbatim.
+ * @throws IllegalStateException if called outside the root project, called more than once, or the project name does not
+ *   match the resulting library name.
+ */
 public fun Project.fluidLibrary(
 	name: String,
 	version: String,

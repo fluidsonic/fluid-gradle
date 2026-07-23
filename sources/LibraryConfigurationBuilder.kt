@@ -1,6 +1,7 @@
 package io.fluidsonic.gradle
 
 
+/** Collects [LibraryDsl] calls and resolves them into a [LibraryConfiguration] via [build]. */
 internal class LibraryConfigurationBuilder(
 	private val fullName: String,
 	private val name: String,

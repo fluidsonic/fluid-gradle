@@ -2,19 +2,21 @@ package io.fluidsonic.gradle
 
 import org.gradle.api.*
 import org.gradle.api.attributes.java.*
-import org.gradle.api.publish.maven.*
-import org.gradle.api.publish.maven.plugins.*
 import org.gradle.api.tasks.testing.*
 import org.gradle.api.tasks.testing.logging.*
-import org.gradle.jvm.tasks.*
 import org.gradle.kotlin.dsl.*
-import org.gradle.plugins.signing.*
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.internal.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlinx.serialization.gradle.*
 
 
+/**
+ * Applies a module's configuration to its [project]: sets up the Kotlin multiplatform and serialization plugins, the
+ * requested targets, language settings, dependencies, test tasks, and (when enabled) publishing.
+ *
+ * The [configuration] passed in is merged onto the library-wide `allModules {}` default before being applied.
+ */
 internal class LibraryModuleConfigurator(
 	configuration: LibraryModuleConfiguration,
 	private val project: Project,
@@ -27,12 +29,17 @@ internal class LibraryModuleConfigurator(
 	)
 
 
+	/** Applies the merged module configuration to the project. */
 	fun configure() {
 		with(project) {
 			configureBasics()
 
 			if (configuration.isPublishingEnabled)
-				configurePublishing()
+				PublishingConfigurator(
+					project = project,
+					configuration = configuration,
+					libraryConfiguration = libraryConfiguration,
+				).configure()
 
 			kotlin {
 				sourceSets.all {
@@ -71,9 +78,7 @@ internal class LibraryModuleConfigurator(
 			named(KotlinSourceSet.COMMON_TEST_SOURCE_SET_NAME) {
 				configureSourceSetBasics(pathSuffix = "", dependencies = targetConfiguration.testDependencies)
 
-				dependencies {
-					implementation(kotlin("test"))
-				}
+				addKotlinTestDependency()
 			}
 		}
 
@@ -103,20 +108,18 @@ internal class LibraryModuleConfigurator(
 				defaultSourceSet {
 					configureSourceSetBasics(pathSuffix = "-js", dependencies = targetConfiguration.testDependencies)
 
-					dependencies {
-						implementation(kotlin("test"))
-					}
+					addKotlinTestDependency()
 				}
 			}
 
-			if (!targetConfiguration.noBrowser)
+			if (targetConfiguration.isBrowserEnabled)
 				browser {
 					testTask {
 						configureTestTask()
 					}
 				}
 
-			if (!targetConfiguration.noNodeJs)
+			if (targetConfiguration.isNodeJsEnabled)
 				nodejs {
 					testTask {
 						configureTestTask()
@@ -171,12 +174,7 @@ internal class LibraryModuleConfigurator(
 				defaultSourceSet {
 					configureSourceSetBasics(pathSuffix = pathSuffix, dependencies = targetConfiguration.testDependencies)
 
-					dependencies {
-						implementation(kotlin("test-junit5"))
-						implementation("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
-
-						runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
-					}
+					addJvmTestDependencies()
 				}
 			}
 
@@ -213,7 +211,7 @@ internal class LibraryModuleConfigurator(
 		val jvmConfiguration = configuration.targets.jvm ?: return
 
 		configureJvmTarget(
-			jdkVersion = JdkVersion.v21,
+			jdkVersion = jvmConfiguration.jdkVersion,
 			targetConfiguration = jvmConfiguration,
 			targetName = "jvm",
 			pathSuffix = "-jvm"
@@ -241,6 +239,23 @@ internal class LibraryModuleConfigurator(
 	}
 
 
+	private fun KotlinSourceSet.addKotlinTestDependency() {
+		dependencies {
+			implementation(kotlin("test"))
+		}
+	}
+
+
+	private fun KotlinSourceSet.addJvmTestDependencies() {
+		dependencies {
+			implementation(kotlin("test-junit5"))
+			implementation("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
+
+			runtimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+		}
+	}
+
+
 	private fun KotlinTarget.configureTargetBasics(targetConfiguration: LibraryModuleConfiguration.Target) {
 		if (targetConfiguration.enforcesSameVersionForAllKotlinDependencies) {
 			val kotlinVersion = project.getKotlinPluginVersion()
@@ -260,7 +275,7 @@ internal class LibraryModuleConfigurator(
 
 
 	private fun Project.configureBasics() {
-		if (!configuration.noDokka)
+		if (configuration.isDokkaEnabled)
 			pluginManager.apply("org.jetbrains.dokka")
 
 		apply<KotlinMultiplatformPluginWrapper>()
@@ -270,12 +285,10 @@ internal class LibraryModuleConfigurator(
 		version = libraryConfiguration.version
 		description = configuration.description?.ifEmpty { null }
 
-		repositories {
-			mavenCentral()
-		}
+		useMavenCentralRepository()
 
 		kotlin {
-			if (!configuration.language.noExplicitApi)
+			if (configuration.language.isExplicitApiEnabled)
 				explicitApi()
 
 			configureCommonTarget()
@@ -285,68 +298,4 @@ internal class LibraryModuleConfigurator(
 	}
 
 
-	private fun Project.configurePublishing() {
-		val githubToken: String? = System.getenv("GITHUB_PACKAGES_AUTH_TOKEN") ?: findProperty("GITHUB_PACKAGES_AUTH_TOKEN") as String?
-
-		apply<MavenPublishPlugin>()
-		apply<SigningPlugin>()
-
-		publishing {
-			if (githubToken != null)
-				repositories {
-					maven {
-						name = "github"
-						setUrl("https://maven.pkg.github.com/fluidsonic/${libraryConfiguration.fullName}")
-						credentials {
-							username = "unused"
-							password = githubToken
-						}
-					}
-				}
-
-			publications.withType<MavenPublication> {
-				pom {
-					name.set(libraryConfiguration.fullName)
-					description.set(project.description)
-					url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}")
-					developers {
-						developer {
-							id.set("fluidsonic")
-							name.set("Marc Knaup")
-							email.set("marc@knaup.io")
-						}
-					}
-					licenses {
-						license {
-							name.set("Apache License 2.0")
-							url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}/blob/master/LICENSE")
-						}
-					}
-					scm {
-						connection.set("scm:git:https://github.com/fluidsonic/${libraryConfiguration.fullName}.git")
-						developerConnection.set("scm:git:git@github.com:fluidsonic/${libraryConfiguration.fullName}.git")
-						url.set("https://github.com/fluidsonic/${libraryConfiguration.fullName}")
-					}
-				}
-			}
-		}
-
-		signing {
-			sign(publishing.publications)
-		}
-
-		if (configuration.targets.jvm != null) {
-			val javadocJar = tasks.register<Jar>("javadocJar") {
-				if (!configuration.noDokka)
-					from(tasks.named("dokkaGeneratePublicationHtml"))
-
-				archiveClassifier.set("javadoc")
-			}
-
-			publishing.publications
-				.filterIsInstance<MavenPublication>()
-				.single { it.name == "jvm" }
-				.artifact(javadocJar)
-		}
-	}
 }

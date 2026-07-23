@@ -21,13 +21,23 @@ public interface LibraryModuleDsl {
 	public fun language(configure: LanguageDsl.() -> Unit)
 
 	/** Disables Dokka documentation generation for this module. */
-	public fun noDokka()
+	public fun disableDokka()
+
+	/** Disables Dokka documentation generation for this module. */
+	@Deprecated("Renamed to disableDokka().", ReplaceWith("disableDokka()"))
+	public fun noDokka(): Unit =
+		disableDokka()
 
 	/** Configures the compilation targets for this module. */
 	public fun targets(configure: TargetsDsl.() -> Unit)
 
 	/** Excludes this module from Maven publication. */
-	public fun withoutPublishing()
+	public fun disablePublishing()
+
+	/** Excludes this module from Maven publication. */
+	@Deprecated("Renamed to disablePublishing().", ReplaceWith("disablePublishing()"))
+	public fun withoutPublishing(): Unit =
+		disablePublishing()
 
 
 	/** DSL for configuring the common (metadata) target. */
@@ -90,24 +100,34 @@ public interface LibraryModuleDsl {
 	@Dsl
 	public interface JsDependenciesDsl : DependenciesDsl {
 
+		/** Adds a development-only npm dependency. */
 		public fun devNpm(name: String, version: String): Any
 
+		/** Adds a development-only npm dependency from a local [directory]. */
 		public fun devNpm(name: String, directory: File): Any
 
+		/** Adds a development-only npm dependency from a local [directory], taking its name from the package. */
 		public fun devNpm(directory: File): Any
 
+		/** Adds an npm dependency. Set [generateExternals] to generate Kotlin external declarations for the package. */
 		public fun npm(name: String, version: String, generateExternals: Boolean = false): Any
 
+		/** Adds an npm dependency from a local [directory]. Set [generateExternals] to generate Kotlin external declarations. */
 		public fun npm(name: String, directory: File, generateExternals: Boolean = false): Any
 
+		/** Adds an npm dependency from a local [directory], taking its name from the package. Set [generateExternals] to generate Kotlin external declarations. */
 		public fun npm(directory: File, generateExternals: Boolean = false): Any
 
+		/** Adds an optional npm dependency. Set [generateExternals] to generate Kotlin external declarations for the package. */
 		public fun optionalNpm(name: String, version: String, generateExternals: Boolean = false): Any
 
+		/** Adds an optional npm dependency from a local [directory]. Set [generateExternals] to generate Kotlin external declarations. */
 		public fun optionalNpm(name: String, directory: File, generateExternals: Boolean = false): Any
 
+		/** Adds an optional npm dependency from a local [directory], taking its name from the package. Set [generateExternals] to generate Kotlin external declarations. */
 		public fun optionalNpm(directory: File, generateExternals: Boolean = false): Any
 
+		/** Adds an npm peer dependency. */
 		public fun peerNpm(name: String, version: String): Any
 	}
 
@@ -148,7 +168,16 @@ public interface LibraryModuleDsl {
 
 	/** DSL for configuring the Kotlin/JVM target. */
 	@Dsl
-	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget>
+	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget> {
+
+		/**
+		 * Selects the JDK version this target compiles against.
+		 *
+		 * Defaults to JDK 21 when not called. Only versions 21 to 24 are supported; any other [version] throws
+		 * [IllegalArgumentException].
+		 */
+		public fun jdk(version: Int)
+	}
 
 
 	/** DSL for configuring Kotlin language settings. */
@@ -165,7 +194,12 @@ public interface LibraryModuleDsl {
 		public fun version(version: String)
 
 		/** Disables explicit API mode for this module. */
-		public fun withoutExplicitApi()
+		public fun disableExplicitApi()
+
+		/** Disables explicit API mode for this module. */
+		@Deprecated("Renamed to disableExplicitApi().", ReplaceWith("disableExplicitApi()"))
+		public fun withoutExplicitApi(): Unit =
+			disableExplicitApi()
 	}
 
 
@@ -183,7 +217,12 @@ public interface LibraryModuleDsl {
 		public fun testDependencies(configure: Dependencies.() -> Unit)
 
 		/** Disables the default BOM that enforces the same version for all Kotlin dependencies. */
-		public fun withoutEnforcingSameVersionForAllKotlinDependencies()
+		public fun disableKotlinDependencyVersionAlignment()
+
+		/** Disables the default BOM that enforces the same version for all Kotlin dependencies. */
+		@Deprecated("Renamed to disableKotlinDependencyVersionAlignment().", ReplaceWith("disableKotlinDependencyVersionAlignment()"))
+		public fun withoutEnforcingSameVersionForAllKotlinDependencies(): Unit =
+			disableKotlinDependencyVersionAlignment()
 	}
 
 

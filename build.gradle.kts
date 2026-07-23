@@ -1,4 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.*
+import io.fluidsonic.gradle.buildsupport.*
 import org.jetbrains.kotlin.gradle.dsl.*
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
@@ -90,15 +91,15 @@ val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
 val sonatypePassword: String? = System.getenv("SONATYPE_PASSWORD")
 if (sonatypeUsername != null && sonatypePassword != null) {
 	nexusPublishing {
-		packageGroup = "io.fluidsonic"
+		packageGroup = PublishingMetadata.packageGroup
 
 		repositories {
 			sonatype {
 				username = sonatypeUsername
 				password = sonatypePassword
 
-				nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
-				snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+				nexusUrl.set(uri(PublishingMetadata.sonatypeNexusUrl))
+				snapshotRepositoryUrl.set(uri(PublishingMetadata.sonatypeSnapshotRepositoryUrl))
 			}
 		}
 	}
@@ -126,24 +127,24 @@ if ((sonatypeUsername != null && sonatypePassword != null) || githubToken != nul
 		pom {
 			name.set(project.name)
 			description.set(project.description)
-			url.set("https://github.com/fluidsonic/${project.name}")
+			url.set(PublishingMetadata.projectUrl(project.name))
 			developers {
 				developer {
-					id.set("fluidsonic")
-					name.set("Marc Knaup")
-					email.set("marc@knaup.io")
+					id.set(PublishingMetadata.developerId)
+					name.set(PublishingMetadata.developerName)
+					email.set(PublishingMetadata.developerEmail)
 				}
 			}
 			licenses {
 				license {
-					name.set("Apache License 2.0")
-					url.set("https://github.com/fluidsonic/${project.name}/blob/master/LICENSE")
+					name.set(PublishingMetadata.licenseName)
+					url.set(PublishingMetadata.licenseUrl(project.name))
 				}
 			}
 			scm {
-				connection.set("scm:git:https://github.com/fluidsonic/${project.name}.git")
-				developerConnection.set("scm:git:git@github.com:fluidsonic/${project.name}.git")
-				url.set("https://github.com/fluidsonic/${project.name}")
+				connection.set(PublishingMetadata.scmConnection(project.name))
+				developerConnection.set(PublishingMetadata.scmDeveloperConnection(project.name))
+				url.set(PublishingMetadata.projectUrl(project.name))
 			}
 		}
 	}
@@ -156,7 +157,3 @@ if ((sonatypeUsername != null && sonatypePassword != null) || githubToken != nul
 
 fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
 	tasks.withType(configuration)
-
-
-fun isUnstableVersion(version: String) =
-	Regex("\\b(alpha|beta|dev|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)

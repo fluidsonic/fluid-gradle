@@ -17,7 +17,9 @@ public fun Project.dependencyUpdates(configuration: DependencyUpdatesTask.() -> 
 
 /** The [KotlinMultiplatformExtension] registered on this project. */
 public val Project.kotlin: KotlinMultiplatformExtension
-	get() = extensions.findByType(KotlinMultiplatformExtension::class)!!
+	get() = checkNotNull(extensions.findByType(KotlinMultiplatformExtension::class)) {
+		"The Kotlin multiplatform plugin must be applied before accessing project.kotlin."
+	}
 
 
 /** Configures the [KotlinMultiplatformExtension] on this project. */
@@ -26,20 +28,32 @@ public fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) {
 }
 
 
+/** The [PublishingExtension] registered on this project. */
 internal val Project.publishing: PublishingExtension
 	get() = (this as ExtensionAware).extensions.getByName("publishing") as PublishingExtension
 
 
+/** Configures the [PublishingExtension] on this project. */
 internal fun Project.publishing(configuration: PublishingExtension.() -> Unit) =
 	configure(configuration)
 
 
+/** The [SigningExtension] registered on this project. */
 internal val Project.signing: SigningExtension
 	get() = the()
 
 
+/** Configures the [SigningExtension] on this project. */
 internal fun Project.signing(configuration: SigningExtension.() -> Unit) {
 	configure(configuration)
+}
+
+
+/** Registers Maven Central as a dependency repository for this project. */
+internal fun Project.useMavenCentralRepository() {
+	repositories {
+		mavenCentral()
+	}
 }
 
 

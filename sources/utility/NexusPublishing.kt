@@ -10,6 +10,7 @@ internal val Project.nexusPublishing: NexusPublishExtension
 	get() = extensionOf(this, "nexusPublishing") as NexusPublishExtension
 
 
+/** Configures the [NexusPublishExtension] on this project. */
 internal fun Project.nexusPublishing(action: NexusPublishExtension.() -> Unit) {
 	extensions.configure("nexusPublishing", action)
 }

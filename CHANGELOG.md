@@ -5,6 +5,7 @@
 ### Added
 - Dependabot configuration for automated dependency updates (Gradle and GitHub Actions ecosystems, weekly)
 - Scout knowledge base under `docs/scout/` documenting non-obvious, repo-specific conventions and traps
+- Per-module JVM target selection via `jvm { jdk(version) }` in the target DSL (JDK 21–24; defaults to 21)
 
 ### Changed
 - Kotlin updated to 2.4.10 (KSP to 2.3.10); language and API baseline raised to 2.4
@@ -15,6 +16,15 @@
 - Gradle Versions plugin updated to 0.54.0
 - GitHub Actions pinned to full commit SHAs (`actions/checkout` v7.0.1, `actions/setup-java` v5.6.0)
 - JUnit test dependencies consolidated onto the Gradle version catalog
+- Renamed the opt-out DSL methods to `disableDokka()`, `disablePublishing()`, `disableExplicitApi()`, and `disableKotlinDependencyVersionAlignment()` for naming consistency
+- CI now runs on pull requests, caches Gradle, and tests against JDK 21 and 25; the Gradle wrapper distribution is pinned by SHA-256 and validated in CI
+
+### Deprecated
+- `noDokka()`, `withoutPublishing()`, `withoutExplicitApi()`, and `withoutEnforcingSameVersionForAllKotlinDependencies()` — use the corresponding `disable…` methods (aliases retained for one release)
+
+### Fixed
+- Accessing `project.kotlin` before the Kotlin multiplatform plugin is applied now fails with a clear message instead of a bare `NullPointerException`
+- Unsupported dependency notations now fail fast with a clear error instead of being silently passed through
 
 ### Removed
 - `withLanguageFeature(...)` from the language DSL — the underlying Kotlin compiler API was deprecated to error level and removed in Kotlin 2.4 with no replacement
