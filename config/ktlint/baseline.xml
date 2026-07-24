@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<baseline version="1.0">
+    <file name="sources/Versions.kt">
+        <error line="6" column="12" source="standard:property-naming" />
+        <error line="7" column="12" source="standard:property-naming" />
+    </file>
+    <file name="sources/utility/JdkVersion.kt">
+        <error line="13" column="2" source="standard:enum-entry-name-case" />
+        <error line="14" column="2" source="standard:enum-entry-name-case" />
+        <error line="15" column="2" source="standard:enum-entry-name-case" />
+        <error line="16" column="2" source="standard:enum-entry-name-case" />
+    </file>
+</baseline>

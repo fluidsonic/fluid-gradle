@@ -1,14 +1,12 @@
 package io.fluidsonic.gradle
 
-import io.github.gradlenexus.publishplugin.*
-import org.gradle.api.*
-import org.gradle.kotlin.dsl.accessors.runtime.*
-
+import io.github.gradlenexus.publishplugin.NexusPublishExtension
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.accessors.runtime.extensionOf
 
 /** The [NexusPublishExtension] registered on this project. */
 internal val Project.nexusPublishing: NexusPublishExtension
 	get() = extensionOf(this, "nexusPublishing") as NexusPublishExtension
-
 
 /** Configures the [NexusPublishExtension] on this project. */
 internal fun Project.nexusPublishing(action: NexusPublishExtension.() -> Unit) {

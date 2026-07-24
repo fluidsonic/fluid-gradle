@@ -1,14 +1,10 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.*
-import org.gradle.kotlin.dsl.*
-
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.the
 
 /** Gradle extension registered on the root project to carry the resolved [LibraryConfiguration] to each module. */
-internal data class LibraryPluginExtension(
-	val configuration: LibraryConfiguration
-)
-
+internal data class LibraryPluginExtension(val configuration: LibraryConfiguration)
 
 /**
  * The [LibraryPluginExtension] registered on the root project, regardless of which project this is called on.

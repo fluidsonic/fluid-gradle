@@ -1,8 +1,9 @@
 package io.fluidsonic.gradle
 
-import org.gradle.testfixtures.*
-import kotlin.test.*
-
+import org.gradle.testfixtures.ProjectBuilder
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class LibraryDslTest {
 

@@ -1,19 +1,23 @@
 package io.fluidsonic.gradle
 
-import com.github.benmanes.gradle.versions.updates.*
-import org.gradle.api.*
-import org.gradle.api.plugins.*
-import org.gradle.api.publish.*
-import org.gradle.api.tasks.wrapper.*
-import org.gradle.kotlin.dsl.*
-import org.gradle.plugins.signing.*
-import org.jetbrains.kotlin.gradle.dsl.*
-
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.gradle.api.Action
+import org.gradle.api.DomainObjectCollection
+import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.tasks.wrapper.Wrapper
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.findByType
+import org.gradle.kotlin.dsl.repositories
+import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
+import org.gradle.plugins.signing.SigningExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /** Configures all [DependencyUpdatesTask] instances in this project. */
 public fun Project.dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit): DomainObjectCollection<DependencyUpdatesTask> =
 	tasks.withType(configuration)
-
 
 /** The [KotlinMultiplatformExtension] registered on this project. */
 public val Project.kotlin: KotlinMultiplatformExtension
@@ -21,33 +25,26 @@ public val Project.kotlin: KotlinMultiplatformExtension
 		"The Kotlin multiplatform plugin must be applied before accessing project.kotlin."
 	}
 
-
 /** Configures the [KotlinMultiplatformExtension] on this project. */
 public fun Project.kotlin(configure: Action<KotlinMultiplatformExtension>) {
 	extensions.configure(KotlinMultiplatformExtension::class, configure)
 }
 
-
 /** The [PublishingExtension] registered on this project. */
 internal val Project.publishing: PublishingExtension
 	get() = (this as ExtensionAware).extensions.getByName("publishing") as PublishingExtension
 
-
 /** Configures the [PublishingExtension] on this project. */
-internal fun Project.publishing(configuration: PublishingExtension.() -> Unit) =
-	configure(configuration)
-
+internal fun Project.publishing(configuration: PublishingExtension.() -> Unit) = configure(configuration)
 
 /** The [SigningExtension] registered on this project. */
 internal val Project.signing: SigningExtension
 	get() = the()
 
-
 /** Configures the [SigningExtension] on this project. */
 internal fun Project.signing(configuration: SigningExtension.() -> Unit) {
 	configure(configuration)
 }
-
 
 /** Registers Maven Central as a dependency repository for this project. */
 internal fun Project.useMavenCentralRepository() {
@@ -56,12 +53,8 @@ internal fun Project.useMavenCentralRepository() {
 	}
 }
 
-
 /** Configures all [Wrapper] tasks in this project. */
-public fun Project.wrapper(configuration: Wrapper.() -> Unit): DomainObjectCollection<Wrapper> =
-	tasks.withType(configuration)
-
+public fun Project.wrapper(configuration: Wrapper.() -> Unit): DomainObjectCollection<Wrapper> = tasks.withType(configuration)
 
 /** Returns `true` if the given [version] string looks like a pre-release (alpha, beta, RC, etc.). */
-public fun isUnstableVersion(version: String): Boolean =
-	Regex("\\b(alpha|beta|dev|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)
+public fun isUnstableVersion(version: String): Boolean = Regex("\\b(alpha|beta|dev|eap|m|rc|snapshot)\\d*\\b", RegexOption.IGNORE_CASE).containsMatchIn(version)

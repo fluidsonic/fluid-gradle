@@ -1,4 +1,5 @@
 [versions]
+detekt = "2.0.0-alpha.5"
 dokka = "2.2.0"
 gradle-nexus-publish = "2.0.0"
 gradle-plugin-publish = "2.1.1"
@@ -6,6 +7,7 @@ gradle-versions = "0.54.0"
 junit = "6.1.2"
 kotlin = "2.4.10"
 ksp = "2.3.10"
+ktlint = "14.2.0"
 
 [libraries]
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
@@ -19,7 +21,9 @@ kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serializat
 ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 
 [plugins]
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 gradle-nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradle-nexus-publish" }
 gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
 gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

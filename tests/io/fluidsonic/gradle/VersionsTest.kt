@@ -1,7 +1,7 @@
 package io.fluidsonic.gradle
 
-import kotlin.test.*
-
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class VersionsTest {
 
@@ -11,7 +11,6 @@ class VersionsTest {
 		// (e.g. 1.2.3, 1.2.3-rc.1, 1.2.3+build.5, 1.2.3-rc.1+build.5).
 		val semanticVersion = Regex("""^\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?(?:\+[0-9A-Za-z][0-9A-Za-z.-]*)?$""")
 	}
-
 
 	@Test
 	fun junit_isSemanticVersion() {

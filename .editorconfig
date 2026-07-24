@@ -1,0 +1,23 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = tab
+
+[*.{kt,kts}]
+# The project uses literal TAB indentation and explicit API mode — ktlint must
+# preserve tabs and never rewrite them to spaces.
+indent_style = tab
+# IntelliJ-compatible code style matches the project's existing formatting most
+# closely and avoids the churn of ktlint_official's stricter conventions.
+ktlint_code_style = intellij_idea
+# Generous line-length cap; ktlint is the single owner of line length (detekt's
+# MaxLineLength is disabled to avoid double-reporting).
+max_line_length = 160
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2

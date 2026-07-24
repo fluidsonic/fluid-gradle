@@ -1,12 +1,13 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.artifacts.dsl.*
-import org.jetbrains.kotlin.gradle.dsl.*
-import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.plugin.mpp.*
-import org.jetbrains.kotlin.gradle.targets.js.dsl.*
-import org.jetbrains.kotlin.gradle.targets.jvm.*
-
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.jetbrains.kotlin.gradle.plugin.LanguageSettingsBuilder
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinMetadataCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
+import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
+import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
 /** Resolved configuration for a single library module, produced by [LibraryModuleConfigurationBuilder]. */
 internal class LibraryModuleConfiguration(
@@ -28,18 +29,14 @@ internal class LibraryModuleConfiguration(
 	 * @param addTargetsAutomatically When `true`, a target present only in this configuration is carried into the
 	 *   result even if [other] declares no targets; when `false`, only targets [other] also declares survive.
 	 */
-	fun mergeWith(
-		other: LibraryModuleConfiguration,
-		addTargetsAutomatically: Boolean,
-	) = LibraryModuleConfiguration(
+	fun mergeWith(other: LibraryModuleConfiguration, addTargetsAutomatically: Boolean) = LibraryModuleConfiguration(
 		customConfigurations = customConfigurations + other.customConfigurations,
 		description = other.description ?: description,
 		language = language.mergeWith(other.language),
 		isDokkaEnabled = isDokkaEnabled && other.isDokkaEnabled,
 		isPublishingEnabled = isPublishingEnabled && other.isPublishingEnabled,
-		targets = targets.mergeWith(other.targets, addAutomatically = addTargetsAutomatically)
+		targets = targets.mergeWith(other.targets, addAutomatically = addTargetsAutomatically),
 	)
-
 
 	companion object {
 
@@ -49,10 +46,9 @@ internal class LibraryModuleConfiguration(
 			isDokkaEnabled = true,
 			language = Language.default,
 			isPublishingEnabled = true,
-			targets = Targets.default
+			targets = Targets.default,
 		)
 	}
-
 
 	/** Dependency declarations for a single source set, kept as deferred configuration blocks per dependency kind. */
 	class Dependencies(
@@ -67,7 +63,6 @@ internal class LibraryModuleConfiguration(
 			kspConfigurations = kspConfigurations + other.kspConfigurations,
 		)
 
-
 		companion object {
 
 			val default = Dependencies(
@@ -77,7 +72,6 @@ internal class LibraryModuleConfiguration(
 			)
 		}
 	}
-
 
 	/** Kotlin language settings for a module: opt-in experimental APIs, explicit-API mode, and language version. */
 	class Language(
@@ -91,9 +85,8 @@ internal class LibraryModuleConfiguration(
 			customConfigurations = customConfigurations + other.customConfigurations,
 			experimentalApisToUse = experimentalApisToUse + other.experimentalApisToUse,
 			isExplicitApiEnabled = isExplicitApiEnabled && other.isExplicitApiEnabled,
-			version = other.version ?: version
+			version = other.version ?: version,
 		)
-
 
 		companion object {
 
@@ -101,16 +94,13 @@ internal class LibraryModuleConfiguration(
 				customConfigurations = emptyList(),
 				experimentalApisToUse = emptySet(),
 				isExplicitApiEnabled = true,
-				version = null
+				version = null,
 			)
 		}
 	}
 
-
 	/** Base for a single compilation target's resolved configuration. */
-	sealed class Target(
-		val enforcesSameVersionForAllKotlinDependencies: Boolean,
-	) {
+	sealed class Target(val enforcesSameVersionForAllKotlinDependencies: Boolean) {
 
 		/** Configuration for the common (metadata) target. */
 		class Common(
@@ -119,16 +109,15 @@ internal class LibraryModuleConfiguration(
 			enforcesSameVersionForAllKotlinDependencies: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
 		) : Target(
-			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 		) {
 
 			fun mergeWith(other: Common) = Common(
 				customConfigurations = customConfigurations + other.customConfigurations,
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
+				testDependencies = testDependencies.mergeWith(other.testDependencies),
 			)
-
 
 			companion object {
 
@@ -136,11 +125,10 @@ internal class LibraryModuleConfiguration(
 					customConfigurations = emptyList(),
 					dependencies = Dependencies.default,
 					enforcesSameVersionForAllKotlinDependencies = true,
-					testDependencies = Dependencies.default
+					testDependencies = Dependencies.default,
 				)
 			}
 		}
-
 
 		/** Configuration for the Kotlin/JS target, including which browser and Node.js sub-targets are enabled. */
 		class Js(
@@ -151,7 +139,7 @@ internal class LibraryModuleConfiguration(
 			val isNodeJsEnabled: Boolean,
 			val testDependencies: Dependencies = Dependencies.default,
 		) : Target(
-			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 		) {
 
 			fun mergeWith(other: Js) = Js(
@@ -160,10 +148,9 @@ internal class LibraryModuleConfiguration(
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
 				isBrowserEnabled = isBrowserEnabled && other.isBrowserEnabled,
 				isNodeJsEnabled = isNodeJsEnabled && other.isNodeJsEnabled,
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
+				testDependencies = testDependencies.mergeWith(other.testDependencies),
 			)
 		}
-
 
 		/** Configuration for the Kotlin/JVM target, including the [jdkVersion] it compiles against. */
 		class Jvm(
@@ -173,7 +160,7 @@ internal class LibraryModuleConfiguration(
 			val jdkVersion: JdkVersion = JdkVersion.v21,
 			val testDependencies: Dependencies = Dependencies.default,
 		) : Target(
-			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies
+			enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies,
 		) {
 
 			// The higher JDK version wins on merge: a JDK selection is a minimum requirement, so taking the
@@ -183,32 +170,26 @@ internal class LibraryModuleConfiguration(
 				dependencies = dependencies.mergeWith(other.dependencies),
 				enforcesSameVersionForAllKotlinDependencies = enforcesSameVersionForAllKotlinDependencies && other.enforcesSameVersionForAllKotlinDependencies,
 				jdkVersion = maxOf(jdkVersion, other.jdkVersion),
-				testDependencies = testDependencies.mergeWith(other.testDependencies)
+				testDependencies = testDependencies.mergeWith(other.testDependencies),
 			)
 		}
 	}
 
-
 	/** The set of compilation targets for a module. [js] and [jvm] are `null` when that target is not enabled. */
-	class Targets(
-		val common: Target.Common,
-		val js: Target.Js?,
-		val jvm: Target.Jvm?,
-	) {
+	class Targets(val common: Target.Common, val js: Target.Js?, val jvm: Target.Jvm?) {
 
 		fun mergeWith(other: Targets, addAutomatically: Boolean) = Targets(
 			common = common.mergeWith(other.common),
 			js = other.js?.let { js?.mergeWith(it) } ?: other.js ?: js.takeIf { addAutomatically },
-			jvm = other.jvm?.let { jvm?.mergeWith(it) } ?: other.jvm ?: jvm.takeIf { addAutomatically }
+			jvm = other.jvm?.let { jvm?.mergeWith(it) } ?: other.jvm ?: jvm.takeIf { addAutomatically },
 		)
-
 
 		companion object {
 
 			val default = Targets(
 				common = Target.Common.default,
 				js = null,
-				jvm = null
+				jvm = null,
 			)
 		}
 	}

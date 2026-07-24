@@ -1,6 +1,7 @@
-import com.github.benmanes.gradle.versions.updates.*
-import io.fluidsonic.gradle.buildsupport.*
-import org.jetbrains.kotlin.gradle.dsl.*
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import io.fluidsonic.gradle.buildsupport.PublishingMetadata
+import io.fluidsonic.gradle.buildsupport.isUnstableVersion
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
@@ -11,10 +12,12 @@ plugins {
 	`kotlin-dsl`
 	`maven-publish`
 	signing
+	alias(libs.plugins.detekt)
 	alias(libs.plugins.gradle.nexus.publish)
 	alias(libs.plugins.gradle.plugin.publish)
 	alias(libs.plugins.gradle.versions)
 	alias(libs.plugins.kotlin.jvm)
+	alias(libs.plugins.ktlint)
 }
 
 dependencies {
@@ -54,6 +57,12 @@ kotlin {
 	}
 	explicitApi()
 	jvmToolchain(21)
+}
+
+detekt {
+	buildUponDefaultConfig = true
+	config.setFrom(files("config/detekt/detekt.yml"))
+	source.setFrom(files("sources", "tests"))
 }
 
 repositories {
@@ -154,6 +163,4 @@ if ((sonatypeUsername != null && sonatypePassword != null) || githubToken != nul
 	}
 }
 
-
-fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) =
-	tasks.withType(configuration)
+fun dependencyUpdates(configuration: DependencyUpdatesTask.() -> Unit) = tasks.withType(configuration)

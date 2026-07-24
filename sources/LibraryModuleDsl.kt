@@ -1,14 +1,15 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.*
-import org.gradle.api.artifacts.*
-import org.jetbrains.kotlin.gradle.dsl.*
-import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.plugin.mpp.*
-import org.jetbrains.kotlin.gradle.targets.js.dsl.*
-import org.jetbrains.kotlin.gradle.targets.jvm.*
-import java.io.*
-
+import org.gradle.api.Project
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.jetbrains.kotlin.gradle.plugin.LanguageSettingsBuilder
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinMetadataCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
+import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
+import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+import java.io.File
 
 /** DSL for configuring a library module. */
 @Dsl
@@ -25,8 +26,7 @@ public interface LibraryModuleDsl {
 
 	/** Disables Dokka documentation generation for this module. */
 	@Deprecated("Renamed to disableDokka().", ReplaceWith("disableDokka()"))
-	public fun noDokka(): Unit =
-		disableDokka()
+	public fun noDokka(): Unit = disableDokka()
 
 	/** Configures the compilation targets for this module. */
 	public fun targets(configure: TargetsDsl.() -> Unit)
@@ -36,17 +36,16 @@ public interface LibraryModuleDsl {
 
 	/** Excludes this module from Maven publication. */
 	@Deprecated("Renamed to disablePublishing().", ReplaceWith("disablePublishing()"))
-	public fun withoutPublishing(): Unit =
-		disablePublishing()
-
+	public fun withoutPublishing(): Unit = disablePublishing()
 
 	/** DSL for configuring the common (metadata) target. */
 	@Dsl
 	public interface CommonTargetDsl : TargetDsl<DependenciesDsl, KotlinOnlyTarget<KotlinMetadataCompilation<Any>>>
 
-
 	/** DSL for declaring dependencies on a source set. */
 	@Dsl
+	// DSL surface: one method per supported dependency notation, so the function count is intentional.
+	@Suppress("TooManyFunctions")
 	public interface DependenciesDsl {
 
 		/** Adds an API dependency visible to consumers. */
@@ -76,7 +75,6 @@ public interface LibraryModuleDsl {
 		/** Adds a runtime-only dependency not available at compile time with additional [configure] block. */
 		public fun runtimeOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 
-
 		/** Creates a dependency notation for a `io.fluidsonic.*` module. */
 		public fun fluid(simpleModuleName: String, version: String, usePrefix: Boolean = true): Any
 
@@ -87,13 +85,11 @@ public interface LibraryModuleDsl {
 		public fun kotlinx(simpleModuleName: String, version: String, usePrefix: Boolean = true): Any
 
 		/** Creates a dependency notation for a Gradle project by [path]. */
-		public fun project(path: String, configuration: String? = null): Any =
-			project(mapOf("configuration" to configuration, "path" to path))
+		public fun project(path: String, configuration: String? = null): Any = project(mapOf("configuration" to configuration, "path" to path))
 
 		/** Creates a dependency notation for a Gradle project by [notation] map. */
 		public fun project(notation: Map<String, Any?>): Any
 	}
-
 
 	/** DSL for declaring JS-specific dependencies, including npm packages. */
 	@Deprecated("JS target support will be removed in a future version.")
@@ -131,7 +127,6 @@ public interface LibraryModuleDsl {
 		public fun peerNpm(name: String, version: String): Any
 	}
 
-
 	/** DSL for configuring the Kotlin/JS target. */
 	@Deprecated("JS target support will be removed in a future version.")
 	@Suppress("DEPRECATION")
@@ -144,7 +139,6 @@ public interface LibraryModuleDsl {
 		/** Disables Node.js sub-target. */
 		public fun withoutNodeJs()
 	}
-
 
 	/** DSL for declaring JVM-specific dependencies, including annotation processors. */
 	@Dsl
@@ -165,7 +159,6 @@ public interface LibraryModuleDsl {
 		public fun ksp(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit)
 	}
 
-
 	/** DSL for configuring the Kotlin/JVM target. */
 	@Dsl
 	public interface JvmTargetDsl : TargetDsl<JvmDependenciesDsl, KotlinJvmTarget> {
@@ -178,7 +171,6 @@ public interface LibraryModuleDsl {
 		 */
 		public fun jdk(version: Int)
 	}
-
 
 	/** DSL for configuring Kotlin language settings. */
 	@Dsl
@@ -198,10 +190,8 @@ public interface LibraryModuleDsl {
 
 		/** Disables explicit API mode for this module. */
 		@Deprecated("Renamed to disableExplicitApi().", ReplaceWith("disableExplicitApi()"))
-		public fun withoutExplicitApi(): Unit =
-			disableExplicitApi()
+		public fun withoutExplicitApi(): Unit = disableExplicitApi()
 	}
-
 
 	/** Base DSL for configuring a compilation target. */
 	@Dsl
@@ -221,10 +211,8 @@ public interface LibraryModuleDsl {
 
 		/** Disables the default BOM that enforces the same version for all Kotlin dependencies. */
 		@Deprecated("Renamed to disableKotlinDependencyVersionAlignment().", ReplaceWith("disableKotlinDependencyVersionAlignment()"))
-		public fun withoutEnforcingSameVersionForAllKotlinDependencies(): Unit =
-			disableKotlinDependencyVersionAlignment()
+		public fun withoutEnforcingSameVersionForAllKotlinDependencies(): Unit = disableKotlinDependencyVersionAlignment()
 	}
-
 
 	/** DSL for declaring which compilation targets to enable. */
 	@Dsl
@@ -242,14 +230,10 @@ public interface LibraryModuleDsl {
 	}
 }
 
-
 /** Entry point for configuring a library module. Must be called in each subproject's `build.gradle.kts`. */
-public fun Project.fluidLibraryModule(
-	description: String,
-	configure: LibraryModuleDsl.() -> Unit,
-) {
+public fun Project.fluidLibraryModule(description: String, configure: LibraryModuleDsl.() -> Unit) {
 	LibraryModuleConfigurator(
 		configuration = LibraryModuleConfigurationBuilder(description = description).apply(configure).build(),
-		project = project
+		project = project,
 	).configure()
 }

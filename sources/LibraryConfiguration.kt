@@ -1,6 +1,5 @@
 package io.fluidsonic.gradle
 
-
 /**
  * Resolved root-level configuration produced by [LibraryConfigurationBuilder] and consumed by [LibraryConfigurator].
  *
@@ -14,5 +13,5 @@ internal class LibraryConfiguration(
 	val fullName: String,
 	val gradleVersion: String,
 	val name: String,
-	val version: String
+	val version: String,
 )

@@ -1,11 +1,13 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.*
-import org.gradle.api.artifacts.*
-import org.jetbrains.kotlin.gradle.plugin.*
-import java.io.*
-import kotlin.test.*
-
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class DependenciesBuilderTest {
 
@@ -106,7 +108,6 @@ class DependenciesBuilderTest {
 		assertEquals(actual = deps.kspConfigurations.size, expected = 1)
 	}
 
-
 	/**
 	 * A [KotlinDependencyHandler] test double that records which configuration method (`api`/`compileOnly`/`runtimeOnly`)
 	 * each resolved notation was routed to, so a plain notation stored by [DependenciesBuilder] can be verified to reach
@@ -118,14 +119,11 @@ class DependenciesBuilderTest {
 
 		val additions: MutableList<Addition> = mutableListOf()
 
-
 		/** A single notation together with the configuration method (`api`/`compileOnly`/`runtimeOnly`) it was routed to. */
 		data class Addition(val configuration: String, val notation: Any?)
 
-
 		override val project: Project
 			get() = throw UnsupportedOperationException("not exercised by these tests")
-
 
 		override fun api(dependencyNotation: Any): Dependency? {
 			additions += Addition(configuration = "api", notation = dependencyNotation)
@@ -154,61 +152,46 @@ class DependenciesBuilderTest {
 		override fun kotlin(simpleModuleName: String, version: String?): ExternalModuleDependency =
 			throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun project(notation: Map<String, Any?>): ProjectDependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun project(notation: Map<String, Any?>): ProjectDependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun npm(name: String, version: String): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun npm(name: String, version: String): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun npm(name: String, directory: File): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun npm(name: String, directory: File): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun npm(directory: File): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun npm(directory: File): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun devNpm(name: String, version: String): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun devNpm(name: String, version: String): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun devNpm(name: String, directory: File): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun devNpm(name: String, directory: File): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun devNpm(directory: File): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun devNpm(directory: File): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun optionalNpm(name: String, version: String): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun optionalNpm(name: String, version: String): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun optionalNpm(name: String, directory: File): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun optionalNpm(name: String, directory: File): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun optionalNpm(directory: File): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun optionalNpm(directory: File): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun peerNpm(name: String, version: String): Dependency =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun peerNpm(name: String, version: String): Dependency = throw UnsupportedOperationException("not exercised by these tests")
 
 		override fun implementation(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit): ExternalModuleDependency =
 			throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun <T : Dependency> implementation(dependency: T, configure: T.() -> Unit): T =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun <T : Dependency> implementation(dependency: T, configure: T.() -> Unit): T = throw UnsupportedOperationException("not exercised by these tests")
 
 		override fun api(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit): ExternalModuleDependency =
 			throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun <T : Dependency> api(dependency: T, configure: T.() -> Unit): T =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun <T : Dependency> api(dependency: T, configure: T.() -> Unit): T = throw UnsupportedOperationException("not exercised by these tests")
 
 		override fun compileOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit): ExternalModuleDependency =
 			throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun <T : Dependency> compileOnly(dependency: T, configure: T.() -> Unit): T =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun <T : Dependency> compileOnly(dependency: T, configure: T.() -> Unit): T = throw UnsupportedOperationException("not exercised by these tests")
 
 		override fun runtimeOnly(dependencyNotation: String, configure: ExternalModuleDependency.() -> Unit): ExternalModuleDependency =
 			throw UnsupportedOperationException("not exercised by these tests")
 
-		override fun <T : Dependency> runtimeOnly(dependency: T, configure: T.() -> Unit): T =
-			throw UnsupportedOperationException("not exercised by these tests")
+		override fun <T : Dependency> runtimeOnly(dependency: T, configure: T.() -> Unit): T = throw UnsupportedOperationException("not exercised by these tests")
 	}
 }

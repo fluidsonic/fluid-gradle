@@ -3,8 +3,9 @@ package io.fluidsonic.gradle
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 import org.jetbrains.kotlin.gradle.plugin.LanguageSettingsBuilder
-import kotlin.test.*
-
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class LibraryModuleConfigurationTest {
 
@@ -120,7 +121,6 @@ class LibraryModuleConfigurationTest {
 		assertEquals(actual = merged.isExplicitApiEnabled, expected = false)
 	}
 
-
 	// Dependencies.mergeWith()
 
 	@Test
@@ -177,7 +177,6 @@ class LibraryModuleConfigurationTest {
 		assertEquals(actual = merged.kspConfigurations.size, expected = 2)
 	}
 
-
 	// Target.Common.mergeWith()
 
 	@Test
@@ -207,7 +206,6 @@ class LibraryModuleConfigurationTest {
 		val merged = a.mergeWith(b)
 		assertEquals(actual = merged.enforcesSameVersionForAllKotlinDependencies, expected = false)
 	}
-
 
 	// Target.Jvm.mergeWith()
 
@@ -254,7 +252,6 @@ class LibraryModuleConfigurationTest {
 		val merged = a.mergeWith(b)
 		assertEquals(actual = merged.jdkVersion, expected = JdkVersion.v24)
 	}
-
 
 	// Target.Js.mergeWith()
 
@@ -311,7 +308,6 @@ class LibraryModuleConfigurationTest {
 		val merged = a.mergeWith(b)
 		assertEquals(actual = merged.customConfigurations.size, expected = 2)
 	}
-
 
 	// Targets.mergeWith()
 
@@ -390,7 +386,6 @@ class LibraryModuleConfigurationTest {
 		assertNotNull(merged.jvm)
 		assertEquals(actual = merged.jvm!!.customConfigurations.size, expected = 2)
 	}
-
 
 	// Top-level mergeWith()
 

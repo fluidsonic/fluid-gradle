@@ -1,8 +1,7 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.*
-import org.gradle.kotlin.dsl.*
-
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.findByType
 
 /** DSL for configuring root-level library settings. */
 @Dsl
@@ -18,7 +17,6 @@ public interface LibraryDsl {
 	public fun gradleVersion(version: String)
 }
 
-
 /**
  * Entry point for configuring a fluidsonic library project. Must be called in the root project's `build.gradle.kts`.
  *
@@ -27,12 +25,7 @@ public interface LibraryDsl {
  * @throws IllegalStateException if called outside the root project, called more than once, or the project name does not
  *   match the resulting library name.
  */
-public fun Project.fluidLibrary(
-	name: String,
-	version: String,
-	prefixName: Boolean = true,
-	configure: LibraryDsl.() -> Unit = {}
-) {
+public fun Project.fluidLibrary(name: String, version: String, prefixName: Boolean = true, configure: LibraryDsl.() -> Unit = {}) {
 	require(name.isNotEmpty()) { "'name' must not be empty." }
 	require(version.isNotEmpty()) { "'version' must not be empty." }
 
@@ -46,7 +39,7 @@ public fun Project.fluidLibrary(
 		configuration = LibraryConfigurationBuilder(
 			fullName = fullName,
 			name = name,
-			version = version
+			version = version,
 		)
 			.apply {
 				allModules {
@@ -58,6 +51,6 @@ public fun Project.fluidLibrary(
 			}
 			.apply(configure)
 			.build(),
-		project = project
+		project = project,
 	).configure()
 }

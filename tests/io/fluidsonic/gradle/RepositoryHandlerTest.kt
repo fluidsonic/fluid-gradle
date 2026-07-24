@@ -1,9 +1,9 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.artifacts.repositories.*
-import org.gradle.testfixtures.*
-import kotlin.test.*
-
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.testfixtures.ProjectBuilder
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class RepositoryHandlerTest {
 

@@ -1,12 +1,13 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.*
-import org.gradle.api.publish.maven.*
-import org.gradle.api.publish.maven.plugins.*
-import org.gradle.jvm.tasks.*
-import org.gradle.kotlin.dsl.*
-import org.gradle.plugins.signing.*
-
+import org.gradle.api.Project
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
+import org.gradle.plugins.signing.SigningPlugin
 
 /**
  * Configures Maven publishing for a single library module: applies the publishing and signing plugins, registers the
@@ -28,7 +29,7 @@ internal class PublishingConfigurator(
 		apply<SigningPlugin>()
 
 		publishing {
-			if (githubToken != null)
+			if (githubToken != null) {
 				repositories {
 					maven {
 						name = "github"
@@ -39,6 +40,7 @@ internal class PublishingConfigurator(
 						}
 					}
 				}
+			}
 
 			publications.withType<MavenPublication> {
 				pom {
@@ -73,8 +75,9 @@ internal class PublishingConfigurator(
 
 		if (configuration.targets.jvm != null) {
 			val javadocJar = tasks.register<Jar>("javadocJar") {
-				if (configuration.isDokkaEnabled)
+				if (configuration.isDokkaEnabled) {
 					from(tasks.named("dokkaGeneratePublicationHtml"))
+				}
 
 				archiveClassifier.set("javadoc")
 			}

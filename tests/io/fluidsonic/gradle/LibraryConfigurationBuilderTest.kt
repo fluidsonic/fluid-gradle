@@ -1,7 +1,7 @@
 package io.fluidsonic.gradle
 
-import kotlin.test.*
-
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class LibraryConfigurationBuilderTest {
 

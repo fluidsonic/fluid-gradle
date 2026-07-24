@@ -1,9 +1,10 @@
 package io.fluidsonic.gradle
 
-import org.gradle.testkit.runner.*
-import java.io.*
-import kotlin.test.*
-
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class LibraryModuleConfiguratorFunctionalTest {
 
@@ -22,7 +23,7 @@ class LibraryModuleConfiguratorFunctionalTest {
 						jvm()
 					}
 				}
-			""".trimIndent()
+			""".trimIndent(),
 		)
 
 		val result = runGradle(projectDirectory, ":module:jvmTest", "--dry-run")
@@ -41,7 +42,6 @@ class LibraryModuleConfiguratorFunctionalTest {
 		)
 	}
 
-
 	@Test
 	fun publishingEnabled_registersMavenPublicationTasks() {
 		val projectDirectory = createLibraryProject(
@@ -57,7 +57,7 @@ class LibraryModuleConfiguratorFunctionalTest {
 						jvm()
 					}
 				}
-			""".trimIndent()
+			""".trimIndent(),
 		)
 
 		val result = runGradle(projectDirectory, ":module:publishToMavenLocal", "--dry-run")
@@ -67,7 +67,6 @@ class LibraryModuleConfiguratorFunctionalTest {
 			message = "expected the JVM MavenPublication task in output but got:\n${result.output}",
 		)
 	}
-
 
 	@Test
 	fun disablePublishing_removesPublishTasks() {
@@ -86,18 +85,17 @@ class LibraryModuleConfiguratorFunctionalTest {
 						jvm()
 					}
 				}
-			""".trimIndent()
+			""".trimIndent(),
 		)
 
 		val result = runGradleAndFail(projectDirectory, ":module:publishToMavenLocal", "--dry-run")
 
 		assertTrue(
-			actual = result.output.contains("Cannot locate tasks that match ':module:publishToMavenLocal'")
-				|| result.output.contains("Task 'publishToMavenLocal' not found"),
+			actual = result.output.contains("Cannot locate tasks that match ':module:publishToMavenLocal'") ||
+				result.output.contains("Task 'publishToMavenLocal' not found"),
 			message = "expected publishToMavenLocal to be absent but got:\n${result.output}",
 		)
 	}
-
 
 	private fun createLibraryProject(moduleBuildScript: String): File {
 		val projectDirectory = createTempDirectory()
@@ -106,7 +104,7 @@ class LibraryModuleConfiguratorFunctionalTest {
 			"""
 				rootProject.name = "fluid-test"
 				include(":module")
-			""".trimIndent()
+			""".trimIndent(),
 		)
 
 		projectDirectory.resolve("build.gradle.kts").writeText(
@@ -118,7 +116,7 @@ class LibraryModuleConfiguratorFunctionalTest {
 				}
 
 				fluidLibrary(name = "test", version = "1.0.0")
-			""".trimIndent()
+			""".trimIndent(),
 		)
 
 		val moduleDirectory = projectDirectory.resolve("module")
@@ -127,7 +125,6 @@ class LibraryModuleConfiguratorFunctionalTest {
 
 		return projectDirectory
 	}
-
 
 	private fun createTempDirectory(): File {
 		val directory = File.createTempFile("fluid-gradle-functional", "")
@@ -138,18 +135,12 @@ class LibraryModuleConfiguratorFunctionalTest {
 		return directory
 	}
 
+	private fun runGradle(projectDirectory: File, vararg arguments: String): BuildResult = gradleRunner(projectDirectory, *arguments).build()
 
-	private fun runGradle(projectDirectory: File, vararg arguments: String): BuildResult =
-		gradleRunner(projectDirectory, *arguments).build()
+	private fun runGradleAndFail(projectDirectory: File, vararg arguments: String): BuildResult = gradleRunner(projectDirectory, *arguments).buildAndFail()
 
-
-	private fun runGradleAndFail(projectDirectory: File, vararg arguments: String): BuildResult =
-		gradleRunner(projectDirectory, *arguments).buildAndFail()
-
-
-	private fun gradleRunner(projectDirectory: File, vararg arguments: String): GradleRunner =
-		GradleRunner.create()
-			.withProjectDir(projectDirectory)
-			.withPluginClasspath()
-			.withArguments(*arguments)
+	private fun gradleRunner(projectDirectory: File, vararg arguments: String): GradleRunner = GradleRunner.create()
+		.withProjectDir(projectDirectory)
+		.withPluginClasspath()
+		.withArguments(*arguments)
 }

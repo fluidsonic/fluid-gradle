@@ -1,23 +1,20 @@
 package io.fluidsonic.gradle
 
-import com.github.benmanes.gradle.versions.*
-import com.github.benmanes.gradle.versions.updates.gradle.*
-import io.github.gradlenexus.publishplugin.*
-import org.gradle.api.*
-import org.gradle.api.publish.maven.plugins.*
-import org.gradle.api.tasks.wrapper.*
-import org.gradle.kotlin.dsl.*
-
+import com.github.benmanes.gradle.versions.VersionsPlugin
+import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
+import io.github.gradlenexus.publishplugin.NexusPublishPlugin
+import org.gradle.api.Project
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.wrapper.Wrapper
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.assign
 
 /**
  * Applies a resolved [LibraryConfiguration] to the root [project]: the dependency-updates plugin, the Gradle wrapper
  * version, Maven Central publishing to Sonatype, and the [LibraryPluginExtension] that exposes the configuration to
  * each module.
  */
-internal class LibraryConfigurator(
-	private val configuration: LibraryConfiguration,
-	private val project: Project,
-) {
+internal class LibraryConfigurator(private val configuration: LibraryConfiguration, private val project: Project) {
 
 	/** Applies the configuration to the root project. */
 	fun configure() = project.run {
@@ -33,17 +30,17 @@ internal class LibraryConfigurator(
 		dependencyUpdates {
 			gradleReleaseChannel = GradleReleaseChannel.CURRENT.id
 
-			if (!configuration.dependencyUpdatesIncludeUnstableVersions)
+			if (!configuration.dependencyUpdatesIncludeUnstableVersions) {
 				rejectVersionIf {
 					isUnstableVersion(candidate.version) && !isUnstableVersion(currentVersion)
 				}
+			}
 		}
 
 		configurePublishing()
 
 		extensions.add("io.fluidsonic.gradle", LibraryPluginExtension(configuration = configuration))
 	}
-
 
 	private fun Project.configurePublishing() {
 		val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
@@ -52,7 +49,7 @@ internal class LibraryConfigurator(
 		apply<MavenPublishPlugin>()
 		apply<NexusPublishPlugin>()
 
-		if (sonatypeUsername != null && sonatypePassword != null)
+		if (sonatypeUsername != null && sonatypePassword != null) {
 			nexusPublishing {
 				packageGroup = "io.fluidsonic"
 
@@ -66,5 +63,6 @@ internal class LibraryConfigurator(
 					}
 				}
 			}
+		}
 	}
 }

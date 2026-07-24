@@ -1,9 +1,8 @@
 package io.fluidsonic.gradle
 
-import org.gradle.api.artifacts.dsl.*
-import org.gradle.api.artifacts.repositories.*
-import org.gradle.kotlin.dsl.*
-
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.kotlin.dsl.maven
 
 /**
  * Adds the JitPack repository (`https://jitpack.io`) to this project's repositories.
@@ -14,5 +13,4 @@ import org.gradle.kotlin.dsl.*
  * JitPack artifacts carry weaker supply-chain guarantees than Maven Central: they are neither signed, immutable, nor
  * independently reviewed. Prefer Maven Central when a dependency is published there.
  */
-public fun RepositoryHandler.jitpack(): MavenArtifactRepository =
-	maven("https://jitpack.io")
+public fun RepositoryHandler.jitpack(): MavenArtifactRepository = maven("https://jitpack.io")

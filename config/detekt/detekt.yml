@@ -1,0 +1,35 @@
+# detekt configuration for fluid-gradle.
+#
+# buildUponDefaultConfig = true (see build.gradle.kts), so this file only
+# OVERRIDES the default ruleset. ktlint is the single owner of formatting and
+# style — imports, naming format, line length — so detekt's overlapping style
+# and naming rules are disabled here to avoid double-reporting the same issue
+# from two tools. detekt retains its complexity, smell, and bug rules.
+
+naming:
+  # Naming format (function, enum-entry, property, ...) is owned by ktlint.
+  active: false
+
+complexity:
+  CyclomaticComplexMethod:
+    # A method whose body is a single `when` (e.g. exhaustive sealed-class
+    # dispatch) is not genuinely complex — its "complexity" is just arm count.
+    ignoreSingleWhenExpression: true
+  TooManyFunctions:
+    # Test classes legitimately hold many test methods, and test doubles must
+    # override every method of the wide Gradle interfaces they implement.
+    excludes: ['**/tests/**']
+
+empty-blocks:
+  EmptyFunctionBlock:
+    # A required override may legitimately be empty (e.g. the marker plugin's
+    # apply() — configuration happens via the fluidLibrary DSL, not apply()).
+    ignoreOverridden: true
+
+style:
+  WildcardImport:
+    # Import hygiene is owned by ktlint's no-wildcard-imports rule.
+    active: false
+  MaxLineLength:
+    # Line length is owned by ktlint (max_line_length in .editorconfig).
+    active: false
