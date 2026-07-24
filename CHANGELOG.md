@@ -7,6 +7,7 @@
 - Scout knowledge base under `docs/scout/` documenting non-obvious, repo-specific conventions and traps
 - Per-module JVM target selection via `jvm { jdk(version) }` in the target DSL (JDK 21–24; defaults to 21)
 - Kotlin linting and static analysis via ktlint and detekt, enforced by `./gradlew check` and in CI
+- Automatic Dokka cross-module aggregation for multi-module libraries — cross-module KDoc links resolve without a manual `dokka(project(...))` block in the root build script
 
 ### Changed
 - Kotlin updated to 2.4.10 (KSP to 2.3.10); language and API baseline raised to 2.4

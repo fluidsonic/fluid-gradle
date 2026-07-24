@@ -10,6 +10,7 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -275,6 +276,10 @@ internal class LibraryModuleConfigurator(configuration: LibraryModuleConfigurati
 	private fun Project.configureBasics() {
 		if (configuration.isDokkaEnabled) {
 			pluginManager.apply("org.jetbrains.dokka")
+
+			// Gradle always configures the root before its subprojects, so the root's `dokka` configuration already
+			// exists here. Registering this module into it wires up Dokka v2 cross-module aggregation automatically.
+			rootProject.dependencies.add("dokka", rootProject.dependencies.project(project.path))
 		}
 
 		apply<KotlinMultiplatformPluginWrapper>()

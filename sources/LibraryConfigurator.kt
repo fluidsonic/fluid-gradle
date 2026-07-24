@@ -20,6 +20,13 @@ internal class LibraryConfigurator(private val configuration: LibraryConfigurati
 	fun configure() = project.run {
 		apply<VersionsPlugin>()
 
+		// Applying Dokka on the root creates the `dokka` configuration that each Dokka-enabled module registers itself
+		// into, so cross-module KDoc references resolve in the aggregated Dokka site without a hand-written dependency
+		// block. Gated on the `allModules {}` default: `allModules { disableDokka() }` sets this false for every module.
+		if (configuration.defaultModuleConfiguration.isDokkaEnabled) {
+			pluginManager.apply("org.jetbrains.dokka")
+		}
+
 		useMavenCentralRepository()
 
 		wrapper {
