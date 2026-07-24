@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [4.0.0] - 2026-07-24
 
 ### Added
 - Dependabot configuration for automated dependency updates (Gradle and GitHub Actions ecosystems, weekly)
