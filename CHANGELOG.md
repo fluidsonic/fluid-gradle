@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- The Gradle wrapper task now downloads and pins the distribution's SHA-256 checksum automatically when you run `./gradlew wrapper`, so bumping the Gradle version no longer requires passing `--gradle-distribution-sha256-sum` by hand; the fetched checksum is printed for you to cross-check against https://gradle.org/release-checksums/ before committing
+
 ## [4.0.0] - 2026-07-24
 
 ### Added

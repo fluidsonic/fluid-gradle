@@ -1,5 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import io.fluidsonic.gradle.buildsupport.PublishingMetadata
+import io.fluidsonic.gradle.buildsupport.fetchGradleDistributionSha256Sum
 import io.fluidsonic.gradle.buildsupport.isUnstableVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
@@ -86,6 +87,19 @@ tasks.withType<Test> {
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
 	gradleVersion = "9.6.1"
+
+	// Fetch and pin the distribution checksum at execution time so a Gradle version bump does not require passing
+	// `--gradle-distribution-sha256-sum` by hand. Logged at lifecycle level for cross-checking against
+	// https://gradle.org/release-checksums/ before committing.
+	doFirst {
+		val checksumUrl = "$distributionUrl.sha256"
+		val sum = fetchGradleDistributionSha256Sum(distributionUrl)
+
+		logger.lifecycle("Fetched Gradle distribution SHA-256 sum from $checksumUrl: $sum")
+		logger.lifecycle("Verify it against https://gradle.org/release-checksums/ before committing.")
+
+		distributionSha256Sum = sum
+	}
 }
 
 dependencyUpdates {

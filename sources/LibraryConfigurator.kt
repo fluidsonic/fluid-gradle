@@ -32,6 +32,20 @@ internal class LibraryConfigurator(private val configuration: LibraryConfigurati
 		wrapper {
 			distributionType = Wrapper.DistributionType.ALL
 			gradleVersion = configuration.gradleVersion
+
+			// Fetch and pin the distribution checksum at execution time so a Gradle version bump does not require passing
+			// `--gradle-distribution-sha256-sum` by hand. Logged at lifecycle level for cross-checking against
+			// https://gradle.org/release-checksums/ before committing. Capturing `this` (the Wrapper task) is
+			// configuration-cache-safe because it IS the task.
+			doFirst {
+				val checksumUrl = "$distributionUrl.sha256"
+				val sum = fetchGradleDistributionSha256Sum(distributionUrl)
+
+				logger.lifecycle("Fetched Gradle distribution SHA-256 sum from $checksumUrl: $sum")
+				logger.lifecycle("Verify it against https://gradle.org/release-checksums/ before committing.")
+
+				distributionSha256Sum = sum
+			}
 		}
 
 		dependencyUpdates {
