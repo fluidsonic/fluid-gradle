@@ -4,6 +4,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -229,6 +230,164 @@ class LibraryModuleConfiguratorFunctionalTest {
 		)
 	}
 
+	@Test
+	fun jvmTest_greenRunIsQuiet() {
+		val projectDirectory = createJvmTestFixtureProject(includeFailingTest = false, gradleProperties = null)
+
+		val result = runGradle(projectDirectory, ":module:jvmTest")
+		val output = result.output
+		val metrics = metricsOf(output)
+
+		assertTrue(
+			actual = output.contains("> Task :module:jvmTest"),
+			message = "expected the jvmTest task to have run ($metrics) but got:\n$output",
+		)
+		assertEquals(
+			actual = output.occurrenceCount(GREEN_SUMMARY_LINE),
+			expected = 1,
+			message = "expected exactly one summary line for all $FIXTURE_TEST_COUNT tests ($metrics) but got:\n$output",
+		)
+		assertFalse(
+			actual = output.contains("PASSED"),
+			message = "expected no per-test PASSED events ($metrics) but got:\n$output",
+		)
+		// A successful run of this fixture measures 21 lines. The ceiling guards against a future re-flood, not against
+		// small changes in Gradle's own task output.
+		assertTrue(
+			actual = output.lines().size <= GREEN_RUN_LINE_CEILING,
+			message = "expected a quiet green run but got $metrics:\n$output",
+		)
+	}
+
+	@Test
+	fun jvmTest_failingRunStaysDiagnosable() {
+		val projectDirectory = createJvmTestFixtureProject(includeFailingTest = true, gradleProperties = null)
+
+		val result = runGradleAndFail(projectDirectory, ":module:jvmTest")
+		val output = result.output
+		val metrics = metricsOf(output)
+
+		assertTrue(
+			actual = output.contains("FAILED"),
+			message = "expected a FAILED marker ($metrics) but got:\n$output",
+		)
+		assertTrue(
+			actual = output.contains(FAILING_ASSERTION_MESSAGE),
+			message = "expected the assertion message ($metrics) but got:\n$output",
+		)
+		assertTrue(
+			actual = output.contains(FAILING_EXPECTED_VALUE.toString()),
+			message = "expected the expected value ($metrics) but got:\n$output",
+		)
+		assertTrue(
+			actual = output.contains(FAILING_ACTUAL_VALUE.toString()),
+			message = "expected the actual value ($metrics) but got:\n$output",
+		)
+		assertEquals(
+			actual = output.occurrenceCount(":module:jvmTest — ${FIXTURE_TEST_COUNT + 1} tests, $FIXTURE_TEST_COUNT passed, 1 failed"),
+			expected = 1,
+			message = "expected exactly one summary line reporting the failure ($metrics) but got:\n$output",
+		)
+	}
+
+	@Test
+	fun jvmTest_summarySurvivesConfigurationCache() {
+		val projectDirectory = createJvmTestFixtureProject(
+			includeFailingTest = false,
+			gradleProperties = "org.gradle.configuration-cache=true",
+		)
+
+		// `--rerun` on both runs keeps the requested task graph identical (so the cache entry is reusable) while forcing
+		// the test task to execute again instead of being up-to-date, which would skip the listener entirely.
+		val firstRun = runGradle(projectDirectory, ":module:jvmTest", "--rerun", "--configuration-cache")
+
+		assertTrue(
+			actual = firstRun.output.contains("Configuration cache entry stored"),
+			message = "expected a configuration cache entry to be stored but got:\n${firstRun.output}",
+		)
+		assertFalse(
+			actual = firstRun.output.contains("problems were found storing the configuration cache"),
+			message = "expected no configuration cache problems but got:\n${firstRun.output}",
+		)
+
+		val secondRun = runGradle(projectDirectory, ":module:jvmTest", "--rerun", "--configuration-cache")
+
+		assertTrue(
+			actual = secondRun.output.contains("Reusing configuration cache"),
+			message = "expected the configuration cache to be reused but got:\n${secondRun.output}",
+		)
+		assertEquals(
+			actual = secondRun.output.occurrenceCount(GREEN_SUMMARY_LINE),
+			expected = 1,
+			message = "expected the summary line on the cache-reusing run but got:\n${secondRun.output}",
+		)
+	}
+
+	@Test
+	fun jvmTest_infoRestoresVerboseOutput() {
+		val projectDirectory = createJvmTestFixtureProject(includeFailingTest = false, gradleProperties = null)
+
+		val result = runGradle(projectDirectory, ":module:jvmTest", "--info")
+		val output = result.output
+
+		assertEquals(
+			actual = output.occurrenceCount("PASSED"),
+			expected = FIXTURE_TEST_COUNT,
+			message = "expected a PASSED event per test with --info but got:\n$output",
+		)
+		assertEquals(
+			actual = output.occurrenceCount(FIXTURE_STANDARD_OUTPUT_MARKER),
+			expected = FIXTURE_TEST_COUNT,
+			message = "expected the tests' standard output with --info but got:\n$output",
+		)
+	}
+
+	/**
+	 * Creates a single-module library project whose JVM test source set holds [FIXTURE_TEST_COUNT] passing tests — each
+	 * printing to standard output — plus, when [includeFailingTest] is set, one deliberately failing test.
+	 */
+	private fun createJvmTestFixtureProject(includeFailingTest: Boolean, gradleProperties: String?): File {
+		val projectDirectory = createLibraryProject(
+			modules = mapOf("module" to plainModuleBuildScript(description = "Test module")),
+			gradleProperties = gradleProperties,
+		)
+
+		// The JVM test source set maps to `tests-jvm/`, not `src/test/kotlin` (see configureSourceSetBasics).
+		val testDirectory = projectDirectory.resolve("module").resolve("tests-jvm").resolve("fixture")
+		testDirectory.mkdirs()
+		testDirectory.resolve("GeneratedTest.kt").writeText(generateTestSource(includeFailingTest = includeFailingTest))
+
+		return projectDirectory
+	}
+
+	private fun generateTestSource(includeFailingTest: Boolean): String = buildString {
+		appendLine("package fixture")
+		appendLine()
+		appendLine("import kotlin.test.Test")
+		appendLine("import kotlin.test.assertEquals")
+		appendLine()
+		appendLine("class GeneratedTest {")
+
+		repeat(FIXTURE_TEST_COUNT) { index ->
+			appendLine()
+			appendLine("\t@Test")
+			appendLine("\tfun passing$index() {")
+			appendLine("\t\tprintln(\"$FIXTURE_STANDARD_OUTPUT_MARKER $index\")")
+			appendLine("\t\tassertEquals(actual = $index + 1, expected = ${index + 1})")
+			appendLine("\t}")
+		}
+
+		if (includeFailingTest) {
+			appendLine()
+			appendLine("\t@Test")
+			appendLine("\tfun failing() {")
+			appendLine("\t\tassertEquals(actual = $FAILING_ACTUAL_VALUE, expected = $FAILING_EXPECTED_VALUE, message = \"$FAILING_ASSERTION_MESSAGE\")")
+			appendLine("\t}")
+		}
+
+		appendLine("}")
+	}
+
 	private fun createLibraryProject(moduleBuildScript: String): File = createLibraryProject(modules = mapOf("module" to moduleBuildScript))
 
 	private fun createLibraryProject(modules: Map<String, String>, rootBuildScript: String = defaultRootBuildScript, gradleProperties: String? = null): File {
@@ -287,7 +446,19 @@ class LibraryModuleConfiguratorFunctionalTest {
 		.withPluginClasspath()
 		.withArguments(*arguments)
 
+	private fun metricsOf(output: String) = "${output.lines().size} lines, ${output.toByteArray().size} bytes"
+
+	private fun String.occurrenceCount(needle: String): Int = split(needle).size - 1
+
 	private companion object {
+
+		const val FAILING_ACTUAL_VALUE = 54321
+		const val FAILING_ASSERTION_MESSAGE = "widget count mismatch"
+		const val FAILING_EXPECTED_VALUE = 12345
+		const val FIXTURE_STANDARD_OUTPUT_MARKER = "FIXTURE_STDOUT"
+		const val FIXTURE_TEST_COUNT = 50
+		const val GREEN_RUN_LINE_CEILING = 40
+		const val GREEN_SUMMARY_LINE = ":module:jvmTest — $FIXTURE_TEST_COUNT tests, all passed"
 
 		val defaultRootBuildScript = """
 			import io.fluidsonic.gradle.fluidLibrary

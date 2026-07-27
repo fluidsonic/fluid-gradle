@@ -8,6 +8,6 @@ How ktlint is configured here and how deliberate naming exceptions are kept pass
 - `enum-entry-name-case` — the `JdkVersion.v21`–`v24` entries (`sources/utility/JdkVersion.kt`).
 - `property-naming` — the lowercase `junit`/`gradle` consts in `Versions` (`sources/Versions.kt`).
 
-If you legitimately add another lowercased-const or unconventional name, regenerate the baseline rather than reformatting the code.
+If you legitimately add another unconventional name, regenerate the baseline rather than reformatting the code — but note that baseline entries are anchored by line number, so prefer a conforming name in files that change often. For constants specifically, detekt pushes in the opposite direction and narrows the choice to two options; see `constant-naming-lint-conflict.md`.
 
 Note: ktlint's `function-naming` already exempts `@Test` functions, so this project's underscore-separated test names pass ktlint without a baseline entry (they were only flagged by detekt's now-disabled `naming` ruleset).

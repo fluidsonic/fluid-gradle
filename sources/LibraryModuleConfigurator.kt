@@ -63,12 +63,32 @@ internal class LibraryModuleConfigurator(configuration: LibraryModuleConfigurati
 	}
 
 	private fun AbstractTestTask.configureTestTask() {
+		// `events = …` (i.e. `setEvents`) REPLACES the event set, whereas the similar-looking `events(…)` only ADDS to it
+		// despite its javadoc claiming otherwise. Always assign, never call.
 		testLogging {
-			events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+			// A green run stays silent; TestSummaryLogger below reports that tests ran. Standard streams are omitted —
+			// they remain in the HTML report and in the `--info` view configured below.
+			events = setOf(TestLogEvent.FAILED)
 			exceptionFormat = TestExceptionFormat.FULL
+			showCauses = true
 			showExceptions = true
-			showStandardStreams = true
+			showStackTraces = true
+
+			// `--info` restores the previous console output. Gradle's own defaults for this level already include
+			// everything but `PASSED`.
+			info {
+				events = setOf(
+					TestLogEvent.FAILED,
+					TestLogEvent.PASSED,
+					TestLogEvent.SKIPPED,
+					TestLogEvent.STANDARD_ERROR,
+					TestLogEvent.STANDARD_OUT,
+				)
+				exceptionFormat = TestExceptionFormat.FULL
+			}
 		}
+
+		addTestListener(TestSummaryLogger(taskPath = path))
 	}
 
 	private fun KotlinMultiplatformExtension.configureCommonTarget() {

@@ -14,7 +14,7 @@ In your root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("io.fluidsonic.gradle") version "3.0.0"
+    id("io.fluidsonic.gradle") version "4.1.0"
 }
 ```
 
@@ -87,6 +87,23 @@ Root-level options are available inside `fluidLibrary(…) { … }`:
 
 - `gradleVersion("9.6.1")` — sets the Gradle wrapper version.
 - `dependencyUpdatesIncludeUnstableVersions()` — includes pre-release versions when checking for updates.
+
+
+Test output
+-----------
+
+Test tasks are quiet by default so that a failure is easy to spot.
+
+- A **successful** run prints one summary line per test task:
+  ```
+  :module:jvmTest — 50 tests, all passed
+  ```
+- A **failing** run prints that summary with the counts (`51 tests, 50 passed, 1 failed`) plus, for each failed test,
+  the full exception with its causes and stack trace.
+- Per-test standard output and standard error are not printed to the console. They are always recorded in the HTML
+  report at `<module>/build/reports/tests/<task>/index.html`.
+- `./gradlew check --info` restores the verbose console output — an event per passed, failed, and skipped test, plus
+  each test's standard output and standard error.
 
 
 Requirements

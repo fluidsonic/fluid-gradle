@@ -1,9 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [4.1.0] - 2026-07-27
 
 ### Changed
 - The Gradle wrapper task now downloads and pins the distribution's SHA-256 checksum automatically when you run `./gradlew wrapper`, so bumping the Gradle version no longer requires passing `--gradle-distribution-sha256-sum` by hand; the fetched checksum is printed for you to cross-check against https://gradle.org/release-checksums/ before committing
+- Test tasks are now quiet by default: instead of an event per passed, skipped, and standard-stream line, a successful run prints one summary line per test task (`:module:jvmTest — 50 tests, all passed`) and a failure prints that summary with its counts plus the full exception, causes, and stack trace. On a 50-test module a successful run drops from 270 to 21 lines of output, so a failure is no longer buried in noise. Per-test standard output and standard error are unchanged in the HTML report at `<module>/build/reports/tests/<task>/index.html`, and `./gradlew check --info` restores the previous verbose console output. Anything that parses `PASSED` lines out of build logs must switch to `--info`, the JUnit XML, or the HTML report
 
 ## [4.0.0] - 2026-07-24
 

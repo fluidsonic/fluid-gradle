@@ -1,0 +1,7 @@
+# Naming a new constant: detekt and ktlint leave exactly two options
+
+ktlint and detekt pincer any new constant in this repo, so the naming is not a free choice. Matters whenever a `val` is added to a companion object or an `object`. See `lint-and-format-tooling.md` for the tool split and `ktlint-editorconfig-baseline.md` for the baseline.
+
+A plain `val` with a compile-time constant initializer trips detekt's `MayBeConstant`, which demands a `const val`: that rule is on by default and `config/detekt/detekt.yml` does not turn it off — inside the `style` ruleset it disables only `WildcardImport` and `MaxLineLength`. Making it a camelCase `const val` then trips ktlint's `standard:property-naming`, which demands screaming snake case for constants. Only two things satisfy both tools: name the constant `SCREAMING_SNAKE_CASE`, or add a `config/ktlint/baseline.xml` entry.
+
+**Prefer `SCREAMING_SNAKE_CASE` for anything new.** Baseline entries are anchored by line number (`<error line="…" column="…" source="…" />`), so an entry in a file that changes often silently breaks on any edit above it and the build fails until the baseline is regenerated. The standing baselined exception is the camelCase `Versions.junit` / `Versions.gradle` in `sources/Versions.kt`, a file that rarely moves. Newer constants — for example the private ones in `tests/io/fluidsonic/gradle/LibraryModuleConfiguratorFunctionalTest.kt` — use `SCREAMING_SNAKE_CASE` instead.
