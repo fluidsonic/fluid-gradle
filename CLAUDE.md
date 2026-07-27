@@ -4,6 +4,8 @@
 
 - Build: `./gradlew build`
 - Test: `./gradlew test`
+- Gate: `./gradlew check` (runs `test`, `ktlintCheck`, and `detekt`)
+- Verifying gate: `./gradlew clean build --no-build-cache --rerun-tasks` — the build cache and up-to-date checks make a plain `build` a no-op that verifies nothing
 - Dependency check: `./gradlew dependencyUpdates --no-configuration-cache --no-parallel` (the flags are required until gradle-versions 0.55.0; see `docs/scout/dependency-updates-task.md`)
 
 ## Source layout
