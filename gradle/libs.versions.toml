@@ -6,7 +6,7 @@ gradle-plugin-publish = "2.1.1"
 gradle-versions = "0.54.0"
 junit = "6.1.2"
 kotlin = "2.4.10"
-ksp = "2.3.10"
+ksp = "2.3.11"
 ktlint = "14.2.0"
 
 [libraries]
