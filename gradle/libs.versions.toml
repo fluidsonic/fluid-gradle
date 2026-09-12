@@ -2,7 +2,7 @@
 detekt = "2.0.0-alpha.5"
 dokka = "2.2.0"
 gradle-nexus-publish = "2.0.0"
-gradle-plugin-publish = "2.1.1"
+gradle-plugin-publish = "2.2.0"
 gradle-versions = "0.54.0"
 junit = "6.1.2"
 kotlin = "2.4.10"
