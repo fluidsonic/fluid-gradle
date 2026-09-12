@@ -5,7 +5,7 @@ gradle-nexus-publish = "2.0.0"
 gradle-plugin-publish = "2.1.1"
 gradle-versions = "0.54.0"
 junit = "6.1.2"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 ksp = "2.3.10"
 ktlint = "14.2.0"
 
