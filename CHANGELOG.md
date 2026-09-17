@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- Failed SNAPSHOT publications to GitHub Packages are republished with a fresh build number, up to three attempts; release publications and other repositories are unchanged
+
 ## [4.1.0] - 2026-07-27
 
 ### Changed

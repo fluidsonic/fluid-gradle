@@ -2,6 +2,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import io.fluidsonic.gradle.buildsupport.PublishingMetadata
 import io.fluidsonic.gradle.buildsupport.fetchGradleDistributionSha256Sum
 import io.fluidsonic.gradle.buildsupport.isUnstableVersion
+import io.fluidsonic.gradle.buildsupport.retryGithubSnapshotPublications
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
@@ -143,6 +144,8 @@ if (githubToken != null) {
 			}
 		}
 	}
+
+	retryGithubSnapshotPublications()
 }
 
 if ((sonatypeUsername != null && sonatypePassword != null) || githubToken != null) {

@@ -11,8 +11,9 @@ import org.gradle.plugins.signing.SigningPlugin
 
 /**
  * Configures Maven publishing for a single library module: applies the publishing and signing plugins, registers the
- * GitHub Packages repository when a token is available, fills in the POM, signs all publications, and attaches a
- * Javadoc JAR to the JVM publication.
+ * GitHub Packages repository when a token is available, makes the GitHub publish tasks republish a failed SNAPSHOT (see
+ * [retryGithubSnapshotPublications]), fills in the POM, signs all publications, and attaches a Javadoc JAR to the JVM
+ * publication.
  *
  * Applied only when the module has publishing enabled.
  */
@@ -68,6 +69,8 @@ internal class PublishingConfigurator(
 				}
 			}
 		}
+
+		retryGithubSnapshotPublications()
 
 		signing {
 			sign(publishing.publications)

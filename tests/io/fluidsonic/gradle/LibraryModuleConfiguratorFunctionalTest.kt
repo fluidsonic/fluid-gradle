@@ -1,7 +1,5 @@
 package io.fluidsonic.gradle
 
-import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -391,7 +389,7 @@ class LibraryModuleConfiguratorFunctionalTest {
 	private fun createLibraryProject(moduleBuildScript: String): File = createLibraryProject(modules = mapOf("module" to moduleBuildScript))
 
 	private fun createLibraryProject(modules: Map<String, String>, rootBuildScript: String = defaultRootBuildScript, gradleProperties: String? = null): File {
-		val projectDirectory = createTempDirectory()
+		val projectDirectory = createFunctionalTestDirectory()
 
 		val settings = buildString {
 			appendLine("rootProject.name = \"fluid-test\"")
@@ -428,27 +426,7 @@ class LibraryModuleConfiguratorFunctionalTest {
 		}
 	""".trimIndent()
 
-	private fun createTempDirectory(): File {
-		val directory = File.createTempFile("fluid-gradle-functional", "")
-		directory.delete()
-		directory.mkdirs()
-		directory.deleteOnExit()
-
-		return directory
-	}
-
-	private fun runGradle(projectDirectory: File, vararg arguments: String): BuildResult = gradleRunner(projectDirectory, *arguments).build()
-
-	private fun runGradleAndFail(projectDirectory: File, vararg arguments: String): BuildResult = gradleRunner(projectDirectory, *arguments).buildAndFail()
-
-	private fun gradleRunner(projectDirectory: File, vararg arguments: String): GradleRunner = GradleRunner.create()
-		.withProjectDir(projectDirectory)
-		.withPluginClasspath()
-		.withArguments(*arguments)
-
 	private fun metricsOf(output: String) = "${output.lines().size} lines, ${output.toByteArray().size} bytes"
-
-	private fun String.occurrenceCount(needle: String): Int = split(needle).size - 1
 
 	private companion object {
 

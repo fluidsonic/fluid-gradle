@@ -8,6 +8,8 @@ Two independent credential paths:
 
 The plugin's own `build.gradle.kts` duplicates this exact dual-credential logic for self-publishing; its POM-metadata constants live in `buildSrc` `PublishingMetadata` (see `buildsrc-duplication.md`).
 
+Right after the `publishing {}` block, `PublishingConfigurator.configure` calls `retryGithubSnapshotPublications()`, which retries a failed SNAPSHOT publish to GitHub Packages — see `github-packages-snapshot-retry.md`. The explicit `credentials { username/password }` on the `github` repository also means its `PublishToMavenRepository` tasks always disable the configuration cache (documented in that same leaf).
+
 Javadoc trap: when a JVM target exists, `PublishingConfigurator.configure` registers a `javadocJar` sourced from the Dokka v2 task `dokkaGeneratePublicationHtml` (skipped unless `isDokkaEnabled`) and attaches it via `publications.filterIsInstance<MavenPublication>().single { it.name == "jvm" }`. The `.single { }` **throws** if there is not exactly one publication named `jvm`. Only the JVM publication receives a javadoc artifact.
 
 dokka version: 2.2.0 (as of 2026-07, `gradle/libs.versions.toml`).
