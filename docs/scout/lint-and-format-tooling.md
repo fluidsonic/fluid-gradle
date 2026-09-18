@@ -8,4 +8,6 @@ How static analysis is split across two tools, and why detekt runs a pre-release
 
 **Calibrated, not silenced:** `CyclomaticComplexMethod.ignoreSingleWhenExpression` (exhaustive sealed `when`), `EmptyFunctionBlock.ignoreOverridden` (`LibraryPlugin.apply()` no-op), `TooManyFunctions` excludes `**/tests/**`.
 
-detekt version: 2.0.0-alpha.5, ktlint-gradle: 14.2.0 (as of 2026-07, `gradle/libs.versions.toml`).
+**The ktlint CLI version and the ktlint-gradle plugin version are two separate catalog keys.** `gradle/libs.versions.toml` defines `ktlint-gradle` (14.2.0, referenced by the `ktlint` plugin alias's `version.ref`) and `ktlint-cli` (1.8.0) independently — per the version-bump commit, the plugin's bundled default trails current ktlint releases, so the catalog pins the CLI explicitly. `build.gradle.kts`'s `ktlint { version.set(libs.versions.ktlint.cli) }` block reads that catalog value instead of a hardcoded literal, so `dependencyUpdates` and Dependabot both see it.
+
+detekt version: 2.0.0-alpha.6, ktlint-gradle: 14.2.0, ktlint-cli: 1.8.0 (as of 2026-09, `gradle/libs.versions.toml` and `build.gradle.kts`).

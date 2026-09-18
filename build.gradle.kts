@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 description = "Gradle plugin for simplifying the configuration of io.fluidsonic.* Kotlin libraries"
 group = "io.fluidsonic.gradle"
-version = "4.1.0"
+version = "4.2.0"
 
 plugins {
 	`java-gradle-plugin`
@@ -67,6 +67,11 @@ detekt {
 	source.setFrom(files("sources", "tests"))
 }
 
+ktlint {
+	// ktlint-gradle bundles a default ktlint-cli version; the catalog pins it so `dependencyUpdates` and Dependabot see it.
+	version.set(libs.versions.ktlint.cli)
+}
+
 repositories {
 	mavenCentral()
 	gradlePluginPortal()
@@ -83,11 +88,24 @@ sourceSets {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+
+	// The functional tests each drive a nested Gradle build through TestKit. Running them concurrently overlaps the nested
+	// builds; the cap keeps the number of TestKit daemons small enough that each is reused across builds — one daemon per
+	// test instead thrashes the machine with cold JVM start-ups and takes longer than running serially.
+	systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+	systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+	systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
+	systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "4")
+
+	// TestKit's default directory is the test JVM's temp dir under `build/`, so `clean` throws away the nested builds'
+	// Gradle user home — including their ~570 MB dependency cache, which every clean gate then downloads again. Keep it
+	// next to the real Gradle user home instead (see `FunctionalTestSupport.kt`).
+	systemProperty("io.fluidsonic.gradle.testKitDirectory", gradle.gradleUserHomeDir.resolve("testkit/io.fluidsonic.gradle").absolutePath)
 }
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.ALL
-	gradleVersion = "9.6.1"
+	gradleVersion = "9.7.1"
 
 	// Fetch and pin the distribution checksum at execution time so a Gradle version bump does not require passing
 	// `--gradle-distribution-sha256-sum` by hand. Logged at lifecycle level for cross-checking against

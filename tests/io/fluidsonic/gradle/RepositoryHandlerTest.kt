@@ -2,9 +2,12 @@ package io.fluidsonic.gradle
 
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.jupiter.api.parallel.ResourceLock
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+// ProjectBuilder initializes process-global Gradle services; its users stay off each other's threads under concurrent tests.
+@ResourceLock("ProjectBuilder")
 class RepositoryHandlerTest {
 
 	@Test

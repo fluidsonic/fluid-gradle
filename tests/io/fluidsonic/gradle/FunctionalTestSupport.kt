@@ -22,5 +22,12 @@ internal fun gradleRunner(projectDirectory: File, vararg arguments: String): Gra
 	.withProjectDir(projectDirectory)
 	.withPluginClasspath()
 	.withArguments(*arguments)
+	.let { runner -> testKitDirectory?.let(runner::withTestKitDir) ?: runner }
+
+/**
+ * The Gradle user home of the nested builds, set by the `test` task (see `build.gradle.kts`). TestKit's default lives
+ * under the test JVM's temp dir inside `build/`, where `clean` discards the nested builds' dependency cache.
+ */
+private val testKitDirectory: File? = System.getProperty("io.fluidsonic.gradle.testKitDirectory")?.let(::File)
 
 internal fun String.occurrenceCount(needle: String): Int = split(needle).size - 1

@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.junit.jupiter.api.parallel.ResourceLock
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,6 +22,8 @@ import kotlin.test.assertTrue
  * resolve to a real Kotlin-Gradle dependency (never leak the internal marker object through the `else` branch).
  */
 @Suppress("DEPRECATION")
+// ProjectBuilder initializes process-global Gradle services; its users stay off each other's threads under concurrent tests.
+@ResourceLock("ProjectBuilder")
 class KotlinDependencyResolveTest {
 
 	private val rootProject: Project = ProjectBuilder.builder().build()

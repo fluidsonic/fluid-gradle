@@ -156,6 +156,42 @@ class LibraryModuleConfiguratorFunctionalTest {
 	}
 
 	@Test
+	fun dependencyUpdates_reportsModuleDependenciesFromRoot() {
+		// Since gradle-versions-plugin 0.55.0 the root `dependencyUpdates` task aggregates per-project
+		// `partialDependencyUpdates` tasks instead of resolving every project itself, so a module-only dependency proves
+		// the modules still end up in the root report.
+		val projectDirectory = createLibraryProject(
+			modules = mapOf(
+				"moduleA" to """
+					import io.fluidsonic.gradle.fluidLibraryModule
+
+					plugins {
+						id("io.fluidsonic.gradle")
+					}
+
+					fluidLibraryModule(description = "Module A") {
+						targets {
+							jvm {
+								dependencies {
+									implementation("$OUTDATED_DEPENDENCY")
+								}
+							}
+						}
+					}
+				""".trimIndent(),
+				"moduleB" to plainModuleBuildScript(description = "Module B"),
+			),
+		)
+
+		val result = runGradle(projectDirectory, ":dependencyUpdates")
+
+		assertTrue(
+			actual = result.output.contains("$OUTDATED_DEPENDENCY_MODULE [$OUTDATED_DEPENDENCY_VERSION -> "),
+			message = "expected :moduleA's outdated dependency in the root dependencyUpdates report but got:\n${result.output}",
+		)
+	}
+
+	@Test
 	fun rootDokkaConfiguration_absentWhenAllModulesDisableDokka() {
 		val projectDirectory = createLibraryProject(
 			rootBuildScript = """
@@ -437,6 +473,9 @@ class LibraryModuleConfiguratorFunctionalTest {
 		const val FIXTURE_TEST_COUNT = 50
 		const val GREEN_RUN_LINE_CEILING = 40
 		const val GREEN_SUMMARY_LINE = ":module:jvmTest — $FIXTURE_TEST_COUNT tests, all passed"
+		const val OUTDATED_DEPENDENCY_MODULE = "org.jetbrains.kotlinx:kotlinx-coroutines-core"
+		const val OUTDATED_DEPENDENCY_VERSION = "1.7.0"
+		const val OUTDATED_DEPENDENCY = "$OUTDATED_DEPENDENCY_MODULE:$OUTDATED_DEPENDENCY_VERSION"
 
 		val defaultRootBuildScript = """
 			import io.fluidsonic.gradle.fluidLibrary

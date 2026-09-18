@@ -12,4 +12,4 @@ The three counter-intuitive parts of Gradle's `testLogging` API that shape `conf
 
 Pitfall: this plugin does not apply itself. Its own `test` task (`build.gradle.kts`, the `tasks.withType<Test>` block) only calls `useJUnitPlatform()`, so it runs Gradle's stock lifecycle logging — `FAILED` only, `SHORT` exception format. A `println` in this repo's own tests never reaches the console; read `build/test-results/test/TEST-*.xml` or fold the value into an assertion message instead.
 
-Gradle version: 9.6.1 (as of 2026-07, `gradle/wrapper/gradle-wrapper.properties`).
+Gradle version: 9.7.1 (as of 2026-09, `gradle/wrapper/gradle-wrapper.properties`).

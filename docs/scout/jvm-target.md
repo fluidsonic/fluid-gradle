@@ -8,4 +8,4 @@ The JVM **test** source set is force-injected with dependencies the user never d
 
 Both compilations also set the `TargetJvmVersion` attribute to `jdkVersion.code`.
 
-junit version: 6.1.2 (as of 2026-07, `sources/Versions.kt` `Versions.junit`).
+junit version: 6.1.3 (as of 2026-09, `sources/Versions.kt` `Versions.junit`).

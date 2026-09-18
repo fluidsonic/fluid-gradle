@@ -1,9 +1,20 @@
 # Changelog
 
-## [Unreleased]
+## [4.2.0] - 2026-09-18
 
 ### Changed
 - Failed SNAPSHOT publications to GitHub Packages are republished with a fresh build number, up to three attempts; release publications and other repositories are unchanged
+- Gradle wrapper updated to 9.7.1; consuming libraries default to the same wrapper version
+- JUnit updated to 6.1.3, including the version injected into consumers' JVM test source sets
+- KSP updated to 2.3.12
+- Gradle Versions plugin updated to 0.64.0 on its new `io.github.ben-manes` coordinates
+- `./gradlew dependencyUpdates` no longer needs `--no-configuration-cache --no-parallel`
+- Gradle Plugin Publish updated to 2.2.1, detekt to 2.0.0-alpha.6, ktlint to 1.8.0
+- GitHub Actions updated (`gradle/actions` v6.3.0, `actions/setup-java` v6.0.1)
+- Functional tests run concurrently and keep TestKit's dependency cache outside `build/`, so `clean` builds no longer re-download it
+
+### Security
+- Kotlin updated to 2.4.20, fixing CVE-2026-53914 (GHSA-r937-wjx7-w2jp) in the Kotlin Gradle plugin applied to every consuming build
 
 ## [4.1.0] - 2026-07-27
 

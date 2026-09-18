@@ -14,7 +14,7 @@ In your root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("io.fluidsonic.gradle") version "4.1.0"
+    id("io.fluidsonic.gradle") version "4.2.0"
 }
 ```
 
@@ -85,7 +85,7 @@ fluidLibraryModule(description = "…") {
 
 Root-level options are available inside `fluidLibrary(…) { … }`:
 
-- `gradleVersion("9.6.1")` — sets the Gradle wrapper version.
+- `gradleVersion("9.7.1")` — sets the Gradle wrapper version.
 - `dependencyUpdatesIncludeUnstableVersions()` — includes pre-release versions when checking for updates.
 
 

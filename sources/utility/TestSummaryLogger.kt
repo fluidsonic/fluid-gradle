@@ -36,7 +36,9 @@ internal class TestSummaryLogger(private val taskPath: String) : TestListener {
 
 		return when {
 			total == 0L -> "no tests ran"
+
 			failed == 0L && skipped == 0L -> "$total tests, all passed"
+
 			else -> buildString {
 				append(total)
 				append(" tests, ")
